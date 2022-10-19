@@ -18,6 +18,10 @@ target_include_directories(${library_name} PRIVATE
     #PUBLIC_HEADER $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
 #)
 
+target_compile_features(${example_name} PRIVATE
+    # cxx_std_11
+)
+
 install(TARGETS ${library_name}
 )
 
