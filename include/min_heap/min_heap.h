@@ -12,6 +12,7 @@
 #ifndef MIN_HEAP_H
 #define MIN_HEAP_H
 
+#include <algorithm>
 #include <functional>
 #include <ostream>
 #include <vector>
@@ -45,6 +46,26 @@ public:
     down_heap(0);
   }
 
+  void erase(const value_type &v) {
+    auto iter = std::find(heap_.begin(), heap_.end(), v);
+    if (iter == heap_.end())
+      return;
+
+    index_type index = iter - heap_.begin();
+    index_type last_index = heap_.size() - 1;
+    if (index == last_index) {
+      heap_.pop_back();
+    } else {
+      std::swap(heap_[index], heap_[heap_.size() - 1]);
+      heap_.pop_back();
+      if (index > 0 && comp_(heap_[index], heap_[(index - 1) / 2]))
+        up_heap(index);
+      else
+        down_heap(index);
+    }
+  }
+
+private:
   void dump(std::ostream &os) {
     os << "{";
     size_t size = heap_.size();
@@ -56,7 +77,6 @@ public:
     os << "}\n";
   }
 
-private:
   void up_heap(index_type index) {
     while (index > 0) {
       index_type parent_index = (index - 1) / 2;

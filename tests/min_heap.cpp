@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 
+#include <chrono>
+
 #include "min_heap/max_heap.h"
 #include "min_heap/min_heap.h"
 
@@ -42,5 +44,42 @@ TEST(HeapTest, max_heap) {
   EXPECT_EQ(*h.front(), 0);
   h.pop();
   EXPECT_EQ(*h.front(), -8);
+  h.pop();
+}
+
+TEST(HeapTest, min_heap_time) {
+  auto now = std::chrono::steady_clock::now();
+  auto now1 = now + std::chrono::milliseconds(109);
+  auto now2 = now + std::chrono::milliseconds(108);
+  auto now3 = now + std::chrono::milliseconds(110);
+  auto now4 = now + std::chrono::milliseconds(-10);
+  min_heap<std::chrono::time_point<std::chrono::steady_clock> > h;
+  h.push(now);
+  h.push(now1);
+  h.push(now2);
+  h.push(now3);
+  h.push(now4);
+  h.erase(now);
+  // std::cout << "{";
+  // bool first = true;
+  // while (!h.empty()) {
+  //   if (!first)
+  //     std::cout << ", ";
+  //   std::cout << h.front()->time_since_epoch().count() << "ns";
+  //   first = false;
+  //   h.pop();
+  // }
+  // std::cout << "}\n";
+  // std::cout << decltype(now)::period::num << "/" << decltype(now)::period::den
+  //           << "\n";
+  EXPECT_EQ(now4, *h.front());
+  h.pop();
+  EXPECT_EQ(*h.front(), now2);
+  h.pop();
+  EXPECT_EQ(*h.front(), now1);
+  h.pop();
+  EXPECT_EQ(*h.front(), now3);
+
+  // test empty
   h.pop();
 }
