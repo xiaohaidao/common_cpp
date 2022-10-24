@@ -7,6 +7,7 @@
 
 #include "min_heap/max_heap.h"
 #include "min_heap/min_heap.h"
+#include "min_heap/timer_task.h"
 
 TEST(HeapTest, min_heap) {
   min_heap<int> h;
@@ -82,4 +83,33 @@ TEST(HeapTest, min_heap_time) {
 
   // test empty
   h.pop();
+}
+
+class myKey {
+public:
+  myKey() : k_(0) {}
+  myKey(uint32_t k) : k_(k) {}
+  ~myKey() {}
+  bool operator<(const myKey &r) const { return this->k_ < r.k_; }
+
+private:
+  uint32_t k_;
+};
+
+TEST(HeapTest, timer_task) {
+  timer_task<myKey> task;
+  auto p = []() {
+    std::cout << "time now :"
+              << std::chrono::duration_cast<std::chrono::milliseconds>(
+                     std::chrono::system_clock::now().time_since_epoch())
+                     .count()
+              << "\n";
+  };
+
+  task.post(1, 1000, p);
+  task.post(2, 2000, p);
+  task.post(3, 3000, p);
+  task.post(4, 4000, p);
+  task.post(2, 4000, p);
+  // while (!task.empty());
 }
