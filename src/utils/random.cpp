@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstring>
 
 namespace {
 
@@ -64,13 +65,60 @@ public:
   }
 };
 
-xorshift64 g_xorshfit;
+class xoshiro256ss {
+  uint64_t seed_[4];
+  uint64_t rol64(uint64_t x, uint64_t k) { return (x << k) | (x >> (64 - k)); }
+
+public:
+  xoshiro256ss() {
+    xorshift64 xor64;
+    seed_[0] = xor64();
+    seed_[1] = xor64();
+    seed_[2] = xor64();
+    seed_[3] = xor64();
+  }
+
+  uint64_t operator()() {
+    uint64_t *s = seed_;
+    uint64_t const result = rol64(s[1] * 5, 7) * 9;
+    uint64_t const t = s[1] << 17;
+    s[2] ^= s[0];
+    s[3] ^= s[1];
+    s[1] ^= s[2];
+    s[0] ^= s[3];
+
+    s[2] ^= t;
+    s[3] = rol64(s[3], 45);
+    return result;
+  }
+
+  float gen_float() {
+    uint64_t s = (*this)();
+    s = ((s >> 41) + (0x7fUL << 23));
+    float r = {};
+    memcpy(&r, &s, sizeof(r));
+    return r;
+  }
+
+  double gen_double() {
+    uint64_t s = (*this)();
+    s = ((s >> 12) + (0x3ffUL << 52));
+    double r = {};
+    memcpy(&r, &s, sizeof(r));
+    return r;
+  }
+
+};
+
+xoshiro256ss g_xorshfit;
 
 } // namespace
 
 size_t rand_num() { return g_xorshfit(); }
 
 size_t rand_scope(size_t min, size_t max) {
+  if (max == min)
+    return max;
   return rand_num() % (std::max(min, max) - std::min(min, max)) +
          std::min(min, max);
 }
