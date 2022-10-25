@@ -12,7 +12,7 @@ include(cmake/common.cmake)
 include(clang_format)
 include(clang_tidy)
 
-# add_subdirectory(src)
+add_subdirectory(src)
 # add_subdirectory(example)
 
 option(BUILD_TESTING "Build test" OFF)

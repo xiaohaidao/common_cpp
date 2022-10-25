@@ -71,8 +71,6 @@ TEST(HeapTest, min_heap_time) {
   //   h.pop();
   // }
   // std::cout << "}\n";
-  // std::cout << decltype(now)::period::num << "/" << decltype(now)::period::den
-  //           << "\n";
   EXPECT_EQ(now4, *h.front());
   h.pop();
   EXPECT_EQ(*h.front(), now2);
