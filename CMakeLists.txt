@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-project("your_project_name")
+project("common_cpp")
 
 # import common configure
 include(cmake/common.cmake)
@@ -14,6 +14,8 @@ include(clang_tidy)
 
 add_subdirectory(src)
 # add_subdirectory(example)
+
+include(CPack)
 
 option(BUILD_TESTING "Build test" OFF)
 include(CTest)

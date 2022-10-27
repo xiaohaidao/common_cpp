@@ -2,15 +2,15 @@
 #ifndef UTILS_RANDOM_H
 #define UTILS_RANDOM_H
 
-#include <inttypes.h>
 #include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-size_t rand_num();
-size_t rand_scope(size_t min, size_t max);
+void fixSeed();
+size_t randNum();
+size_t randScope(size_t min, size_t max);
 
 #ifdef __cplusplus
 }

@@ -39,17 +39,36 @@ public:
   }
 };
 
-class xorshift128 {
-  uint32_t seed_[4];
+class Seed {
+  bool fix_seed_;
+  static constexpr uint64_t FIX_SEED = 15011051792192176828u;
 
 public:
-  xorshift128() {
+  Seed() : fix_seed_(false) {}
+
+  void gen32(uint32_t *dst, size_t size) {
     xorshift32 xor32;
-    seed_[0] = xor32();
-    seed_[1] = xor32();
-    seed_[2] = xor32();
-    seed_[3] = xor32();
+    for (size_t i = 0; i < size; ++i) {
+      dst[i] = fix_seed_ ? (FIX_SEED | i) : xor32();
+    }
   }
+
+  void gen64(uint64_t *dst, size_t size) {
+    xorshift64 xor64;
+    for (size_t i = 0; i < size; ++i) {
+      dst[i] = fix_seed_ ? (FIX_SEED | i) : xor64();
+    }
+  }
+
+  void setFix(bool fix) { fix_seed_ = fix; }
+};
+
+class xorshift128 {
+  uint32_t seed_[4];
+  Seed gen_seed_;
+
+public:
+  xorshift128() { setFixSeed(false); }
 
   uint32_t operator()() {
     uint32_t t = seed_[3];
@@ -63,20 +82,22 @@ public:
     t ^= t >> 8;
     return seed_[0] = t ^ s ^ (s >> 19);
   }
+
+  void setFixSeed(bool fix) {
+    gen_seed_.setFix(fix);
+    gen_seed_.gen32(seed_, 4);
+  }
+
 };
 
 class xoshiro256ss {
   uint64_t seed_[4];
+  Seed gen_seed_;
+
   uint64_t rol64(uint64_t x, uint64_t k) { return (x << k) | (x >> (64 - k)); }
 
 public:
-  xoshiro256ss() {
-    xorshift64 xor64;
-    seed_[0] = xor64();
-    seed_[1] = xor64();
-    seed_[2] = xor64();
-    seed_[3] = xor64();
-  }
+  xoshiro256ss() { setFixSeed(false); }
 
   uint64_t operator()() {
     uint64_t *s = seed_;
@@ -92,7 +113,12 @@ public:
     return result;
   }
 
-  float gen_float() {
+  void setFixSeed(bool fix) {
+    gen_seed_.setFix(fix);
+    gen_seed_.gen64(seed_, 4);
+  }
+
+  float genFloat() {
     uint64_t s = (*this)();
     s = ((s >> 41) + (0x7fUL << 23));
     float r = {};
@@ -100,25 +126,27 @@ public:
     return r;
   }
 
-  double gen_double() {
+  double genDouble() {
     uint64_t s = (*this)();
     s = ((s >> 12) + (0x3ffUL << 52));
     double r = {};
     memcpy(&r, &s, sizeof(r));
     return r;
   }
-
 };
 
 xoshiro256ss g_xorshfit;
 
 } // namespace
 
-size_t rand_num() { return g_xorshfit(); }
+void fixSeed() { g_xorshfit.setFixSeed(true); }
 
-size_t rand_scope(size_t min, size_t max) {
-  if (max == min)
-    return max;
-  return rand_num() % (std::max(min, max) - std::min(min, max)) +
-         std::min(min, max);
+size_t randNum() { return g_xorshfit(); }
+
+size_t randScope(size_t min_v, size_t max_v) {
+  size_t diff = std::max(min_v, max_v) - std::min(min_v, max_v);
+  if (diff == 0) {
+    return max_v;
+  }
+  return randNum() % diff + std::min(min_v, max_v);
 }
