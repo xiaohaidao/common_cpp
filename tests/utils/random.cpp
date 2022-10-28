@@ -5,7 +5,7 @@
 
 #include "utils/random.h"
 
-TEST(Random, random) {
+TEST(RandomTest, randomScopeTest) {
   for (size_t i = 0; i < 100; ++i) {
     auto v = randScope(899, 1099);
     EXPECT_TRUE(v >= 899);
@@ -38,7 +38,9 @@ TEST(Random, random) {
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 902);
   }
+}
 
+TEST(RandomTest, randomNumTest) {
   std::set<uint64_t> exist;
   for (size_t i = 0; i < 10000; ++i) {
     auto v = randNum();

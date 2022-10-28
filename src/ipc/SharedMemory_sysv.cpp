@@ -66,7 +66,9 @@ void SharedMemory::attach(std::error_code &ec) {
   }
 }
 
-void SharedMemory::del(std::error_code &ec) {
+void SharedMemory::close(std::error_code &ec) {}
+
+void SharedMemory::remove(std::error_code &ec) {
   if (shmctl(shmid_, IPC_RMID, 0) == -1) {
     ec = {errno, std::system_category()};
     return;

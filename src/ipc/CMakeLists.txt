@@ -3,6 +3,8 @@
 
 set(library_name "ipc")
 add_library(${library_name}
+    MsgQueue_posix.cpp
+    MsgQueue.cpp
     # SharedMemory_sysv.cpp
     SharedMemory_posix.cpp
     SharedMemory.cpp

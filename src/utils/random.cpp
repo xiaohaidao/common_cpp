@@ -87,7 +87,6 @@ public:
     gen_seed_.setFix(fix);
     gen_seed_.gen32(seed_, 4);
   }
-
 };
 
 class xoshiro256ss {

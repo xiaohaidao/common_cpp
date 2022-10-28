@@ -18,6 +18,11 @@ public:
   static SharedMemory create(const std::string &key, size_t block_num,
                              std::error_code &ec);
 
+  static SharedMemory create(const char *key, size_t block_num,
+                             std::error_code &ec) {
+    return create(std::string(key), block_num, ec);
+  }
+
   template <typename T>
   static SharedMemory create(const T &key, size_t block_num,
                              std::error_code &ec) {
@@ -25,6 +30,10 @@ public:
   }
 
   static SharedMemory get(const std::string &key, std::error_code &ec);
+
+  static SharedMemory get(const char *key, std::error_code &ec) {
+    return get(std::string(key), ec);
+  }
 
   template <typename T>
   static SharedMemory get(const T &key, std::error_code &ec) {
@@ -36,7 +45,8 @@ public:
   void *memory() const;
   size_t size() const;
 
-  void del(std::error_code &ec);
+  void close(std::error_code &ec);
+  void remove(std::error_code &ec);
 
 private:
   void attach(std::error_code &ec);

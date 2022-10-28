@@ -24,7 +24,15 @@
 
 namespace ipc {
 
+#define CHECK_EC(ec, re)                                                       \
+  do {                                                                         \
+    if (ec) {                                                                  \
+      return re;                                                               \
+    }                                                                          \
+  } while (false)
+
 SharedMemory SharedMemory::get(const std::string &key, std::error_code &ec) {
+  CHECK_EC(ec, SharedMemory());
   SharedMemory result;
   if ((result.shmid_ = shm_open(key.c_str(), O_RDWR, 0)) == -1) {
     ec = {errno, std::system_category()};
@@ -45,10 +53,11 @@ SharedMemory SharedMemory::get(const std::string &key, std::error_code &ec) {
 
 SharedMemory SharedMemory::create(const std::string &key, size_t block_num,
                                   std::error_code &ec) {
+  CHECK_EC(ec, SharedMemory());
   SharedMemory result;
   //  delete O_EXCL will create force
   if ((result.shmid_ = shm_open(key.c_str(), O_CREAT | O_EXCL | O_RDWR,
-                                ACCESSPERMS)) == -1) {
+                                DEFFILEMODE)) == -1) {
     ec = {errno, std::system_category()};
     return result;
   }
@@ -66,6 +75,7 @@ SharedMemory SharedMemory::create(const std::string &key, size_t block_num,
 }
 
 void SharedMemory::deatch(std::error_code &ec) {
+  CHECK_EC(ec, );
   if (memory_ == nullptr) {
     return;
   }
@@ -79,6 +89,7 @@ void SharedMemory::deatch(std::error_code &ec) {
 }
 
 void SharedMemory::attach(std::error_code &ec) {
+  CHECK_EC(ec, );
   if ((memory_ = mmap(nullptr, size_, PROT_READ | PROT_WRITE, MAP_SHARED,
                       shmid_, 0)) == MAP_FAILED) {
     ec = {errno, std::system_category()};
@@ -87,16 +98,28 @@ void SharedMemory::attach(std::error_code &ec) {
   }
 }
 
-void SharedMemory::del(std::error_code &ec) {
-  if (shmid_ < 0) {
+void SharedMemory::close(std::error_code &ec) {
+  CHECK_EC(ec, );
+  deatch(ec);
+  CHECK_EC(ec, );
+  if (shmid_ <= 0) {
     return;
   }
-  deatch(ec);
-  if (shm_unlink(key_.c_str()) == -1) {
+  if (::close(shmid_) == -1) {
     ec = {errno, std::system_category()};
     return;
   }
   shmid_ = 0;
+}
+
+void SharedMemory::remove(std::error_code &ec) {
+  CHECK_EC(ec, );
+  close(ec);
+  CHECK_EC(ec, );
+  if (shm_unlink(key_.c_str()) == -1) {
+    ec = {errno, std::system_category()};
+    return;
+  }
 }
 
 } // namespace ipc

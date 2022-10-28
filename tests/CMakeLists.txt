@@ -5,6 +5,7 @@ set(test_name "cpp_common_test")
 add_executable(${test_name}
     main.cpp
     min_heap.cpp
+    ipc/MsgQueue.cpp
     ipc/SharedMemory.cpp
     utils/log.cpp
     utils/random.cpp
