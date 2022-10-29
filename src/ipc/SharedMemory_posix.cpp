@@ -20,8 +20,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "utils/log.h"
-
 namespace ipc {
 
 #define CHECK_EC(ec, re)                                                       \
@@ -31,7 +29,7 @@ namespace ipc {
     }                                                                          \
   } while (false)
 
-SharedMemory SharedMemory::get(const std::string &key, std::error_code &ec) {
+SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, SharedMemory());
   SharedMemory result;
   if ((result.shmid_ = shm_open(key.c_str(), O_RDWR, 0)) == -1) {

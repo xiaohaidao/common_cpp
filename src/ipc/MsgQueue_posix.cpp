@@ -23,8 +23,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "utils/log.h"
-
 namespace ipc {
 
 #define CHECK_EC(ec, re)                                                       \
@@ -34,32 +32,20 @@ namespace ipc {
     }                                                                          \
   } while (false)
 
-void getSystemAttri(mqd_t mq) {
-  struct mq_attr attr;
-  if (mq_getattr(mq, &attr) != -1) {
-    LOG_TRACE("system maxinum # of message on queue : %ld", attr.mq_maxmsg);
-    LOG_TRACE("system maxinum message size : %ld", attr.mq_msgsize);
-  }
-}
-
 std::string transferName(const std::string &name) {
-  if (name.size() == 0) {
-    return name;
-  }
-  if (name[0] != '/') {
+  if (name.size() > 0 && name[0] != '/') {
     return "/" + name;
   }
   return name;
 }
 
-MsgQueue MsgQueue::get(const std::string &key, std::error_code &ec) {
+MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, MsgQueue());
   MsgQueue result;
   if ((result.msgid_ = mq_open(transferName(key).c_str(), O_RDWR)) == -1) {
     ec = {errno, std::system_category()};
     return result;
   }
-  // getSystemAttri(result.msgid_);
   result.key_ = transferName(key);
   return result;
 }
@@ -74,7 +60,6 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
     ec = {errno, std::system_category()};
     return result;
   }
-  // getSystemAttri(result.msgid_);
   result.key_ = transferName(key);
   return result;
 }
@@ -88,20 +73,30 @@ void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
   }
 }
 
-void MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
+bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
                            std::error_code &ec) {
 
-  CHECK_EC(ec, );
+  CHECK_EC(ec, false);
 
   struct timespec timeout {};
-  timeout.tv_sec = timeout_ms / 1000;
-  timeout.tv_nsec = timeout_ms % 1000 * 1000000;
+  if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
+    ec = {errno, std::system_category()};
+    return false;
+  }
+  timeout.tv_sec += timeout_ms / 1000;
+  timeout.tv_nsec += timeout_ms % 1000 * 1000000;
+  timeout.tv_sec += timeout.tv_nsec / 1000000000;
+  timeout.tv_nsec = timeout.tv_nsec % 1000000000;
 
   constexpr int priority = 0; // the priority in [0-31], highest priority first
   if (mq_timedsend(msgid_, data, size, priority, &timeout) == -1) {
-    ec = {errno, std::system_category()};
-    return;
+    int e_code = errno;
+    if (e_code != ETIMEDOUT) {
+      ec = {e_code, std::system_category()};
+    }
+    return false;
   }
+  return true;
 }
 
 size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
@@ -119,13 +114,23 @@ size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
   CHECK_EC(ec, 0);
 
   struct timespec timeout {};
-  timeout.tv_sec = timeout_ms / 1000;
-  timeout.tv_nsec = timeout_ms % 1000 * 1000000;
+  if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
+    ec = {errno, std::system_category()};
+    printf("get time error\n");
+    return 0;
+  }
+  timeout.tv_sec += timeout_ms / 1000;
+  timeout.tv_nsec += timeout_ms % 1000 * 1000000;
+  timeout.tv_sec += timeout.tv_nsec / 1000000000;
+  timeout.tv_nsec = timeout.tv_nsec % 1000000000;
 
-  size_t size;
+  size_t size = 0;
   if ((size = mq_timedreceive(msgid_, data, data_size, nullptr, &timeout)) ==
       -1) {
-    ec = {errno, std::system_category()};
+    int e_code = errno;
+    if (e_code != ETIMEDOUT) {
+      ec = {e_code, std::system_category()};
+    }
     return 0;
   }
   return size;

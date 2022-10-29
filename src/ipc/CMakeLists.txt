@@ -5,15 +5,23 @@ set(library_name "ipc")
 add_library(${library_name}
     MsgQueue_posix.cpp
     MsgQueue.cpp
+    Semaphores_posix.cpp
+    Semaphores.cpp
     # SharedMemory_sysv.cpp
     SharedMemory_posix.cpp
     SharedMemory.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC
-    rt
-    utils
 )
+
+if(WIN32)
+elseif(UNIX)
+target_link_libraries(${library_name} PUBLIC
+    rt
+    pthread
+)
+endif()
 
 target_include_directories(${library_name} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -26,7 +34,7 @@ target_include_directories(${library_name} PRIVATE
 #)
 
 target_compile_features(${library_name} PUBLIC
-    # cxx_std_11
+    cxx_std_11
 )
 
 install(TARGETS ${library_name}

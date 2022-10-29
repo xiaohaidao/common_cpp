@@ -25,20 +25,21 @@ public:
     return create(std::to_string(key), ec);
   }
 
-  static MsgQueue get(const std::string &key, std::error_code &ec);
+  static MsgQueue open(const std::string &key, std::error_code &ec);
 
-  static MsgQueue get(const char *key, std::error_code &ec) {
-    return get(std::string(key), ec);
+  static MsgQueue open(const char *key, std::error_code &ec) {
+    return open(std::string(key), ec);
   }
 
-  template <typename T> static MsgQueue get(const T &key, std::error_code &ec) {
-    return get(std::to_string(key), ec);
+  template <typename T>
+  static MsgQueue open(const T &key, std::error_code &ec) {
+    return open(std::to_string(key), ec);
   }
 
   /// 当队列满时，命令会阻塞
   void send(const char *data, size_t size, std::error_code &ec);
 
-  void sendTimeout(const char *data, size_t size, size_t timeout_ms,
+  bool sendTimeout(const char *data, size_t size, size_t timeout_ms,
                    std::error_code &ec);
 
   /// 当队列空时，命令会阻塞, data_size建议不小于8192
@@ -54,7 +55,7 @@ public:
 private:
   int msgid_;
 
-  /// mq_unlink need it
+  /// unlink need it
   std::string key_;
 
 }; // class MsgQueue

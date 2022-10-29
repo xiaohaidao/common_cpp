@@ -42,7 +42,7 @@ TEST(RandomTest, randomScopeTest) {
 
 TEST(RandomTest, randomNumTest) {
   std::set<uint64_t> exist;
-  for (size_t i = 0; i < 10000; ++i) {
+  for (size_t i = 0; i < 1000; ++i) {
     auto v = randNum();
     EXPECT_TRUE(exist.find(v) == exist.end());
     exist.insert(v);

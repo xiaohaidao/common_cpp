@@ -3,8 +3,6 @@
 
 #include "ipc/SharedMemory.h"
 
-#include "utils/log.h"
-
 namespace ipc {
 
 SharedMemory::SharedMemory() : shmid_(0), memory_(nullptr), size_(0) {}

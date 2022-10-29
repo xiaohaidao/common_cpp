@@ -20,7 +20,7 @@
 
 namespace ipc {
 
-SharedMemory SharedMemory::get(const std::string &key, std::error_code &ec) {
+SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
   SharedMemory result;
   result.shmid_ = shmget(ftok(key.c_str(), 0), 0, 0);
   if (result.shmid_ == -1) {

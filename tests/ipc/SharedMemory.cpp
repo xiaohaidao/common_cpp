@@ -18,14 +18,14 @@ TEST(IPCTest, SharedMemoryTest) {
   EXPECT_TRUE(ec) << ec.message();
   ec.clear();
 
-  auto sh1 = ipc::SharedMemory::get(33333, ec);
+  auto sh1 = ipc::SharedMemory::open(33333, ec);
   EXPECT_FALSE(ec) << ec.message();
   ec.clear();
-  ipc::SharedMemory::get(2, ec);
+  ipc::SharedMemory::open(2, ec);
   EXPECT_TRUE(ec) << ec.message();
   ec.clear();
 
-  auto sh2 = ipc::SharedMemory::get("sh_momery", ec);
+  auto sh2 = ipc::SharedMemory::open("sh_momery", ec);
   EXPECT_FALSE(ec) << ec.message();
   ec.clear();
 

@@ -1,12 +1,12 @@
 // Copyright (C) 2022 All rights reserved.
 // Email: oxox0@qq.com. Created in 202210
 
-#include "ipc/MsgQueue.h"
+#include "ipc/Semaphores.h"
 
 namespace ipc {
 
-MsgQueue::MsgQueue() : msgid_(0) {}
+Semaphores::Semaphores() : sem_(nullptr) {}
 
-MsgQueue::~MsgQueue() {}
+Semaphores::~Semaphores() {}
 
 } // namespace ipc

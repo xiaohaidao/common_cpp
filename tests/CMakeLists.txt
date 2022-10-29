@@ -6,6 +6,7 @@ add_executable(${test_name}
     main.cpp
     min_heap.cpp
     ipc/MsgQueue.cpp
+    ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
     utils/log.cpp
     utils/random.cpp

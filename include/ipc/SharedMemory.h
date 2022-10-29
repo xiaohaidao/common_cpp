@@ -29,15 +29,15 @@ public:
     return create(std::to_string(key), block_num, ec);
   }
 
-  static SharedMemory get(const std::string &key, std::error_code &ec);
+  static SharedMemory open(const std::string &key, std::error_code &ec);
 
-  static SharedMemory get(const char *key, std::error_code &ec) {
-    return get(std::string(key), ec);
+  static SharedMemory open(const char *key, std::error_code &ec) {
+    return open(std::string(key), ec);
   }
 
   template <typename T>
-  static SharedMemory get(const T &key, std::error_code &ec) {
-    return get(std::to_string(key), ec);
+  static SharedMemory open(const T &key, std::error_code &ec) {
+    return open(std::to_string(key), ec);
   }
 
   static constexpr size_t blockSize() { return 4096; }
@@ -57,7 +57,7 @@ private:
   void *memory_;
   size_t size_;
 
-  /// shm_unlink need it
+  /// unlink need it
   std::string key_;
 
 }; // class SharedMemory

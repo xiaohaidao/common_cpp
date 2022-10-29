@@ -21,7 +21,7 @@ target_include_directories(${library_name} PRIVATE
 #)
 
 target_compile_features(${library_name} PRIVATE
-    # cxx_std_11
+    cxx_std_11
 )
 
 install(TARGETS ${library_name}
