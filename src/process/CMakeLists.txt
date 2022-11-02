@@ -1,31 +1,24 @@
 # Copyright (C) 2022 dobot All rights reserved.
 # Author: libobo@dobot.cc. Created in 202204
 
-set(library_name "ipc")
+set(library_name "process")
 add_library(${library_name}
-    MsgQueue_posix.cpp
-    MsgQueue.cpp
-    Semaphores_posix.cpp
-    Semaphores.cpp
-    SharedMemory_posix.cpp
-    SharedMemory.cpp
+    Process_posix.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC
 )
-
-if(WIN32)
-elseif(UNIX)
-target_link_libraries(${library_name} PUBLIC
-    rt
-    pthread
-)
-endif()
 
 target_include_directories(${library_name} PRIVATE
     ${PROJECT_SOURCE_DIR}/src
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    PUBLIC $<INSTALL_INTERFACE:include/>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
 )
+
+# set_target_properties(${library_name}
+#     PROPERTIES
+#     PUBLIC_HEADER $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+# )
 
 target_compile_features(${library_name} PUBLIC
     cxx_std_11

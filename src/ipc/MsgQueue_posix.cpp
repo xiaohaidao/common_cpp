@@ -23,14 +23,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace ipc {
+#include "utils/macro.h"
 
-#define CHECK_EC(ec, re)                                                       \
-  do {                                                                         \
-    if (ec) {                                                                  \
-      return re;                                                               \
-    }                                                                          \
-  } while (false)
+namespace ipc {
 
 std::string transferName(const std::string &name) {
   if (name.size() > 0 && name[0] != '/') {

@@ -8,6 +8,7 @@ add_executable(${test_name}
     ipc/MsgQueue.cpp
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
+    process/Process.cpp
     utils/log.cpp
     utils/random.cpp
 )
@@ -20,6 +21,7 @@ target_include_directories(${test_name} PRIVATE
 target_link_libraries(${test_name} PRIVATE
     gtest_main
     ipc
+    process
     utils
 )
 

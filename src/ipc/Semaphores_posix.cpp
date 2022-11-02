@@ -19,14 +19,9 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
-namespace ipc {
+#include "utils/macro.h"
 
-#define CHECK_EC(ec, re)                                                       \
-  do {                                                                         \
-    if (ec) {                                                                  \
-      return re;                                                               \
-    }                                                                          \
-  } while (false)
+namespace ipc {
 
 Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, Semaphores());

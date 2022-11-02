@@ -20,14 +20,9 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-namespace ipc {
+#include "utils/macro.h"
 
-#define CHECK_EC(ec, re)                                                       \
-  do {                                                                         \
-    if (ec) {                                                                  \
-      return re;                                                               \
-    }                                                                          \
-  } while (false)
+namespace ipc {
 
 SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, SharedMemory());
