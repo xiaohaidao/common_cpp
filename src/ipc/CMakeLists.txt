@@ -3,11 +3,14 @@
 
 set(library_name "ipc")
 add_library(${library_name}
+    MsgQueue_null.cpp
     MsgQueue_posix.cpp
     MsgQueue.cpp
     Semaphores_posix.cpp
+    Semaphores_win.cpp
     Semaphores.cpp
     SharedMemory_posix.cpp
+    SharedMemory_win.cpp
     SharedMemory.cpp
 )
 

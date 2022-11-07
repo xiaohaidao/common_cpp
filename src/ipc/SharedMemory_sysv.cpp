@@ -18,6 +18,8 @@
 
 #include <sys/shm.h>
 
+#include "utils/error_code.h"
+
 namespace ipc {
 
 SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
@@ -38,7 +40,7 @@ SharedMemory SharedMemory::create(const std::string &key, size_t block_num,
   result.shmid_ = shmget(ftok(key.c_str(), 0), block_num * 4096,
                          0666 | IPC_CREAT | IPC_EXCL);
   if (result.shmid_ == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     // return result;
   }
 
@@ -48,7 +50,7 @@ SharedMemory SharedMemory::create(const std::string &key, size_t block_num,
 
 void SharedMemory::deatch(std::error_code &ec) {
   if (shmdt(memory_) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
   memory_ = nullptr;
@@ -61,7 +63,7 @@ void SharedMemory::attach(std::error_code &ec) {
   }
   memory_ = shmat(shmid_, 0, 0);
   if (memory_ == (void *)-1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     memory_ = nullptr;
   }
 }
@@ -70,7 +72,7 @@ void SharedMemory::close(std::error_code &ec) {}
 
 void SharedMemory::remove(std::error_code &ec) {
   if (shmctl(shmid_, IPC_RMID, 0) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
   shmid_ = 0;

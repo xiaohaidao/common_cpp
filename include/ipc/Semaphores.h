@@ -14,6 +14,7 @@ public:
   Semaphores();
   ~Semaphores();
 
+  // the initial number is 1
   static Semaphores create(const std::string &key, std::error_code &ec);
 
   static Semaphores create(const char *key, std::error_code &ec) {
@@ -43,6 +44,8 @@ public:
   void notifyOne(std::error_code &ec);
 
   void close(std::error_code &ec);
+
+  // do nothing on windows platform
   void remove(std::error_code &ec);
 
 private:

@@ -19,6 +19,7 @@
 #include <semaphore.h>
 #include <sys/stat.h>
 
+#include "utils/error_code.h"
 #include "utils/macro.h"
 
 namespace ipc {
@@ -27,7 +28,7 @@ Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, Semaphores());
   Semaphores result;
   if ((result.sem_ = sem_open(key.c_str(), O_RDWR, 0, 0)) == SEM_FAILED) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return result;
   }
   result.key_ = key;
@@ -39,8 +40,8 @@ Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
   Semaphores result;
   //  delete O_EXCL will create force
   if ((result.sem_ = sem_open(key.c_str(), O_RDWR | O_CREAT | O_EXCL,
-                              DEFFILEMODE, 0)) == SEM_FAILED) {
-    ec = {errno, std::system_category()};
+                              DEFFILEMODE, 1)) == SEM_FAILED) {
+    ec = getErrorCode();
     return result;
   }
   result.key_ = key;
@@ -50,7 +51,7 @@ Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
 void Semaphores::wait(std::error_code &ec) {
   CHECK_EC(ec, );
   if (::sem_wait((sem_t *)sem_) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
   }
 }
 
@@ -70,7 +71,7 @@ bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
   CHECK_EC(ec, false);
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return false;
   }
   timeout.tv_sec += timeout_ms / 1000;
@@ -91,7 +92,7 @@ bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
 void Semaphores::notifyOne(std::error_code &ec) {
   CHECK_EC(ec, );
   if (::sem_post((sem_t *)sem_) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
 }
@@ -100,7 +101,7 @@ void Semaphores::close(std::error_code &ec) {
   CHECK_EC(ec, );
 
   if (::sem_close((sem_t *)sem_) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
   sem_ = nullptr;
@@ -112,7 +113,7 @@ void Semaphores::remove(std::error_code &ec) {
   CHECK_EC(ec, );
 
   if (sem_unlink(key_.c_str()) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
 }

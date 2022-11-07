@@ -14,8 +14,7 @@ public:
   SharedMemory();
   ~SharedMemory();
 
-  // 1 block size is 4k
-  static SharedMemory create(const std::string &key, size_t block_num,
+  static SharedMemory create(const std::string &key, size_t mem_size,
                              std::error_code &ec);
 
   static SharedMemory create(const char *key, size_t block_num,
@@ -40,12 +39,12 @@ public:
     return open(std::to_string(key), ec);
   }
 
-  static constexpr size_t blockSize() { return 4096; }
-
   void *memory() const;
   size_t size() const;
 
   void close(std::error_code &ec);
+
+  // do nothing on windows platform
   void remove(std::error_code &ec);
 
 private:
@@ -53,12 +52,18 @@ private:
 
   void deatch(std::error_code &ec);
 
-  int shmid_;
-  void *memory_;
-  size_t size_;
+#if defined(WIN32)
+  typedef void *native_handle;
+#elif defined(__linux__)
+  typedef int native_handle;
 
   /// unlink need it
   std::string key_;
+#endif // __linux__
+
+  native_handle shmid_;
+  void *memory_;
+  size_t size_;
 
 }; // class SharedMemory
 

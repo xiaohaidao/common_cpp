@@ -23,6 +23,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "utils/error_code.h"
 #include "utils/macro.h"
 
 namespace ipc {
@@ -38,7 +39,7 @@ MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
   CHECK_EC(ec, MsgQueue());
   MsgQueue result;
   if ((result.msgid_ = mq_open(transferName(key).c_str(), O_RDWR)) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return result;
   }
   result.key_ = transferName(key);
@@ -52,7 +53,7 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
   if ((result.msgid_ =
            mq_open(transferName(key).c_str(), O_RDWR | O_CREAT | O_EXCL,
                    DEFFILEMODE, nullptr)) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return result;
   }
   result.key_ = transferName(key);
@@ -63,7 +64,7 @@ void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
   CHECK_EC(ec, );
   constexpr int priority = 0; // the priority in [0-31], highest priority first
   if (mq_send(msgid_, data, size, priority) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
 }
@@ -75,7 +76,7 @@ bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return false;
   }
   timeout.tv_sec += timeout_ms / 1000;
@@ -98,7 +99,7 @@ size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
   CHECK_EC(ec, 0);
   size_t size;
   if ((size = mq_receive(msgid_, data, data_size, nullptr)) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return 0;
   }
   return size;
@@ -110,7 +111,7 @@ size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     printf("get time error\n");
     return 0;
   }
@@ -138,7 +139,7 @@ void MsgQueue::close(std::error_code &ec) {
     return;
   }
   if (mq_close(msgid_) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
   msgid_ = 0;
@@ -150,7 +151,7 @@ void MsgQueue::remove(std::error_code &ec) {
   CHECK_EC(ec, );
 
   if (mq_unlink(key_.c_str()) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
     return;
   }
 }

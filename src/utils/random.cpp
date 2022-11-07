@@ -127,7 +127,7 @@ public:
 
   double genDouble() {
     uint64_t s = (*this)();
-    s = ((s >> 12) + (0x3ffUL << 52));
+    s = ((s >> 12) + (0x3ffULL << 52));
     double r = {};
     memcpy(&r, &s, sizeof(r));
     return r;

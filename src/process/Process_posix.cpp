@@ -3,37 +3,16 @@
 
 #include "process/Process.h"
 
+#include <spawn.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "utils/error_code.h"
 #include "utils/macro.h"
 
 Process::Process() : child_handle_(0) {}
 
-Process::Process(pid_t pid) : child_handle_(pid) {}
-
-Process Process::call(const char *command, char const *const argv[],
-                      char const *const envp[], std::error_code &ec) {
-  Process sys;
-  CHECK_EC(ec, sys);
-
-  pid_t pid = ::vfork();
-  if (pid == -1) {
-    ec = {errno, std::system_category()};
-    return sys;
-  } else if (pid == 0) {
-
-    ::execve(command, const_cast<char *const *>(argv),
-             const_cast<char *const *>(envp));
-    ::_exit(EXIT_FAILURE);
-  }
-
-  sys.child_handle_ = pid;
-  return sys;
-}
-
 Process Process::call(const char *command, const std::vector<std::string> &argv,
-                      const std::vector<std::string> &envp,
                       std::error_code &ec) {
 
   std::vector<const char *> arg, env;
@@ -42,13 +21,37 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
   }
   arg.push_back(nullptr);
 
-  for (auto const &i : envp) {
-    env.push_back(i.c_str());
-  }
-  env.push_back(nullptr);
+  Process sys;
+  CHECK_EC(ec, sys);
 
-  return Process::call(command, const_cast<const char *const *>(arg.data()),
-                       const_cast<const char *const *>(env.data()), ec);
+  posix_spawn_file_actions_t file_actions = {};
+  posix_spawn_file_actions_init(&file_actions);
+  // posix_spawn_file_actions_addclose(&file_actions, STDOUT_FILENO);
+
+  posix_spawnattr_t attr = {};
+  posix_spawnattr_init(&attr);
+  posix_spawnattr_setflags(&attr, POSIX_SPAWN_USEVFORK);
+
+  pid_t pid = 0;
+  if (posix_spawnp(&pid, command, &file_actions, &attr,
+                   const_cast<char *const *>(arg.data()), nullptr) != 0) {
+    ec = getErrorCode();
+    return sys;
+  }
+  posix_spawnattr_destroy(&attr);
+  posix_spawn_file_actions_destroy(&file_actions);
+
+  if (!ec) {
+    sys.child_handle_ = pid;
+  }
+  return sys;
+}
+
+Process Process::open(uint64_t pid, std::error_code &ec) {
+  Process p;
+  CHECK_EC(ec, p);
+  p.child_handle_ = pid;
+  return p;
 }
 
 bool Process::running(std::error_code &ec) {
@@ -87,7 +90,7 @@ void Process::wait(std::error_code &ec) {
 void Process::terminate(std::error_code &ec) {
   CHECK_EC(ec, );
   if (::kill(child_handle_, SIGKILL) == -1) {
-    ec = {errno, std::system_category()};
+    ec = getErrorCode();
   }
 }
 

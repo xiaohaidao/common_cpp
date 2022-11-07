@@ -7,8 +7,6 @@ namespace ipc {
 
 SharedMemory::SharedMemory() : shmid_(0), memory_(nullptr), size_(0) {}
 
-SharedMemory::~SharedMemory() {}
-
 void *SharedMemory::memory() const { return memory_; }
 
 size_t SharedMemory::size() const { return size_; }

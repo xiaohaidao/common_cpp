@@ -8,21 +8,17 @@
 
 class Process {
 public:
+#ifdef WIN32
+  typedef void *native_handle;
+#else  // WIN32
+  typedef pid_t native_handle;
+#endif // WIN32
   Process();
-  explicit Process(pid_t pid);
-
-  /// @example ```
-  /// char *newargv[] = {"hello", "world", NULL };
-  /// char *newenviron[] = { NULL };
-  /// std::error_code ec;
-  /// Process::call("echo", newargv, newenviron, ec);
-  /// ```
-  static Process call(const char *command, char const *const argv[],
-                      char const *const envp[], std::error_code &ec);
 
   static Process call(const char *command, const std::vector<std::string> &argv,
-                      const std::vector<std::string> &envp,
                       std::error_code &ec);
+
+  static Process open(uint64_t pid, std::error_code &ec);
 
   bool running(std::error_code &ec);
 
@@ -33,7 +29,7 @@ public:
   void terminate(std::error_code &ec);
 
 private:
-  pid_t child_handle_;
+  native_handle child_handle_;
 };
 
 #endif // PROCESS_PROCESS_H

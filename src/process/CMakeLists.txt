@@ -4,6 +4,7 @@
 set(library_name "process")
 add_library(${library_name}
     Process_posix.cpp
+    Process_win.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC
