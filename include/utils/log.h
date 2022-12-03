@@ -6,31 +6,37 @@
 extern "C" {
 #endif
 
+#include <string.h>
+
+#define __FILENAME__                                                           \
+  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+// (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+
 enum LogLevel {
   kTrace,
   kDebug,
-  kWarn,
   kInfo,
+  kWarn,
   kError,
 };
 
 #define LOG_TRACE(...)                                                         \
-  log_print(kTrace, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  logPrint(kTrace, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 #define LOG_DEBUG(...)                                                         \
-  log_print(kDebug, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  logPrint(kDebug, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 #define LOG_WARN(...)                                                          \
-  log_print(kWarn, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  logPrint(kWarn, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 #define LOG_INFO(...)                                                          \
-  log_print(kInfo, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  logPrint(kInfo, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
 #define LOG_ERROR(...)                                                         \
-  log_print(kError, __FILE__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  logPrint(kError, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
 
-void log_print(LogLevel level, const char *filename, int line,
-               const char *func_name, const char *fmt, ...);
+void logPrint(LogLevel level, const char *filename, int line,
+              const char *func_name, const char *fmt, ...);
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@
  *
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "ipc/SharedMemory.h"
 
@@ -125,4 +125,4 @@ void SharedMemory::remove(std::error_code &ec) { CHECK_EC(ec, ); }
 
 } // namespace ipc
 
-#endif // WIN32
+#endif // _WIN32

@@ -11,7 +11,7 @@
  *
  */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "ipc/Semaphores.h"
 
@@ -101,4 +101,4 @@ void Semaphores::remove(std::error_code &ec) {
 
 } // namespace ipc
 
-#endif // WIN32
+#endif // _WIN32

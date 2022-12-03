@@ -59,7 +59,8 @@ void formatLog(const LogData &data, std::string &log) {
 
   std::stringstream ss_h;
   // ISO 8601 data format
-  ss_h << "[" << std::put_time(localtime(&now_time), "(%z)%F %T.") << ms << "]"
+  ss_h << "[" << std::put_time(localtime(&now_time), "(%z)%F %T.")
+       << std::setfill('0') << std::setw(3) << ms << "]"
        << "[" << data.thread_id << "]"
        << "[" << getEnumStr(data.level) << "]"
        << "[" << data.filename << ":" << data.line << "]"
@@ -72,12 +73,15 @@ void formatLog(const LogData &data, std::string &log) {
   log = ss_h.str();
 }
 
-void exportLog(const std::string &log) { printf("%s", log.c_str()); }
+void exportLog(const LogData &data, const std::string &log) {
+  auto out_stream = data.level >= kError ? stderr : stdout;
+  fprintf(out_stream, "%s", log.c_str());
+}
 
 } // namespace
 
-void log_print(LogLevel level, const char *filename, int line,
-               const char *func_name, const char *fmt, ...) {
+void logPrint(LogLevel level, const char *filename, int line,
+              const char *func_name, const char *fmt, ...) {
 
   LogData log_data = {};
 
@@ -107,5 +111,5 @@ void log_print(LogLevel level, const char *filename, int line,
   formatLog(log_data, log);
 
   // export the log
-  exportLog(log);
+  exportLog(log_data, log);
 }

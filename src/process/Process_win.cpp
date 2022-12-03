@@ -1,5 +1,5 @@
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #include "process/Process.h"
 
@@ -79,9 +79,9 @@ void Process::wait(std::error_code &ec) {
 
 void Process::terminate(std::error_code &ec) {
   CHECK_EC(ec, );
-  if (!CloseHandle(child_handle_)) {
+  if (!TerminateProcess(child_handle_, -1)) {
     ec = getErrorCode();
   }
 }
 
-#endif // WIN32
+#endif // _WIN32

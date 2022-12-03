@@ -9,6 +9,8 @@ add_executable(${test_name}
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
     process/Process.cpp
+    sockets/SocketAddr.cpp
+    sockets/TcpListener.cpp
     utils/log.cpp
     utils/random.cpp
 )
@@ -22,6 +24,8 @@ target_link_libraries(${test_name} PRIVATE
     gtest_main
     ipc
     process
+    reactor
+    sockets
     utils
 )
 

@@ -52,7 +52,7 @@ private:
 
   void deatch(std::error_code &ec);
 
-#if defined(WIN32)
+#if defined(_WIN32)
   typedef void *native_handle;
 #elif defined(__linux__)
   typedef int native_handle;

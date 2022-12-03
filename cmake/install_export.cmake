@@ -19,7 +19,7 @@ install(EXPORT ${library_name_target}
 )
 
 set(library_name_config ${library_name}Config)
-configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/Config.cmake.in
+configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/template/Config.cmake.in
   ${PROJECT_BINARY_DIR}/lib/cmake/${library_name_config}.cmake
     INSTALL_DESTINATION ${cmake_files_install_dir}
 )

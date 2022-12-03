@@ -8,11 +8,11 @@
 
 class Process {
 public:
-#ifdef WIN32
+#ifdef _WIN32
   typedef void *native_handle;
-#else  // WIN32
+#else  // _WIN32
   typedef pid_t native_handle;
-#endif // WIN32
+#endif // _WIN32
   Process();
 
   static Process call(const char *command, const std::vector<std::string> &argv,

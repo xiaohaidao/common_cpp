@@ -8,7 +8,7 @@
 
 TEST(ProcessTest, Process) {
   std::error_code ec;
-#ifdef WIN32
+#ifdef _WIN32
   auto child =
       Process::call("c:/windows/system32/cmd.exe", {"/c", "net user"}, ec);
   // auto child = Process::call("c:/windows/notepad.exe", {}, ec);
@@ -17,7 +17,7 @@ TEST(ProcessTest, Process) {
   // auto child = Process::call("sleep", {"sleep", "50"}, ec);
   // auto child = Process::call("/bin/sh", {"sh", "-c", "ls -al"}, ec);
   // auto child = Process::call("/bin/sh", {"sh", "-c", "id"}, ec);
-#endif // WIN32
+#endif // _WIN32
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

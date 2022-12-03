@@ -51,8 +51,10 @@ public:
 private:
   void *sem_;
 
+#if defined(__linux__)
   /// unlink need it
   std::string key_;
+#endif // __linux__
 
 }; // class Semaphores
 

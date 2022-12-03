@@ -7,7 +7,7 @@
 #include "utils/log.h"
 
 TEST(IPCTest, MsgQueueTest) {
-#ifndef WIN32
+#ifndef _WIN32
   std::error_code ec;
   ipc::MsgQueue::create(3, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -55,5 +55,5 @@ TEST(IPCTest, MsgQueueTest) {
   msg2.remove(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-#endif // WIN32
+#endif // _WIN32
 }
