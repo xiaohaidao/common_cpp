@@ -1,10 +1,14 @@
 
 #ifdef __linux__
 
-#ifndef PROACTOR_OPERATION_POSIX_H
-#define PROACTOR_OPERATION_POSIX_H
+#ifndef PROACTOR_OPERATION_DETAIL_POSIX_H
+#define PROACTOR_OPERATION_DETAIL_POSIX_H
 
 #include <system_error>
+
+class Proactor;
+
+namespace detail {
 
 class OperationPosix {
   friend class Proactor;
@@ -24,6 +28,8 @@ protected:
   // bool(&handle_key, &overlapp, &trans_size, &ec);
 };
 
-#endif // PROACTOR_OPERATION_POSIX_H
+} // namespace detail
+
+#endif // PROACTOR_OPERATION_DETAIL_POSIX_H
 
 #endif // __linux__

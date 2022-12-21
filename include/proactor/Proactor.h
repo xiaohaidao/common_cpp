@@ -2,9 +2,7 @@
 #ifndef PROACTOR_PROACTOR_H
 #define PROACTOR_PROACTOR_H
 
-#include <system_error>
-
-#include "operation/detail/Operation.h"
+#include "proactor/operation/detail/Operation.h"
 
 class Proactor {
 public:
@@ -29,6 +27,8 @@ public:
   void depose(const native_handle &file_descriptor, std::error_code &ec);
 
 private:
+  Proactor();
+
   native_handle fd_;
   bool shutdown_;
   // std::atomic<uint8_t> work_count_;

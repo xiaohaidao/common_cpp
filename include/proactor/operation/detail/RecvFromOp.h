@@ -1,12 +1,10 @@
 
-#ifndef PROACTOR_OPERATION_RECVFROMOP_H
-#define PROACTOR_OPERATION_RECVFROMOP_H
+#ifndef PROACTOR_OPERATION_DETAIL_RECVFROMOP_H
+#define PROACTOR_OPERATION_DETAIL_RECVFROMOP_H
 
 #include <functional>
 
-#include "Operation.h"
-
-class Proactor;
+#include "proactor/operation/detail/Operation.h"
 
 namespace detail {
 
@@ -18,10 +16,10 @@ public:
 
   RecvFromOp();
 
-  void async_read_from(sockets::socket_type s, char *buff, size_t size,
+  void async_recv_from(sockets::socket_type s, char *buff, size_t size,
                        func_type async_func, std::error_code &ec);
 
-protected:
+  // protected:
   // Proactor call this function
   void complete(Proactor *p, const std::error_code &result_ec,
                 size_t trans_size) override;
@@ -34,9 +32,10 @@ private:
 
   func_type func_;
   sockets::SocketAddr from_;
+  int from_size_;
 
 }; // class RecvFromOp
 
 } // namespace detail
 
-#endif // PROACTOR_OPERATION_RECVFROMOP_H
+#endif // PROACTOR_OPERATION_DETAIL_RECVFROMOP_H

@@ -1,12 +1,12 @@
 
-#ifndef PROACTOR_OPERATION_SENDTOOP_H
-#define PROACTOR_OPERATION_SENDTOOP_H
+#ifndef PROACTOR_OPERATION_DETAIL_SENDTOOP_H
+#define PROACTOR_OPERATION_DETAIL_SENDTOOP_H
 
 #include <functional>
 
-#include "Operation.h"
+#include "proactor/operation/detail/Operation.h"
 
-class Proactor;
+namespace detail {
 
 class SendToOp : public Operation {
 public:
@@ -19,7 +19,7 @@ public:
                      func_type async_func, const sockets::SocketAddr &to,
                      std::error_code &ec);
 
-protected:
+  // protected:
   // Proactor call this function
   void complete(Proactor *p, const std::error_code &result_ec,
                 size_t trans_size) override;
@@ -35,4 +35,6 @@ private:
 
 }; // class SendToOp
 
-#endif // PROACTOR_OPERATION_SENDTOOP_H
+} // namespace detail
+
+#endif // PROACTOR_OPERATION_DETAIL_SENDTOOP_H

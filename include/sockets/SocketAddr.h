@@ -8,8 +8,6 @@
 #include <system_error>
 #include <vector>
 
-namespace sockets {
-
 enum FamilyType {
   kUnspecified,
   kIpV4,
@@ -28,6 +26,8 @@ enum Protocal {
   kIcmp,
   kIcmpV6,
 };
+
+namespace sockets {
 
 #ifdef _WIN32
 typedef uint64_t socket_type;

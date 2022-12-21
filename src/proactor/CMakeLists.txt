@@ -3,15 +3,28 @@
 
 set(library_name "proactor")
 add_library(${library_name}
-    operation/RecvFromOp_win.cpp
-    operation/RecvOp_win.cpp
-    operation/SendOp_win.cpp
-    operation/SendToOp_win.cpp
     Proactor_win.cpp
+    operation/TcpListenerOp_win.cpp
+    operation/TcpStreamOp_win.cpp
+    operation/detail/AcceptOp_win.cpp
+    operation/detail/ConnectOp_win.cpp
+    operation/detail/RecvFromOp_win.cpp
+    operation/detail/RecvOp_win.cpp
+    operation/detail/SendOp_win.cpp
+    operation/detail/SendToOp_win.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC
+  sockets
+  utils
 )
+
+if(WIN32)
+target_link_libraries(${library_name} PUBLIC
+    mswsock
+)
+elseif(UNIX)
+endif()
 
 target_include_directories(${library_name} PRIVATE
     ${PROJECT_SOURCE_DIR}/src

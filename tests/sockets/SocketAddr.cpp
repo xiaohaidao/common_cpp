@@ -28,7 +28,8 @@ TEST(SocketsTest, SocketAddr) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("www.baidu.com ip is %s port %d", local.get_ip(), local.get_port());
-  buff1[64] = {}, buff2[64] = {};
+  memset(buff1, 0, sizeof(buff1));
+  memset(buff2, 0, sizeof(buff2));
   local.get_nameinfo(buff1, sizeof(buff1), buff2, sizeof(buff2), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -45,7 +46,8 @@ TEST(SocketsTest, SocketAddr) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("local ip is %s port %d", local.get_ip(), local.get_port());
-  buff1[64] = {}, buff2[64] = {};
+  memset(buff1, 0, sizeof(buff1));
+  memset(buff2, 0, sizeof(buff2));
   local.get_nameinfo(buff1, sizeof(buff1), buff2, sizeof(buff2), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();

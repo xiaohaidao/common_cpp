@@ -1,7 +1,7 @@
 
 #ifdef _WIN32
 
-#include "operation/detail/RecvFromOp.h"
+#include "proactor/operation/detail/RecvFromOp.h"
 
 #include <winsock2.h>
 
@@ -11,14 +11,16 @@ namespace detail {
 
 RecvFromOp::RecvFromOp() {}
 
-void RecvFromOp::async_read_from(sockets::socket_type s, char *buff,
+void RecvFromOp::async_recv_from(sockets::socket_type s, char *buff,
                                  size_t size, func_type async_func,
                                  std::error_code &ec) {
-  buff_ = {size, buff};
+
+  WSABUF b = {(uint32_t)size, buff};
   func_ = async_func;
-  if (!::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, nullptr,
-                     from_.native_addr(), from_.native_addr_size(), this,
-                     nullptr)) {
+  from_size_ = 0;
+  if (!::WSARecvFrom(s, (WSABUF *)&b, 1, nullptr, nullptr,
+                     (sockaddr *)from_.native_addr(), &from_size_,
+                     (LPWSAOVERLAPPED)this, nullptr)) {
     ec = getNetErrorCode();
   }
 }

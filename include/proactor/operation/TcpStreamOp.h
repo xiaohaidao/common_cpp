@@ -4,21 +4,22 @@
 
 #include <functional>
 
-#include "Proactor.h"
-#include "operation/detail/RecvOp.h"
-#include "operation/detail/SendOp.h"
-
-class Proactor;
+#include "proactor/Proactor.h"
+#include "proactor/operation/detail/ConnectOp.h"
+#include "proactor/operation/detail/RecvOp.h"
+#include "proactor/operation/detail/SendOp.h"
 
 class TcpStreamOp {
 public:
   typedef std::function<void(const std::error_code &, size_t)> func_type;
 
-  explicit TcpStreamOp(Operation &context);
-  TcpStreamOp(Operation &context, sockets::socket_type s);
+  TcpStreamOp();
+  explicit TcpStreamOp(Proactor &context);
+  TcpStreamOp(Proactor &context, sockets::socket_type s);
 
   void connect(const sockets::SocketAddr &addr, std::error_code &ec);
-  void async_connect(const sockets::SocketAddr &addr, std::error_code &ec);
+  void async_connect(const sockets::SocketAddr &addr, func_type f,
+                     std::error_code &ec);
 
   void async_read(char *buff, size_t buff_size, func_type f,
                   std::error_code &ec);
@@ -33,8 +34,9 @@ public:
   sockets::socket_type native_handle() const;
 
 private:
-  Proactor &ctx_;
+  Proactor *ctx_;
   sockets::socket_type socket_;
+  detail::ConnectOp connect_op_;
   detail::RecvOp recv_op_;
   detail::SendOp send_op_;
 

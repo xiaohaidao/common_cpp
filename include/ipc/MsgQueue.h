@@ -36,8 +36,8 @@ public:
     return open(std::to_string(key), ec);
   }
 
-  /// 当队列满时，命令会阻塞
-  void send(const char *data, size_t size, std::error_code &ec);
+  void send(const char *data, size_t size,
+            std::error_code &ec); /// 当队列满时，命令会阻塞
 
   bool sendTimeout(const char *data, size_t size, size_t timeout_ms,
                    std::error_code &ec);

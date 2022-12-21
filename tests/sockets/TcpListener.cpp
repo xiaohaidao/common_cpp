@@ -31,7 +31,7 @@ TEST(SocketsTest, SelectTcpBlock) {
   ec.clear();
 
   TcpStream &st = rec.first;
-  char buff[128] = "server begin send message\n";
+  char buff[128] = "server begin send message";
   st.write(buff, strlen(buff), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -106,12 +106,14 @@ TEST(SocketsTest, SelectTcp) {
     sl.depost(tcp.native_handle());
 
     TcpStream &st = rec.first;
+    LOG_TRACE("client ip and port %s:%d", rec.second.get_ip(),
+              rec.second.get_port());
+
     char buff[128] = "server begin send message";
+    LOG_TRACE("server write message %d \"%s\"", strlen(buff), buff);
     st.write(buff, strlen(buff), ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("client ip and port %s:%d", rec.second.get_ip(),
-              rec.second.get_port());
 
     sl.post_read(st.native_handle(), [st](Select &sl) mutable {
       std::error_code ec;
@@ -119,9 +121,10 @@ TEST(SocketsTest, SelectTcp) {
       size_t s = st.read(buff, sizeof(buff), ec);
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
-      LOG_TRACE("server read buff \"%s\"", buff);
+      LOG_TRACE("server read buff %d \"%s\"", s, buff);
 
-      st.write(buff, strlen(buff), ec);
+      LOG_TRACE("server write buff %d \"%s\"", s, buff);
+      st.write(buff, s, ec);
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
     });
@@ -138,7 +141,7 @@ TEST(SocketsTest, SelectTcp) {
     size_t s = st.read(buff, sizeof(buff), ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("client read buff \"%s\"", buff);
+    LOG_TRACE("client read buff %d \"%s\"", s, buff);
     if (s == 0) {
       st.close(ec);
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -147,11 +150,14 @@ TEST(SocketsTest, SelectTcp) {
       return;
     }
 
-    st.write(buff, strlen(buff), ec);
+    LOG_TRACE("client write message %d \"%s\"", s, buff);
+    st.write(buff, s, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   });
-  for (size_t i = 0; i < 3; ++i) {
+
+  LOG_TRACE("-------------------- begin run while --------------------");
+  for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
     s.run_one(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -161,6 +167,7 @@ TEST(SocketsTest, SelectTcp) {
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
+  LOG_TRACE("-------------------- end run while --------------------");
 }
 
 // TEST(SocketsTest, SelectTcpAsync) {
