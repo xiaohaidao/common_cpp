@@ -23,6 +23,16 @@ TcpListenerOp::TcpListenerOp(Proactor &context)
 TcpListenerOp::TcpListenerOp(Proactor &context, sockets::socket_type s)
     : ctx_(&context), socket_(s) {}
 
+TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
+    : ctx_(other.ctx_), socket_(other.socket_) {}
+
+const TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
+  this->ctx_ = other.ctx_;
+  this->socket_ = other.socket_;
+  this->accept_op_ = detail::AcceptOp();
+  return *this;
+}
+
 void TcpListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
   if (INVALID_SOCKET != socket_ && socket_ != 0) {
     return;

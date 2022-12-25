@@ -12,6 +12,9 @@ public:
   typedef pid_t native_handle;
 #endif // _WIN32
 
+  Proactor(const Proactor &) = delete;
+  const Proactor &operator=(const Proactor &) = delete;
+
   static Proactor create(std::error_code &ec);
 
   void shutdown();
@@ -31,11 +34,6 @@ private:
 
   native_handle fd_;
   bool shutdown_;
-  // std::atomic<uint8_t> work_count_;
 };
-// Proactor p;
-// sock_read_op sr_op(p, []() {}) {
-//    createWSARecv(socket, buff, buff_size, nullptr, )
-// }
 
 #endif // PROACTOR_PROACTOR_H

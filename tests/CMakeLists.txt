@@ -8,10 +8,11 @@ add_executable(${test_name}
     ipc/MsgQueue.cpp
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
-    proactor/Proactor.cpp
+    # proactor/Proactor.cpp
     process/Process.cpp
+    reactor/Reactor.cpp
     sockets/SocketAddr.cpp
-    sockets/TcpListener.cpp
+    sockets/Tcp.cpp
     utils/log.cpp
     utils/random.cpp
 )
@@ -24,7 +25,7 @@ target_include_directories(${test_name} PRIVATE
 target_link_libraries(${test_name} PRIVATE
     gtest_main
     ipc
-    proactor
+    # proactor
     process
     reactor
     sockets

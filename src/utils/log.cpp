@@ -14,6 +14,27 @@ namespace {
 
 using time_clock_t = std::chrono::time_point<std::chrono::system_clock>;
 
+#ifdef _WIN32
+#define LOCALTIME_S(timer, buf)                                                \
+  ({                                                                           \
+    localtime_s(buf, timer);                                                   \
+    buf;                                                                       \
+  })
+#else
+#define LOCALTIME_S localtime_r
+#endif
+
+#if __GNUC__ < 5
+#define FORMAT_TM(tm, format)                                                  \
+  ({                                                                           \
+    char buf[32];                                                              \
+    std::strftime(buf, 32, format, tm);                                        \
+    buf;                                                                       \
+  })
+#else
+#define FORMAT_TM std::put_time
+#endif
+
 struct LogData {
   LogLevel level;
   time_clock_t now;
@@ -59,7 +80,8 @@ void formatLog(const LogData &data, std::string &log) {
 
   std::stringstream ss_h;
   // ISO 8601 data format
-  ss_h << "[" << std::put_time(localtime(&now_time), "(%z)%F %T.")
+  struct tm buff;
+  ss_h << "[" << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "(%z)%F %T.")
        << std::setfill('0') << std::setw(3) << ms << "]"
        << "[" << data.thread_id << "]"
        << "[" << getEnumStr(data.level) << "]"

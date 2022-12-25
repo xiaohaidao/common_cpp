@@ -3,7 +3,8 @@
 
 set(library_name "reactor")
 add_library(${library_name}
-    Select_win.cpp
+    Epoll.cpp
+    Select.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC

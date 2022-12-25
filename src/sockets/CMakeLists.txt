@@ -3,10 +3,9 @@
 
 set(library_name "sockets")
 add_library(${library_name}
-    SocketAddr_win.cpp
     SocketAddr.cpp
-    TcpListener_win.cpp
-    TcpStream_win.cpp
+    TcpListener.cpp
+    TcpStream.cpp
     # UdpSocket_win.cpp
 )
 

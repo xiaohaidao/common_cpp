@@ -26,6 +26,17 @@ TcpStreamOp::TcpStreamOp(Proactor &context, sockets::socket_type s)
     // }
   }
 }
+TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
+    : ctx_(other.ctx), socket_(other.socket_) {}
+
+const TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
+  this->ctx_ = other.ctx_;
+  this->socket_ = other.socket_;
+  this->connect_op_ = detail::ConnectOp();
+  this->recv_op_ = detail::RecvOp();
+  this->send_op_ = detail::SendOp();
+  return *this;
+}
 
 void TcpStreamOp::connect(const sockets::SocketAddr &addr,
                           std::error_code &ec) {

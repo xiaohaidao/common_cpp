@@ -16,7 +16,6 @@ add_library(${library_name}
 
 target_link_libraries(${library_name} PUBLIC
   sockets
-  utils
 )
 
 if(WIN32)

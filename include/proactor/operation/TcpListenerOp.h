@@ -15,6 +15,9 @@ public:
   explicit TcpListenerOp(Proactor &context);
   TcpListenerOp(Proactor &context, sockets::socket_type s);
 
+  TcpListenerOp(const TcpListenerOp &);
+  const TcpListenerOp &operator=(const TcpListenerOp &);
+
   void bind(const char *port_or_service, std::error_code &ec);
 
   std::pair<TcpStreamOp, sockets::SocketAddr> accept(std::error_code &ec);
@@ -27,7 +30,6 @@ public:
 private:
   Proactor *ctx_;
   sockets::socket_type socket_;
-  // Buff buff_;
   detail::AcceptOp accept_op_;
 
 }; // class TcpListener

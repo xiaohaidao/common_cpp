@@ -1,14 +1,24 @@
 // Copyright (C) 2022 All rights reserved.
 // Email: oxox0@qq.com. Created in 202207
 
-#ifdef _WIN32
-
 #include "sockets/TcpListener.h"
 
+#ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#else
+#include <sys/socket.h>
+#include <unistd.h>
+#endif // _WIN32
 
 #include "utils/error_code.h"
+
+#ifdef _WIN32
+#define closesocket closesocket
+#else
+#define closesocket close
+#define INVALID_SOCKET (socket_type)(~0)
+#endif // _WIN32
 
 namespace sockets {
 
@@ -21,7 +31,7 @@ TcpListener TcpListener::bind(const char *port_or_service,
 
   TcpListener re;
   FamilyType family = kIpV4;
-  SOCKET listen = socket(family, kStream, kTCP, ec);
+  socket_type listen = socket(family, kStream, kTCP, ec);
   if (listen == INVALID_SOCKET || ec) {
     return re;
   }
@@ -50,7 +60,7 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
   std::pair<TcpStream, SocketAddr> re;
 
   // Accept a client socket
-  SOCKET client = ::accept(socket_, NULL, NULL);
+  socket_type client = ::accept(socket_, NULL, NULL);
   if (client == INVALID_SOCKET) {
     ::closesocket(client);
     ec = getNetErrorCode();
@@ -90,5 +100,3 @@ void TcpListener::close(std::error_code &ec) {
 socket_type TcpListener::native_handle() const { return socket_; }
 
 } // namespace sockets
-
-#endif // _WIN32

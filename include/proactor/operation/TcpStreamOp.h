@@ -17,6 +17,9 @@ public:
   explicit TcpStreamOp(Proactor &context);
   TcpStreamOp(Proactor &context, sockets::socket_type s);
 
+  TcpStreamOp(const TcpStreamOp &);
+  const TcpStreamOp &operator=(const TcpStreamOp &);
+
   void connect(const sockets::SocketAddr &addr, std::error_code &ec);
   void async_connect(const sockets::SocketAddr &addr, func_type f,
                      std::error_code &ec);
