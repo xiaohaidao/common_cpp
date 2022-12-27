@@ -10,7 +10,7 @@ namespace detail {
 
 class SendToOp : public Operation {
 public:
-  typedef std::function<void(Proactor *, const std::error_code &, size_t)>
+  typedef std::function<void(void *, const std::error_code &, size_t)>
       func_type;
 
   SendToOp();
@@ -21,7 +21,7 @@ public:
 
   // protected:
   // Proactor call this function
-  void complete(Proactor *p, const std::error_code &result_ec,
+  void complete(void *proactor, const std::error_code &result_ec,
                 size_t trans_size) override;
 
 private:
@@ -33,7 +33,10 @@ private:
   func_type func_;
   sockets::SocketAddr to_;
 
-}; // class SendToOp
+#ifndef _WIN32
+  sockets::socket_type socket_;
+#endif // #ifndef _WIN32
+};     // class SendToOp
 
 } // namespace detail
 

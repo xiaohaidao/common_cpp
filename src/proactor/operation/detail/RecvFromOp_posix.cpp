@@ -1,10 +1,12 @@
 
-#ifdef _WIN32
+#ifdef __linux__
 
 #include "proactor/operation/detail/RecvFromOp.h"
 
-#include <winsock2.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
+#include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
 namespace detail {
@@ -15,23 +17,20 @@ void RecvFromOp::async_recv_from(sockets::socket_type s, char *buff,
                                  size_t size, func_type async_func,
                                  std::error_code &ec) {
 
-  WSABUF b = {(uint32_t)size, buff};
+  buff_ = {(uint32_t)size, (char *)buff};
   func_ = async_func;
   from_size_ = 0;
-  if (!::WSARecvFrom(s, (WSABUF *)&b, 1, nullptr, nullptr,
-                     (sockaddr *)from_.native_addr(), &from_size_,
-                     (LPWSAOVERLAPPED)this, nullptr)) {
-    ec = getNetErrorCode();
-  }
 }
 
 void RecvFromOp::complete(void *p, const std::error_code &result_ec,
                           size_t trans_size) {
 
+  // std::error_code re_ec;
+  // static_cast<Proactor *>(p)->cancel(server_, re_ec);
   if (func_)
     func_(p, result_ec, trans_size, from_);
 }
 
 } // namespace detail
 
-#endif // _WIN32
+#endif // __linux__

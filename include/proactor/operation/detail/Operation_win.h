@@ -8,13 +8,10 @@
 
 #include <system_error>
 
-class Proactor;
-
 namespace detail {
 
 class OperationWin : public OVERLAPPED {
 public:
-  friend class Proactor;
   OperationWin() {
     Internal = 0;
     InternalHigh = 0;
@@ -24,7 +21,7 @@ public:
   }
 
   // protected:
-  virtual void complete(Proactor *p, const std::error_code &result_ec,
+  virtual void complete(void *proactor, const std::error_code &result_ec,
                         size_t trans_size) = 0;
 };
 

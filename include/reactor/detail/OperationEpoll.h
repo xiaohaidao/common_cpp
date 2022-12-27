@@ -8,6 +8,23 @@
 
 namespace detail {
 
+enum OpEnum {
+  EPOLLIN = 0x001,     // readf
+  EPOLLPRI = 0x002,    // out-of-band data or other
+  EPOLLOUT = 0x004,    // write
+  EPOLLERR = 0x008,    // error
+  EPOLLHUP = 0x010,    // remote closed read
+  EPOLLRDHUP = 0x2000, // local closed write
+
+  EPOLLET = 1u << 31 // EdgeTriggered
+};
+
+#define READ_OP_ENUM                                                           \
+  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
+   ::detail::EPOLLET)
+#define WRITE_OP_ENUM                                                          \
+  (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP)
+
 class OperationEpoll : public OperationPosix {
 public:
   OperationEpoll() : OperationPosix(), event_(0) {}

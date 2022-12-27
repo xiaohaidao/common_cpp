@@ -82,7 +82,7 @@ void Select::post_except(socket_type s, ReactorOp *op, std::error_code &ec) {
   fd_ = (std::max)(fd_, s + 1);
 }
 
-void Select::depost(socket_type s, std::error_code &ec) {
+void Select::cancel(socket_type s, std::error_code &ec) {
   REMOVE_SOCKET(s, map_read_op_size_, map_read_op_, read_);
   REMOVE_SOCKET(s, map_write_op_size_, map_write_op_, write_);
   REMOVE_SOCKET(s, map_except_op_size_, map_except_op_, except_);

@@ -17,9 +17,10 @@ void ConnectOp::async_connect(sockets::socket_type s,
                               const sockets::SocketAddr &addr,
                               func_type async_func, std::error_code &ec) {
 
-  if (client_ != INVALID_SOCKET && client_ != 0) {
-    return;
-  }
+  // if (client_ != INVALID_SOCKET && client_ != 0) {
+  //   ec = {EINVAL, std::system_category()};
+  //   return;
+  // }
   client_ = s;
   func_ = async_func;
 
@@ -59,7 +60,7 @@ void ConnectOp::async_connect(sockets::socket_type s,
   }
 }
 
-void ConnectOp::complete(Proactor *p, const std::error_code &result_ec,
+void ConnectOp::complete(void *p, const std::error_code &result_ec,
                          size_t trans_size) {
 
   if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0)) {

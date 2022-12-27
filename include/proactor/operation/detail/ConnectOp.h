@@ -10,7 +10,7 @@ namespace detail {
 
 class ConnectOp : public Operation {
 public:
-  typedef std::function<void(Proactor *, const std::error_code &, size_t,
+  typedef std::function<void(void *, const std::error_code &, size_t,
                              sockets::socket_type)>
       func_type;
 
@@ -21,7 +21,7 @@ public:
 
   // protected:
   // Proactor call this function
-  void complete(Proactor *p, const std::error_code &result_ec,
+  void complete(void *proactor, const std::error_code &result_ec,
                 size_t trans_size) override;
 
 private:

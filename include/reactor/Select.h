@@ -25,8 +25,7 @@ public:
   Select(const Select &) = delete;
   const Select &operator=(const Select &) = delete;
 
-  Select();
-  Select(std::error_code &ec);
+  explicit Select(std::error_code &ec);
 
   size_t call(QueueOp &queue);
   size_t call_one(QueueOp &queue);
@@ -35,12 +34,16 @@ public:
   size_t run_once_timeout(QueueOp &queue, size_t timeout_ms,
                           std::error_code &ec);
 
+  void close(std::error_code & /*ec*/) {}
+
   void post_read(socket_type s, ReactorOp *op, std::error_code &ec);
   void post_write(socket_type s, ReactorOp *op, std::error_code &ec);
   void post_except(socket_type s, ReactorOp *op, std::error_code &ec);
-  void depost(socket_type s, std::error_code &ec);
+  void cancel(socket_type s, std::error_code &ec);
 
 private:
+  Select();
+
   socket_type fd_;
 
   std::array<std::pair<socket_type, ReactorOp *>, FD_SETSIZE> map_read_op_;

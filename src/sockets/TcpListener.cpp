@@ -66,28 +66,8 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
     ec = getNetErrorCode();
     return re;
   }
-  // char addr[64 * 3] = {};
-  // SOCKET client = socket(kUnspecified, kStream, kTCP, ec);
-  // if (client == INVALID_SOCKET || ec) {
-  //   return re;
-  // }
-  // DWORD bytes_received = 0;
-  // printf("sockaddr size %d %d %d\n", sizeof(sockaddr), sizeof(sockaddr) + 16,
-  //        sizeof(sockaddr_in6));
-  // if (!::AcceptEx(socket_, client, addr, 64, 64, 64,
-  //                 &bytes_received, nullptr)) {
-
-  //   ::closesocket(client);
-  //   ec = getNetErrorCode();
-  //   return re;
-  // }
   re.first.socket_ = client;
   re.second = SocketAddr::get_remote_socket(client, ec);
-  // memcpy(re.second.native_addr(), addr + 128, 32);
-  // for (size_t i = 0; i < 64 * 3; ++i) {
-  //   printf("%x",addr[i]);
-  // }
-  // printf("\n");
   return re;
 }
 

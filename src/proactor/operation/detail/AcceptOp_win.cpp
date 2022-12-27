@@ -45,7 +45,7 @@ void AcceptOp::async_accept(sockets::socket_type s, func_type async_func,
   }
 }
 
-void AcceptOp::complete(Proactor *p, const std::error_code &result_ec,
+void AcceptOp::complete(void *p, const std::error_code &result_ec,
                         size_t trans_size) {
 
   if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,

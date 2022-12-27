@@ -19,7 +19,7 @@
 #else
 #define closesocket close
 #define INVALID_SOCKET (socket_type)(~0)
-#define SD_BOTH SHUT_RDWR
+#define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
 namespace sockets {
@@ -49,6 +49,7 @@ TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
     return re;
   }
   re.socket_ = connect;
+  // // windows platform
   // // If mode = 0, blocking is enabled;
   // // If mode != 0, non-blocking mode is enabled.
   // u_long mode = 1;
@@ -131,7 +132,10 @@ int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
 
 void TcpStream::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_BOTH)) {
-    ec = getNetErrorCode();
+    std::error_code re_ec = getNetErrorCode();
+    if (ENOTCONN != re_ec.value()) {
+      ec = re_ec;
+    }
   }
   if (::closesocket(socket_)) {
     ec = getNetErrorCode();

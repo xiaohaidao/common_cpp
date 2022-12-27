@@ -4,18 +4,20 @@
 
 #include "proactor/operation/detail/Operation.h"
 
+class ThreadInfo;
+
 class Proactor {
 public:
 #ifdef _WIN32
   typedef void *native_handle;
 #else  // _WIN32
-  typedef pid_t native_handle;
+  typedef int native_handle;
 #endif // _WIN32
 
   Proactor(const Proactor &) = delete;
   const Proactor &operator=(const Proactor &) = delete;
 
-  static Proactor create(std::error_code &ec);
+  explicit Proactor(std::error_code &ec);
 
   void shutdown();
 
@@ -26,11 +28,17 @@ public:
 
   void notify_op(Operation *op, std::error_code &ec);
 
-  void post(const native_handle &file_descriptor, std::error_code &ec);
-  void depose(const native_handle &file_descriptor, std::error_code &ec);
+  void post(const native_handle &file_descriptor, Operation *op,
+            std::error_code &ec);
+  void cancel(const native_handle &file_descriptor, std::error_code &ec);
+
+  void close(std::error_code &ec);
 
 private:
   Proactor();
+
+  size_t call_one(size_t timeout_us, ThreadInfo &thread_info,
+                  std::error_code &ec);
 
   native_handle fd_;
   bool shutdown_;

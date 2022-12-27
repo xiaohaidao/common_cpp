@@ -14,8 +14,8 @@ public:
   typedef std::function<void(const std::error_code &, size_t)> func_type;
 
   TcpStreamOp();
-  explicit TcpStreamOp(Proactor &context);
-  TcpStreamOp(Proactor &context, sockets::socket_type s);
+  explicit TcpStreamOp(Proactor *context);
+  TcpStreamOp(Proactor *context, sockets::socket_type s);
 
   TcpStreamOp(const TcpStreamOp &);
   const TcpStreamOp &operator=(const TcpStreamOp &);

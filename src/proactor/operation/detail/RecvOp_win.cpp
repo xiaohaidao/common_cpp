@@ -23,7 +23,7 @@ void RecvOp::async_recv(sockets::socket_type s, char *buff, size_t size,
   }
 }
 
-void RecvOp::complete(Proactor *p, const std::error_code &result_ec,
+void RecvOp::complete(void *p, const std::error_code &result_ec,
                       size_t trans_size) {
 
   if (func_)

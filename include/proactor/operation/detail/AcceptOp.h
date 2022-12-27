@@ -11,7 +11,7 @@ namespace detail {
 class AcceptOp : public Operation {
 public:
   typedef std::function<void(
-      Proactor *, const std::error_code &,
+      void *, const std::error_code &,
       std::pair<sockets::socket_type, sockets::SocketAddr>)>
       func_type;
 
@@ -22,14 +22,16 @@ public:
 
   // protected:
   // Proactor call this function
-  void complete(Proactor *p, const std::error_code &result_ec,
+  void complete(void *proactor, const std::error_code &result_ec,
                 size_t trans_size) override;
 
 private:
   func_type func_;
   sockets::socket_type server_;
+#ifdef _WIN32
   sockets::socket_type client_;
   char addresses_[32];
+#endif // _WIN32
 
 }; // class AcceptOp
 

@@ -1,9 +1,10 @@
 
-#ifdef _WIN32
+#ifdef __linux__
 
 #include "proactor/operation/TcpListenerOp.h"
 
-#include <winsock2.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include <utility>
 
@@ -15,20 +16,16 @@ using sockets::SocketAddr;
 using sockets::TcpListener;
 using sockets::TcpStream;
 
-TcpListenerOp::TcpListenerOp() : ctx_(nullptr), socket_(INVALID_SOCKET) {}
+TcpListenerOp::TcpListenerOp() : ctx_(nullptr), socket_(-1) {}
 
-TcpListenerOp::TcpListenerOp(Proactor &context)
-    : ctx_(&context), socket_(INVALID_SOCKET) {}
+TcpListenerOp::TcpListenerOp(Proactor &context) : ctx_(&context), socket_(-1) {}
 
 void TcpListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
-  if (INVALID_SOCKET != socket_ && socket_ != 0) {
+  if (-1 != socket_ && socket_ != 0) {
     return;
   }
   TcpListener listener = TcpListener::bind(port_or_servicer, ec);
   socket_ = listener.native_handle();
-  if (!ec && ctx_ != nullptr) {
-    ctx_->post((HANDLE)socket_, nullptr, ec);
-  }
 }
 
 void TcpListenerOp::async_accept(func_type f, std::error_code &ec) {
@@ -38,21 +35,22 @@ void TcpListenerOp::async_accept(func_type f, std::error_code &ec) {
               std::move(p.second)});
   };
   accept_op_.async_accept(socket_, call_back, ec);
-  if (ec) {
+  if (ec || !ctx_) {
     accept_op_.complete(ctx_, ec, 0);
+    return;
   }
+  accept_op_.set_event_data(READ_OP_ENUM);
+  ctx_->post(socket_, &accept_op_, ec);
 }
 
 void TcpListenerOp::close(std::error_code &ec) {
-  if (!CancelIoEx((HANDLE)socket_, nullptr)) {
-    std::error_code re_ec = getErrorCode();
-    if (re_ec.value() != ERROR_NOT_FOUND) {
-      ec = re_ec;
-    }
+  if (ctx_) {
+    std::error_code t_ec;
+    ctx_->cancel(socket_, t_ec);
   }
   TcpListener listener(socket_);
   listener.close(ec);
-  socket_ = INVALID_SOCKET;
+  socket_ = -1;
 }
 
-#endif // _WIN32
+#endif // __linux__

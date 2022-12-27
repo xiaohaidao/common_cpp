@@ -10,7 +10,7 @@ namespace detail {
 
 class RecvOp : public Operation {
 public:
-  typedef std::function<void(Proactor *, const std::error_code &, size_t)>
+  typedef std::function<void(void *, const std::error_code &, size_t)>
       func_type;
 
   RecvOp();
@@ -20,7 +20,7 @@ public:
 
   // protected:
   // Proactor call this function
-  void complete(Proactor *p, const std::error_code &result_ec,
+  void complete(void *proactor, const std::error_code &result_ec,
                 size_t trans_size) override;
 
 private:
@@ -30,6 +30,10 @@ private:
   } buff_;
 
   func_type func_;
+#ifndef _WIN32
+  sockets::socket_type socket_;
+#endif // #ifndef _WIN32
+
 }; // class RecvOP
 
 } // namespace detail

@@ -4,10 +4,13 @@
 #include "reactor/Epoll.h"
 
 #include <sys/epoll.h>
+#include <unistd.h>
 
 #include "utils/error_code.h"
 
 Epoll::Epoll() : fd_(-1) {}
+
+Epoll::Epoll(int fd) : fd_(fd) {}
 
 Epoll::Epoll(std::error_code &ec) : fd_(epoll_create1(EPOLL_CLOEXEC)) {
   if (fd_ == -1) {
@@ -15,9 +18,9 @@ Epoll::Epoll(std::error_code &ec) : fd_(epoll_create1(EPOLL_CLOEXEC)) {
   }
 }
 
-void Epoll::post(int fd, ReactorOp *op, int or_op_enum, std::error_code &ec) {
+void Epoll::post(int fd, ReactorOp *op, std::error_code &ec) {
   struct epoll_event event = {};
-  event.events = or_op_enum;
+  event.events = op->get_event_data();
   event.data.ptr = op;
   if (epoll_ctl(fd_, EPOLL_CTL_ADD, fd, &event)) {
     std::error_code re_ec = getErrorCode();
@@ -32,14 +35,16 @@ void Epoll::post(int fd, ReactorOp *op, int or_op_enum, std::error_code &ec) {
 }
 
 void Epoll::post_read(int fd, ReactorOp *op, std::error_code &ec) {
-  post(fd, op, READ_OP_ENUM, ec);
+  op->set_event_data(READ_OP_ENUM);
+  post(fd, op, ec);
 }
 
 void Epoll::post_write(int fd, ReactorOp *op, std::error_code &ec) {
-  post(fd, op, WRITE_OP_ENUM, ec);
+  op->set_event_data(WRITE_OP_ENUM);
+  post(fd, op, ec);
 }
 
-void Epoll::depost(int fd, std::error_code &ec) {
+void Epoll::cancel(int fd, std::error_code &ec) {
   struct epoll_event event = {};
   if (epoll_ctl(fd_, EPOLL_CTL_DEL, fd, &event)) {
     ec = getErrorCode();
@@ -81,6 +86,12 @@ size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
     queue.push(ptr);
   }
   return number;
+}
+
+void Epoll::close(std::error_code &ec) {
+  if (::close(fd_)) {
+    ec = getErrorCode();
+  }
 }
 
 #endif // __linux__

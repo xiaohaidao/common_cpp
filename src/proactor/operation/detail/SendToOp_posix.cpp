@@ -1,38 +1,46 @@
 
-#ifdef _WIN32
+#ifdef __linux__
 
 #include "proactor/operation/detail/SendToOp.h"
 
-#include <winsock2.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
+#include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
 namespace detail {
 
-SendToOp::SendToOp() {}
+SendToOp::SendToOp() : socket_(-1) {}
 
 void SendToOp::async_send_to(sockets::socket_type s, const char *buff,
                              size_t size, func_type async_func,
                              const sockets::SocketAddr &to,
                              std::error_code &ec) {
 
-  WSABUF b = {(uint32_t)size, (char *)buff};
+  buff_ = {(uint32_t)size, (char *)buff};
   func_ = async_func;
   to_ = to;
-  if (!::WSASendTo(s, (WSABUF *)&b, 1, nullptr, 0,
-                   (sockaddr *)to_.native_addr(), to_.native_addr_size(),
-                   (LPWSAOVERLAPPED)this, nullptr)) {
-    ec = getNetErrorCode();
-  }
+  socket_ = s;
+  // if (!::WSASendTo(s, (WSABUF *)&b, 1, nullptr, 0,
+  //                  (sockaddr *)to_.native_addr(), to_.native_addr_size(),
+  //                  (LPWSAOVERLAPPED)this, nullptr)) {
+  //   ec = getNetErrorCode();
+  // }
 }
 
 void SendToOp::complete(void *p, const std::error_code &result_ec,
                         size_t trans_size) {
 
+  if (p) {
+    std::error_code ec;
+    static_cast<Proactor *>(p)->cancel(socket_, ec);
+  }
+  std::error_code re_ec = result_ec;
   if (func_)
     func_(p, result_ec, trans_size);
 }
 
 } // namespace detail
 
-#endif // _WIN32
+#endif // __linux__

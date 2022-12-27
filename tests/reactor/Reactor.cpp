@@ -68,7 +68,7 @@ public:
                        << ec.message();
       ec.clear();
 
-      static_cast<T *>(reactor)->depost(client_.native_handle(), ec);
+      static_cast<T *>(reactor)->cancel(client_.native_handle(), ec);
       EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                        << ec.message();
       ec.clear();
@@ -101,20 +101,20 @@ public:
   }
 
   void close() {
+    for (auto &i : tcps_) {
+      i.second.close();
+    }
+    tcps_.clear();
     LOG_TRACE("server close socket %d", native_handle());
     std::error_code ec;
     server_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    for (auto &i : tcps_) {
-      i.second.close();
-    }
-    tcps_.clear();
   }
 
   socket_type native_handle() const { return server_.native_handle(); }
 
-  void read(void *reactor) {
+  void accept(void *reactor) {
     LOG_TRACE("server socket %d begin accpet", native_handle());
     std::error_code ec;
     std::pair<TcpStream, SocketAddr> rec = server_.accept(ec);
@@ -134,13 +134,13 @@ public:
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 
-    static_cast<T *>(reactor)->depost(server_.native_handle(), ec);
+    static_cast<T *>(reactor)->cancel(server_.native_handle(), ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
 
   void complete(void *owner, const std::error_code &re_ec, size_t v) override {
-    read(owner);
+    accept(owner);
   }
 
 private:
@@ -190,6 +190,10 @@ template <typename T> void ReactorFunc() {
 
   client.close();
   server.close();
+
+  reactor.close(ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
 }
 
 TEST(ReactorTest, ReactorTcp) { ReactorFunc<Reactor>(); }
