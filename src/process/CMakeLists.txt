@@ -1,5 +1,3 @@
-# Copyright (C) 2022 dobot All rights reserved.
-# Author: libobo@dobot.cc. Created in 202204
 
 set(library_name "process")
 add_library(${library_name}

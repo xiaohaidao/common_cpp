@@ -1,5 +1,3 @@
-# Copyright (C) 2022 dobot All rights reserved.
-# Author: libobo@dobot.cc. Created in 202210
 
 set(CLANG_TIDY_TOOL clang-tidy)
 add_custom_target(clang_tidy

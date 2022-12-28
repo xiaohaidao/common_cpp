@@ -1,11 +1,6 @@
 // Copyright (C) 2022 All rights reserved.
 // Email: oxox0@qq.com. Created in 202210
 
-/**
- * @file
- *
- */
-
 #ifndef __linux__
 
 #include "ipc/MsgQueue.h"

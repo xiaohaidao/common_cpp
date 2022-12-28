@@ -1,5 +1,3 @@
-# Copyright (C) 2022 dobot All rights reserved.
-# Author: libobo@dobot.cc. Created in 202210
 
 # cmake -DCMAKE_TOOLCHAIN_FILE=${file}
 

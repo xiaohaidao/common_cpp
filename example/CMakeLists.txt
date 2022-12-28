@@ -1,5 +1,3 @@
-# Copyright (C) 2022 dobot All rights reserved.
-# Author: libobo@dobot.cc. Created in 202204
 
 set(example_name "your_name")
 add_executable(${example_name}
