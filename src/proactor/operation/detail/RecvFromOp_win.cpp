@@ -11,9 +11,8 @@ namespace detail {
 
 RecvFromOp::RecvFromOp() {}
 
-void RecvFromOp::async_recv_from(sockets::socket_type s, char *buff,
-                                 size_t size, func_type async_func,
-                                 std::error_code &ec) {
+void RecvFromOp::async_recv_from(socket_type s, char *buff, size_t size,
+                                 func_type async_func, std::error_code &ec) {
 
   WSABUF b = {(uint32_t)size, buff};
   func_ = async_func;

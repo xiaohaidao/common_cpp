@@ -13,8 +13,7 @@ namespace detail {
 
 ConnectOp::ConnectOp() : client_(INVALID_SOCKET) {}
 
-void ConnectOp::async_connect(sockets::socket_type s,
-                              const sockets::SocketAddr &addr,
+void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
                               func_type async_func, std::error_code &ec) {
 
   // if (client_ != INVALID_SOCKET && client_ != 0) {
@@ -67,7 +66,7 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
     // std::error_code ec = getNetErrorCode();
   }
   if (func_) {
-    sockets::socket_type s = client_;
+    socket_type s = client_;
     client_ = INVALID_SOCKET;
 
     func_(p, result_ec, trans_size, s);

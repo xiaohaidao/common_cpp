@@ -140,10 +140,10 @@ xoshiro256ss g_xorshfit;
 
 void fixSeed() { g_xorshfit.setFixSeed(true); }
 
-size_t randNum() { return g_xorshfit(); }
+uint64_t randNum() { return g_xorshfit(); }
 
-size_t randScope(size_t min_v, size_t max_v) {
-  size_t diff = std::max(min_v, max_v) - std::min(min_v, max_v);
+uint64_t randScope(uint64_t min_v, uint64_t max_v) {
+  uint64_t diff = std::max(min_v, max_v) - std::min(min_v, max_v);
   if (diff == 0) {
     return max_v;
   }

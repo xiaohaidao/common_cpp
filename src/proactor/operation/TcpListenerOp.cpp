@@ -5,11 +5,7 @@
 #include "sockets/TcpListener.h"
 #include "utils/error_code.h"
 
-using sockets::SocketAddr;
-using sockets::TcpListener;
-using sockets::TcpStream;
-
-TcpListenerOp::TcpListenerOp(Proactor &context, sockets::socket_type s)
+TcpListenerOp::TcpListenerOp(Proactor &context, socket_type s)
     : ctx_(&context), socket_(s) {}
 
 TcpListenerOp::TcpListenerOp(const TcpListenerOp &other)
@@ -29,4 +25,4 @@ std::pair<TcpStreamOp, SocketAddr> TcpListenerOp::accept(std::error_code &ec) {
   return {TcpStreamOp(ctx_, ac.first.native_handle()), std::move(ac.second)};
 }
 
-sockets::socket_type TcpListenerOp::native_handle() const { return socket_; }
+socket_type TcpListenerOp::native_handle() const { return socket_; }

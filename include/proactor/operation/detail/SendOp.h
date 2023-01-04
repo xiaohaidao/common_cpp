@@ -15,7 +15,7 @@ public:
 
   SendOp();
 
-  void async_send(sockets::socket_type s, const char *buff, size_t size,
+  void async_send(socket_type s, const char *buff, size_t size,
                   func_type async_func, std::error_code &ec);
 
   // protected:
@@ -31,7 +31,7 @@ private:
 
   func_type func_;
 #ifndef _WIN32
-  sockets::socket_type socket_;
+  socket_type socket_;
 #endif // #ifndef _WIN32
 };     // class SendOp
 

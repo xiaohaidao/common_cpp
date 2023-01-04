@@ -15,8 +15,8 @@ public:
 
   RecvOp();
 
-  void async_recv(sockets::socket_type s, char *buff, size_t size,
-                  func_type async_func, std::error_code &ec);
+  void async_recv(socket_type s, char *buff, size_t size, func_type async_func,
+                  std::error_code &ec);
 
   // protected:
   // Proactor call this function
@@ -31,7 +31,7 @@ private:
 
   func_type func_;
 #ifndef _WIN32
-  sockets::socket_type socket_;
+  socket_type socket_;
 #endif // #ifndef _WIN32
 
 }; // class RecvOP

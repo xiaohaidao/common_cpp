@@ -12,7 +12,7 @@ namespace detail {
 
 AcceptOp::AcceptOp() : server_(INVALID_SOCKET), client_(INVALID_SOCKET) {}
 
-void AcceptOp::async_accept(sockets::socket_type s, func_type async_func,
+void AcceptOp::async_accept(socket_type s, func_type async_func,
                             std::error_code &ec) {
   if (client_ == INVALID_SOCKET || client_ == 0) {
     client_ = sockets::socket(kUnspecified, kStream, kTCP, ec);
@@ -53,7 +53,7 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
     // std::error_code ec = getNetErrorCode();
   }
   if (func_) {
-    std::pair<sockets::socket_type, sockets::SocketAddr> ac_addr;
+    std::pair<socket_type, SocketAddr> ac_addr;
     ac_addr.first = client_;
     memcpy(ac_addr.second.native_addr(), addresses_,
            ac_addr.second.native_addr_size());

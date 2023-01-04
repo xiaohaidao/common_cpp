@@ -11,10 +11,6 @@
 #include "sockets/TcpListener.h"
 #include "utils/error_code.h"
 
-using sockets::SocketAddr;
-using sockets::TcpListener;
-using sockets::TcpStream;
-
 TcpListenerOp::TcpListenerOp() : ctx_(nullptr), socket_(INVALID_SOCKET) {}
 
 TcpListenerOp::TcpListenerOp(Proactor &context)
@@ -33,7 +29,7 @@ void TcpListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
 
 void TcpListenerOp::async_accept(func_type f, std::error_code &ec) {
   auto call_back = [f](void *ctx, const std::error_code &re_ec,
-                       std::pair<sockets::socket_type, SocketAddr> p) {
+                       std::pair<socket_type, SocketAddr> p) {
     f(re_ec, {TcpStreamOp(static_cast<Proactor *>(ctx), p.first),
               std::move(p.second)});
   };

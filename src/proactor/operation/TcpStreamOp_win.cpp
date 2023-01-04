@@ -8,14 +8,12 @@
 #include "sockets/TcpStream.h"
 #include "utils/error_code.h"
 
-using sockets::TcpStream;
-
 TcpStreamOp::TcpStreamOp() : ctx_(nullptr), socket_(INVALID_SOCKET) {}
 
 TcpStreamOp::TcpStreamOp(Proactor *context)
     : ctx_(context), socket_(INVALID_SOCKET) {}
 
-TcpStreamOp::TcpStreamOp(Proactor *context, sockets::socket_type s)
+TcpStreamOp::TcpStreamOp(Proactor *context, socket_type s)
     : ctx_(context), socket_(s) {
 
   if (ctx_ != nullptr) {
@@ -27,8 +25,7 @@ TcpStreamOp::TcpStreamOp(Proactor *context, sockets::socket_type s)
   }
 }
 
-void TcpStreamOp::connect(const sockets::SocketAddr &addr,
-                          std::error_code &ec) {
+void TcpStreamOp::connect(const SocketAddr &addr, std::error_code &ec) {
   if (socket_ != INVALID_SOCKET && socket_ != 0) {
     close(ec);
   }
@@ -39,7 +36,7 @@ void TcpStreamOp::connect(const sockets::SocketAddr &addr,
   }
 }
 
-void TcpStreamOp::async_connect(const sockets::SocketAddr &addr, func_type f,
+void TcpStreamOp::async_connect(const SocketAddr &addr, func_type f,
                                 std::error_code &ec) {
 
   if (socket_ != INVALID_SOCKET && socket_ != 0) {
@@ -55,7 +52,7 @@ void TcpStreamOp::async_connect(const sockets::SocketAddr &addr, func_type f,
   }
 
   auto call_back = [f](void *ctx, const std::error_code &re_ec, size_t size,
-                       sockets::socket_type s) {
+                       socket_type s) {
     // assert(this->socket_ == s)
     f(re_ec, size);
   };

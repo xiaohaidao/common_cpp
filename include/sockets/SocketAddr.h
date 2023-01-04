@@ -27,16 +27,18 @@ enum Protocal {
   kIcmpV6,
 };
 
-namespace sockets {
-
 #ifdef _WIN32
 typedef uint64_t socket_type;
 #else  // _WIN32
 typedef int socket_type;
 #endif // _WIN32
 
+namespace sockets {
+
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec);
+
+void setReuseAddr(socket_type s, std::error_code &ec);
 
 int enumToNative(FamilyType family);
 int enumToNative(SocketType type);
@@ -46,13 +48,20 @@ FamilyType nativeToFamily(int family);
 SocketType nativeToType(int type);
 Protocal nativeToProtocal(int protocal);
 
+uint16_t netToHost(uint16_t v);
+uint32_t netToHost(uint32_t v);
+uint64_t netToHost(uint64_t v);
+uint16_t hostToNet(uint16_t v);
+uint32_t hostToNet(uint32_t v);
+uint64_t hostToNet(uint64_t v);
+
+} // namespace sockets
+
 class SocketAddr {
 public:
   SocketAddr();
   SocketAddr(const char *host_or_ip, const char *port_or_service);
 
-  // static SocketAddr localhostV4(unsigned short port);
-  // static SocketAddr localhostV6(unsigned short port);
   static SocketAddr get_local_socket(socket_type handle, std::error_code &ec);
   static SocketAddr get_remote_socket(socket_type handle, std::error_code &ec);
 
@@ -86,7 +95,5 @@ private:
   char ip_addr_[64];   // v4 16, v6 46
   char sock_addr_[64]; // struct sockaddr
 };
-
-} // namespace sockets
 
 #endif // SOCKETS_SOCKETADDR_H

@@ -13,8 +13,7 @@ namespace detail {
 
 ConnectOp::ConnectOp() : client_(-1) {}
 
-void ConnectOp::async_connect(sockets::socket_type s,
-                              const sockets::SocketAddr &addr,
+void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
                               func_type async_func, std::error_code &ec) {
 
   client_ = s;
@@ -48,7 +47,7 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
   }
   std::error_code re_ec = result_ec;
   if (func_) {
-    sockets::socket_type s = client_;
+    socket_type s = client_;
     client_ = -1;
 
     func_(p, re_ec, trans_size, s);

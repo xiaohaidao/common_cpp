@@ -16,7 +16,7 @@ public:
       : tcp_op(std::move(p)), module_(module) {}
   ~Tcp() {}
 
-  sockets::socket_type native_handle() const { return tcp_op.native_handle(); }
+  socket_type native_handle() const { return tcp_op.native_handle(); }
 
   void close() {
     LOG_TRACE("module: %s, close socket %d", module_.c_str(), native_handle());
@@ -50,8 +50,7 @@ public:
     f();
   }
 
-  template <typename F>
-  void async_connect(const sockets::SocketAddr &addr, F f) {
+  template <typename F> void async_connect(const SocketAddr &addr, F f) {
     std::error_code ec;
     tcp_op.async_connect(addr, std::bind(&Tcp::connected<F>, this, f, _1, _2),
                          ec);
@@ -90,9 +89,7 @@ public:
   Service(Proactor &p) : listener_(p) {}
   ~Service() {}
 
-  sockets::socket_type native_handle() const {
-    return listener_.native_handle();
-  }
+  socket_type native_handle() const { return listener_.native_handle(); }
 
   void close() {
     for (auto &i : tcps_) {
@@ -115,7 +112,7 @@ public:
   }
 
   void accept(const std::error_code &re_ec,
-              std::pair<TcpStreamOp, sockets::SocketAddr> ac) {
+              std::pair<TcpStreamOp, SocketAddr> ac) {
 
     LOG_TRACE("server socket %d begin accpet", native_handle());
 
@@ -155,7 +152,6 @@ public:
 };
 
 TEST(ProactorTest, Proactor) {
-  using sockets::SocketAddr;
   std::error_code ec;
   Proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

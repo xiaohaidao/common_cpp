@@ -4,8 +4,6 @@
 #include "sockets/TcpStream.h"
 #include "utils/error_code.h"
 
-using sockets::TcpStream;
-
 TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
     : ctx_(other.ctx_), socket_(other.socket_) {}
 
@@ -30,4 +28,4 @@ size_t TcpStreamOp::write(const char *buff, size_t buff_size,
   return tcp.write(buff, buff_size, ec);
 }
 
-sockets::socket_type TcpStreamOp::native_handle() const { return socket_; }
+socket_type TcpStreamOp::native_handle() const { return socket_; }

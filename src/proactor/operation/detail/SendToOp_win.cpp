@@ -11,9 +11,8 @@ namespace detail {
 
 SendToOp::SendToOp() {}
 
-void SendToOp::async_send_to(sockets::socket_type s, const char *buff,
-                             size_t size, func_type async_func,
-                             const sockets::SocketAddr &to,
+void SendToOp::async_send_to(socket_type s, const char *buff, size_t size,
+                             func_type async_func, const SocketAddr &to,
                              std::error_code &ec) {
 
   WSABUF b = {(uint32_t)size, (char *)buff};

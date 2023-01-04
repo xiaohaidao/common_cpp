@@ -48,6 +48,15 @@ private:
   }
 
 } g_socket_start;
+
+#if __BIG_ENDIAN__
+#define htonll(x) (x)
+#define ntohll(x) (x)
+#else
+#define htonll(x) ((((uint64_t)htonl(x & 0xFFFFFFFF)) << 32) + htonl(x >> 32))
+#define ntohll(x) ((((uint64_t)ntohl(x & 0xFFFFFFFF)) << 32) + ntohl(x >> 32))
+#endif
+
 #endif // _WIN32
 
 } // namespace
@@ -67,6 +76,19 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
     ec = getNetErrorCode();
   }
   return s;
+}
+
+void setReuseAddr(socket_type s, std::error_code &ec) {
+  constexpr int set = 1;
+#ifdef SO_REUSEPORT
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, (const char *)&set,
+                 sizeof(set))) {
+#else
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&set,
+                 sizeof(set))) {
+#endif // SO_REUSEPORT
+    ec = getNetErrorCode();
+  }
 }
 
 int enumToNative(FamilyType family) {
@@ -144,6 +166,36 @@ Protocal nativeToProtocal(int protocal) {
     return kTCP;
   }
 }
+
+uint16_t netToHost(uint16_t v) { return ntohs(v); }
+
+uint32_t netToHost(uint32_t v) { return ntohl(v); }
+
+uint64_t netToHost(uint64_t v) {
+  return
+#ifdef _WIN32
+      ntohll(v);
+#else
+      be64toh(v);
+#endif // _WIN32
+}
+
+uint16_t hostToNet(uint16_t v) { return htons(v); }
+
+uint32_t hostToNet(uint32_t v) { return htonl(v); }
+
+uint64_t hostToNet(uint64_t v) {
+  return
+#ifdef _WIN32
+      htonll(v);
+#else
+      htobe64(v);
+#endif // _WIN32
+}
+
+} // namespace sockets
+
+using namespace sockets;
 
 // inet_ntoa(sin_addr); // ipv4
 // inet_ntop(sin_addr);  ipaddr to str ip
@@ -308,5 +360,3 @@ SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
   ::freeaddrinfo(result);
   return re;
 }
-
-} // namespace sockets

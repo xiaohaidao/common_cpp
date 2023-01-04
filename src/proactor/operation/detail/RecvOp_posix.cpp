@@ -13,7 +13,7 @@ namespace detail {
 
 RecvOp::RecvOp() : socket_(-1) {}
 
-void RecvOp::async_recv(sockets::socket_type s, char *buff, size_t size,
+void RecvOp::async_recv(socket_type s, char *buff, size_t size,
                         func_type async_func, std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};

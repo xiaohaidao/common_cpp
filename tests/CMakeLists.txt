@@ -11,6 +11,7 @@ add_executable(${test_name}
     reactor/Reactor.cpp
     sockets/SocketAddr.cpp
     sockets/Tcp.cpp
+    stun/stun.cpp
     utils/log.cpp
     utils/random.cpp
 )
@@ -27,6 +28,7 @@ target_link_libraries(${test_name} PRIVATE
     process
     reactor
     sockets
+    stun
     utils
 )
 

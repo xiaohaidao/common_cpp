@@ -20,8 +20,6 @@
 #define INVALID_SOCKET (socket_type)(~0)
 #endif // _WIN32
 
-namespace sockets {
-
 TcpListener::TcpListener() : socket_(INVALID_SOCKET) {}
 
 TcpListener::TcpListener(const socket_type &s) : socket_(s) {}
@@ -30,12 +28,33 @@ TcpListener TcpListener::bind(const char *port_or_service,
                               std::error_code &ec) {
 
   TcpListener re;
+  socket_type listen = bind_port(port_or_service, ec).native_handle();
+  re.socket_ = listen;
+  if (ec) {
+    return re;
+  }
+  if (::listen(listen, SOMAXCONN)) {
+    ::closesocket(listen);
+    ec = getNetErrorCode();
+    return re;
+  }
+  return re;
+}
+
+TcpStream TcpListener::bind_port(const char *port_or_service,
+                                 std::error_code &ec) {
+
+  TcpStream re;
   FamilyType family = kIpV4;
-  socket_type listen = socket(family, kStream, kTCP, ec);
+  socket_type listen = sockets::socket(family, kStream, kTCP, ec);
   if (listen == INVALID_SOCKET || ec) {
     return re;
   }
   re.socket_ = listen;
+  sockets::setReuseAddr(listen, ec);
+  if (ec) {
+    return re;
+  }
   // Setup the TCP listening socket
   SocketAddr addr =
       SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
@@ -44,11 +63,6 @@ TcpListener TcpListener::bind(const char *port_or_service,
     return re;
   }
   if (::bind(listen, (sockaddr *)addr.native_addr(), addr.native_addr_size())) {
-    ::closesocket(listen);
-    ec = getNetErrorCode();
-    return re;
-  }
-  if (::listen(listen, SOMAXCONN)) {
     ::closesocket(listen);
     ec = getNetErrorCode();
     return re;
@@ -78,5 +92,3 @@ void TcpListener::close(std::error_code &ec) {
 }
 
 socket_type TcpListener::native_handle() const { return socket_; }
-
-} // namespace sockets

@@ -13,7 +13,7 @@ namespace detail {
 
 SendOp::SendOp() : socket_(-1) {}
 
-void SendOp::async_send(sockets::socket_type s, const char *buff, size_t size,
+void SendOp::async_send(socket_type s, const char *buff, size_t size,
                         func_type async_func, std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};

@@ -22,8 +22,6 @@
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
-namespace sockets {
-
 TcpStream::TcpStream()
     : socket_(INVALID_SOCKET)
 #ifdef _WIN32
@@ -44,7 +42,7 @@ TcpStream::TcpStream(const socket_type &s)
 
 TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
   TcpStream re;
-  socket_type connect = socket(addr.get_family(), kStream, kTCP, ec);
+  socket_type connect = sockets::socket(addr.get_family(), kStream, kTCP, ec);
   if (ec) {
     return re;
   }
@@ -58,12 +56,16 @@ TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
   //   return re;
   // }
 
-  if (::connect(connect, (const sockaddr *)addr.native_addr(),
+  re.connected(addr, ec);
+  return re;
+}
+
+void TcpStream::connected(const SocketAddr &addr, std::error_code &ec) {
+  if (::connect(socket_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size())) {
     ec = getNetErrorCode();
-    ::closesocket(connect);
+    ::closesocket(socket_);
   }
-  return re;
 }
 
 void TcpStream::set_read_timeout(size_t timeout, std::error_code &ec) {
@@ -143,5 +145,3 @@ void TcpStream::close(std::error_code &ec) {
 }
 
 socket_type TcpStream::native_handle() const { return socket_; }
-
-} // namespace sockets

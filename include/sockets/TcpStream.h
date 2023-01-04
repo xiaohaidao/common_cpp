@@ -8,8 +8,6 @@
 
 #include "sockets/SocketAddr.h"
 
-namespace sockets {
-
 class TcpStream {
 public:
   TcpStream();
@@ -17,7 +15,8 @@ public:
 
   static TcpStream connect(const SocketAddr &addr, std::error_code &ec);
 
-  // void shutdown(std::error_code &ec);
+  void connected(const SocketAddr &addr, std::error_code &ec);
+
   void close(std::error_code &ec);
 
   void set_read_timeout(size_t timeout, std::error_code &ec);
@@ -45,7 +44,5 @@ private:
   size_t send_timeout_;
 #endif // _WIN32
 };     // class TcpStream
-
-} // namespace sockets
 
 #endif // SOCKETS_TCPSTREAM_H

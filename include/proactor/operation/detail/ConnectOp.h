@@ -11,12 +11,12 @@ namespace detail {
 class ConnectOp : public Operation {
 public:
   typedef std::function<void(void *, const std::error_code &, size_t,
-                             sockets::socket_type)>
+                             socket_type)>
       func_type;
 
   ConnectOp();
 
-  void async_connect(sockets::socket_type s, const sockets::SocketAddr &addr,
+  void async_connect(socket_type s, const SocketAddr &addr,
                      func_type async_func, std::error_code &ec);
 
   // protected:
@@ -26,7 +26,7 @@ public:
 
 private:
   func_type func_;
-  sockets::socket_type client_;
+  socket_type client_;
 
 }; // class ConnectOp
 
