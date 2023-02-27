@@ -24,10 +24,6 @@ void RecvOp::async_recv(socket_type s, char *buff, size_t size,
 void RecvOp::complete(void *p, const std::error_code &result_ec,
                       size_t trans_size) {
 
-  if (p) {
-    std::error_code ec;
-    static_cast<Proactor *>(p)->cancel(socket_, ec);
-  }
   std::error_code re_ec = result_ec;
   if (func_) {
     int re_size = -1;

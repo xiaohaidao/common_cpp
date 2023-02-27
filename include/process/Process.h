@@ -6,6 +6,10 @@
 #include <system_error>
 #include <vector>
 
+namespace ipc {
+class Pipe;
+}
+
 class Process {
 public:
 #ifdef _WIN32
@@ -15,6 +19,8 @@ public:
 #endif // _WIN32
   Process();
 
+  static Process call(const char *command, const std::vector<std::string> &argv,
+                      const ipc::Pipe &pipe, std::error_code &ec);
   static Process call(const char *command, const std::vector<std::string> &argv,
                       std::error_code &ec);
 

@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "ipc/Pipe.h"
 #include "utils/error_code.h"
 #include "utils/macro.h"
 
@@ -14,6 +15,13 @@ Process::Process() : child_handle_(0) {}
 
 Process Process::call(const char *command, const std::vector<std::string> &argv,
                       std::error_code &ec) {
+
+  ipc::Pipe pipe = ipc::Pipe::std_in_out();
+  return call(command, argv, pipe, ec);
+}
+
+Process Process::call(const char *command, const std::vector<std::string> &argv,
+                      const ipc::Pipe &pipe, std::error_code &ec) {
 
   std::vector<const char *> arg, env;
   for (auto const &i : argv) {
@@ -27,6 +35,15 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
   posix_spawn_file_actions_t file_actions = {};
   posix_spawn_file_actions_init(&file_actions);
   // posix_spawn_file_actions_addclose(&file_actions, STDOUT_FILENO);
+  if (posix_spawn_file_actions_adddup2(&file_actions, STDIN_FILENO,
+                                       pipe.read_native())) {
+
+    ec = getErrorCode();
+  }
+  posix_spawn_file_actions_adddup2(&file_actions, STDOUT_FILENO,
+                                   pipe.write_native());
+  posix_spawn_file_actions_adddup2(&file_actions, STDERR_FILENO,
+                                   pipe.error_native());
 
   posix_spawnattr_t attr = {};
   posix_spawnattr_init(&attr);
@@ -69,7 +86,6 @@ bool Process::running(std::error_code &ec) {
     return false;
   }
   if (WIFEXITED(status) || WIFSIGNALED(status) || WIFSTOPPED(status)) {
-    printf("stop singal %d\n", status);
     return false;
   }
   return true;

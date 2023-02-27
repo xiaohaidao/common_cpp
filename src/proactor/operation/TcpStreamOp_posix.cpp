@@ -45,7 +45,7 @@ void TcpStreamOp::async_connect(const SocketAddr &addr, func_type f,
     connect_op_.complete(ctx_, ec, 0);
     return;
   }
-  connect_op_.set_event_data(WRITE_OP_ENUM);
+  connect_op_.set_event_data(WRITE_OP_ENUM_ONCE);
   ctx_->post(socket_, &connect_op_, ec);
 }
 
@@ -60,7 +60,7 @@ void TcpStreamOp::async_read(char *buff, size_t buff_size, func_type f,
     recv_op_.complete(ctx_, ec, 0);
     return;
   }
-  recv_op_.set_event_data(READ_OP_ENUM);
+  recv_op_.set_event_data(READ_OP_ENUM_ONCE);
   ctx_->post(socket_, &recv_op_, ec);
 }
 
@@ -75,7 +75,7 @@ void TcpStreamOp::async_write(const char *buff, size_t buff_size, func_type f,
     send_op_.complete(ctx_, ec, 0);
     return;
   }
-  send_op_.set_event_data(WRITE_OP_ENUM);
+  send_op_.set_event_data(WRITE_OP_ENUM_ONCE);
   ctx_->post(socket_, &send_op_, ec);
 }
 

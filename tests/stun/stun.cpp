@@ -56,8 +56,7 @@ TEST(StunTest, StunClient) {
 
   std::error_code ec;
   LOG_TRACE("begin connect stun server");
-  auto stun_addr =
-      SocketAddr::resolve_host("stun.stunprotocol.org", "3478", ec);
+  auto stun_addr = SocketAddr::resolve_host("stun.isp.net.au", "3478", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

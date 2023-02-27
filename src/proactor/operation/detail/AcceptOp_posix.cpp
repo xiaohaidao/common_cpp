@@ -22,10 +22,6 @@ void AcceptOp::async_accept(socket_type s, func_type async_func,
 void AcceptOp::complete(void *p, const std::error_code &result_ec,
                         size_t trans_size) {
 
-  if (p) {
-    std::error_code ec;
-    static_cast<Proactor *>(p)->cancel(server_, ec);
-  }
   std::error_code re_ec = result_ec;
   if (func_) {
     // Accept a client socket

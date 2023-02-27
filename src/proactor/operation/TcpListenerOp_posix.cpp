@@ -35,7 +35,7 @@ void TcpListenerOp::async_accept(func_type f, std::error_code &ec) {
     accept_op_.complete(ctx_, ec, 0);
     return;
   }
-  accept_op_.set_event_data(READ_OP_ENUM);
+  accept_op_.set_event_data(READ_OP_ENUM_ONCE);
   ctx_->post(socket_, &accept_op_, ec);
 }
 

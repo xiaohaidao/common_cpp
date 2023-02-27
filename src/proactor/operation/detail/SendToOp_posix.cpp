@@ -31,10 +31,6 @@ void SendToOp::async_send_to(socket_type s, const char *buff, size_t size,
 void SendToOp::complete(void *p, const std::error_code &result_ec,
                         size_t trans_size) {
 
-  if (p) {
-    std::error_code ec;
-    static_cast<Proactor *>(p)->cancel(socket_, ec);
-  }
   std::error_code re_ec = result_ec;
   if (func_)
     func_(p, result_ec, trans_size);

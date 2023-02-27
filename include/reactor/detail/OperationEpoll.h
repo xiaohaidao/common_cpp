@@ -16,7 +16,8 @@ enum OpEnum {
   EPOLLHUP = 0x010,    // remote closed read
   EPOLLRDHUP = 0x2000, // local closed write
 
-  EPOLLET = 1u << 31 // EdgeTriggered
+  EPOLLONESHOT = 1u << 30, // one-shot notification
+  EPOLLET = 1u << 31       // EdgeTriggered
 };
 
 #define READ_OP_ENUM                                                           \
@@ -24,6 +25,12 @@ enum OpEnum {
    ::detail::EPOLLET)
 #define WRITE_OP_ENUM                                                          \
   (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP)
+#define READ_OP_ENUM_ONCE                                                      \
+  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
+   ::detail::EPOLLONESHOT)
+#define WRITE_OP_ENUM_ONCE                                                     \
+  (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP) |           \
+      ::detail::EPOLLONESHOT
 
 class OperationEpoll : public OperationPosix {
 public:

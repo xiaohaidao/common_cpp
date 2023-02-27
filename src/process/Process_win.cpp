@@ -3,13 +3,14 @@
 
 #include "process/Process.h"
 
+#include "ipc/Pipe.h"
 #include "utils/error_code.h"
 #include "utils/macro.h"
 
 Process::Process() : child_handle_(0) {}
 
 Process Process::call(const char *command, const std::vector<std::string> &argv,
-                      std::error_code &ec) {
+                      const ipc::Pipe &pipe, std::error_code &ec) {
 
   std::string arg;
   for (auto const &i : argv) {
@@ -25,6 +26,9 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
 
   ZeroMemory(&si, sizeof(si));
   si.cb = sizeof(si);
+  si.hStdError = pipe.error_native();
+  si.hStdOutput = pipe.write_native();
+  si.hStdInput = pipe.read_native();
   ZeroMemory(&pi, sizeof(pi));
   if (!CreateProcess(command, // module name (use command line)
                      const_cast<LPSTR>(arg.c_str()), // Command line
@@ -42,6 +46,13 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
   }
   sys.child_handle_ = pi.hProcess;
   return sys;
+}
+
+Process Process::call(const char *command, const std::vector<std::string> &argv,
+                      std::error_code &ec) {
+
+  ipc::Pipe pipe = ipc::Pipe::std_in_out();
+  return call(command, argv, pipe, ec);
 }
 
 Process Process::open(uint64_t pid, std::error_code &ec) {

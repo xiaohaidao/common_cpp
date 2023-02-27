@@ -4,6 +4,7 @@ add_executable(${test_name}
     main.cpp
     min_heap.cpp
     ipc/MsgQueue.cpp
+    ipc/Pipe.cpp
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
     proactor/Proactor.cpp

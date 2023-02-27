@@ -42,9 +42,6 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
   if (fcntl(client_, F_SETFL, flags & ~O_NONBLOCK)) {
     ec = getErrorCode();
   }
-  if (p) {
-    static_cast<Proactor *>(p)->cancel(client_, ec);
-  }
   std::error_code re_ec = result_ec;
   if (func_) {
     socket_type s = client_;

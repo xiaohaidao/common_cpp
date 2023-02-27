@@ -157,7 +157,7 @@ TEST(ProactorTest, Proactor) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr addr(nullptr, "8980");
+  SocketAddr addr(nullptr, "8989");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   sprintf(port, "%d", addr.get_port());

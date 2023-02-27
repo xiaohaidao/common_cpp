@@ -24,8 +24,6 @@ void RecvFromOp::async_recv_from(socket_type s, char *buff, size_t size,
 void RecvFromOp::complete(void *p, const std::error_code &result_ec,
                           size_t trans_size) {
 
-  // std::error_code re_ec;
-  // static_cast<Proactor *>(p)->cancel(server_, re_ec);
   if (func_)
     func_(p, result_ec, trans_size, from_);
 }
