@@ -6,7 +6,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
 namespace detail {

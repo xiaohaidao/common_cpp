@@ -8,12 +8,6 @@ class ThreadInfo;
 
 class Proactor {
 public:
-#ifdef _WIN32
-  typedef void *native_handle;
-#else  // _WIN32
-  typedef int native_handle;
-#endif // _WIN32
-
   Proactor(const Proactor &) = delete;
   const Proactor &operator=(const Proactor &) = delete;
 

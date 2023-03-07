@@ -60,6 +60,14 @@ void Proactor::post(const native_handle &file_descriptor, Operation * /*op*/,
   // assert(han == fd_);
 }
 
+void Proactor::cancel(const native_handle &file_descriptor,
+                      std::error_code &ec) {
+
+  if (!::CancelIoEx(file_descriptor, nullptr)) {
+    ec = getErrorCode();
+  }
+}
+
 void Proactor::close(std::error_code &ec) {
   if (!::CloseHandle(fd_)) {
     ec = getErrorCode();
