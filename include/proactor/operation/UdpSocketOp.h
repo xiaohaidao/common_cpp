@@ -1,24 +1,23 @@
 
-#ifndef PROACTOR_OPERATION_TCPSTREAMOP_H
-#define PROACTOR_OPERATION_TCPSTREAMOP_H
+#ifndef PROACTOR_OPERATION_UPDSOCKETOP_H
+#define PROACTOR_OPERATION_UPDSOCKETOP_H
 
 #include <functional>
 
 #include "proactor/Proactor.h"
-#include "proactor/operation/detail/ConnectOp.h"
-#include "proactor/operation/detail/RecvOp.h"
-#include "proactor/operation/detail/SendOp.h"
+#include "proactor/operation/detail/RecvFromOp.h"
+#include "proactor/operation/detail/SendToOp.h"
 
-class TcpStreamOp {
+class UdpSocketOp {
 public:
   typedef std::function<void(const std::error_code &, size_t)> func_type;
 
-  TcpStreamOp();
-  explicit TcpStreamOp(Proactor *context);
-  TcpStreamOp(Proactor *context, socket_type s);
+  UdpSocketOp();
+  explicit UdpSocketOp(Proactor *context);
+  UdpSocketOp(Proactor *context, socket_type s);
 
-  TcpStreamOp(const TcpStreamOp &);
-  const TcpStreamOp &operator=(const TcpStreamOp &);
+  UdpSocketOp(const UdpSocketOp &);
+  const UdpSocketOp &operator=(const UdpSocketOp &);
 
   void connect(const SocketAddr &addr, std::error_code &ec);
   void async_connect(const SocketAddr &addr, func_type f, std::error_code &ec);
@@ -38,10 +37,9 @@ public:
 private:
   Proactor *ctx_;
   socket_type socket_;
-  detail::ConnectOp connect_op_;
-  detail::RecvOp recv_op_;
-  detail::SendOp send_op_;
+  detail::RecvFromOp recvfrom_op_;
+  detail::SendToOp sendto_op_;
 
-}; // class TcpStreamOp
+}; // class UdpSocketOp
 
-#endif // PROACTOR_OPERATION_TCPSTREAMOP_H
+#endif // PROACTOR_OPERATION_UPDSOCKETOP_H

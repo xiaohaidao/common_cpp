@@ -26,7 +26,7 @@ TcpStream::TcpStream()
     : socket_(INVALID_SOCKET)
 #ifdef _WIN32
       ,
-      read_timeout_(-1), send_timeout_(-1)
+      read_timeout_(0), send_timeout_(0)
 #endif // _WIN32
 {
 }
@@ -35,7 +35,7 @@ TcpStream::TcpStream(const socket_type &s)
     : socket_(s)
 #ifdef _WIN32
       ,
-      read_timeout_(-1), send_timeout_(-1)
+      read_timeout_(0), send_timeout_(0)
 #endif // _WIN32
 {
 }
@@ -68,39 +68,25 @@ void TcpStream::connected(const SocketAddr &addr, std::error_code &ec) {
   }
 }
 
-void TcpStream::set_read_timeout(size_t timeout, std::error_code &ec) {
-  size_t time_out = timeout;
-  if (!::setsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, (const char *)&time_out,
-                    sizeof(time_out))) {
-    ec = getNetErrorCode();
-    return;
-  }
+void TcpStream::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
-  read_timeout_ = timeout;
+  read_timeout_ = timeout_ms;
 #endif // _WIN32
+  sockets::setReadTimeout(socket_, timeout_ms, ec);
 }
 
-void TcpStream::set_write_timeout(size_t timeout, std::error_code &ec) {
-  size_t time_out = timeout;
-  if (!::setsockopt(socket_, SOL_SOCKET, SO_SNDTIMEO, (const char *)&time_out,
-                    sizeof(time_out))) {
-    ec = getNetErrorCode();
-    return;
-  }
+void TcpStream::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
-  send_timeout_ = timeout;
+  send_timeout_ = timeout_ms;
 #endif // _WIN32
+  sockets::setWriteTimeout(socket_, timeout_ms, ec);
 }
 
 size_t TcpStream::read_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   return read_timeout_;
 #else
-  socklen_t v = 0, s = sizeof(v);
-  if (!::getsockopt(socket_, SOL_SOCKET, SO_RCVTIMEO, (void *)&v, &s)) {
-    ec = getNetErrorCode();
-  }
-  return v;
+  return sockets::readTimeout(socket_, ec);
 #endif // _WIN32
 }
 
@@ -108,11 +94,7 @@ size_t TcpStream::write_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   return send_timeout_;
 #else
-  socklen_t v = 0, s = sizeof(v);
-  if (!::getsockopt(socket_, SOL_SOCKET, SO_SNDTIMEO, (void *)&v, &s)) {
-    ec = getNetErrorCode();
-  }
-  return v;
+  return sockets::writeTimeout(socket_, ec);
 #endif // _WIN32
 }
 

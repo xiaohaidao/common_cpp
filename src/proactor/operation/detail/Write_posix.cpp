@@ -12,7 +12,7 @@ namespace detail {
 WriteOp::WriteOp() : fd_(0), buff_({}) {}
 
 void WriteOp::async_write(native_handle fd, const char *buff, size_t size,
-                        func_type async_func, std::error_code &ec) {
+                          func_type async_func, std::error_code &ec) {
 
   func_ = async_func;
   fd_ = fd;
@@ -20,7 +20,7 @@ void WriteOp::async_write(native_handle fd, const char *buff, size_t size,
 }
 
 void WriteOp::complete(void *p, const std::error_code &result_ec,
-                      size_t trans_size) {
+                       size_t trans_size) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

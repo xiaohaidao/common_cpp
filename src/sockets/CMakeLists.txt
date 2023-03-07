@@ -2,9 +2,10 @@
 set(library_name "sockets")
 add_library(${library_name}
     SocketAddr.cpp
+    sockets.cpp
     TcpListener.cpp
     TcpStream.cpp
-    # UdpSocket_win.cpp
+    UdpSocket.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC

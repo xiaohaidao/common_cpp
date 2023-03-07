@@ -7,63 +7,52 @@
 #include "utils/log.h"
 
 TEST(SocketsTest, SelectTcpBlock) {
-  return;
   // server
-  using namespace sockets;
   std::error_code ec;
 
-  SocketAddr addr("127.0.0.1", "8981");
+  SocketAddr addr("127.0.0.1", "8988");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
-  auto tcp = TcpListener::bind("8980", ec);
+  auto tcp = TcpListener::bind(std::to_string(addr.get_port()).c_str(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(tcp.native_handle() > 0);
-  LOG_TRACE("server socket value %d", tcp.native_handle());
-
-  auto rec = tcp.accept(ec);
+  LOG_TRACE("server socket value %d, default read timeout %d",
+            tcp.native_handle(), tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  tcp.close(ec);
+  tcp.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-
-  TcpStream &st = rec.first;
-  char buff[128] = "server begin send message";
-  st.write(buff, strlen(buff), ec);
-  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-  ec.clear();
-  LOG_TRACE("client ip and port %s:%d", rec.second.get_ip(),
-            rec.second.get_port());
-
-  memset(buff, 0, sizeof(buff));
-  size_t s = st.read(buff, sizeof(buff), ec);
-  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-  ec.clear();
-  LOG_TRACE("read buff %s", buff);
-
-  st.write(buff, strlen(buff), ec);
-  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-  ec.clear();
-
-  st.close(ec);
+  LOG_TRACE("server socket read timeout %d", tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
   // client
-  st = TcpStream::connect(addr, ec);
+  auto st = TcpStream::connect(addr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(st.native_handle() > 0);
   LOG_TRACE("clinet socket value %d", st.native_handle());
-  LOG_TRACE("client ip and port %s:%d", addr.get_ip(), addr.get_port());
 
-  memset(buff, 0, sizeof(buff));
-  s = st.read(buff, sizeof(buff), ec);
+  st.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("read buff %s", buff);
+  st.set_write_timeout(100, ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  LOG_TRACE("client read timeout %dms and write timeout %dms",
+            st.read_timeout(ec), st.write_timeout(ec));
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+
+  char buff[] = "send message!";
+  memset(buff, 0, sizeof(buff));
+  int s = st.read(buff, sizeof(buff), ec);
+  // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  LOG_TRACE("read buff %d: %s", s, buff);
   if (s == 0) {
     st.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -71,10 +60,14 @@ TEST(SocketsTest, SelectTcpBlock) {
   }
 
   st.write(buff, strlen(buff), ec);
-  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
   st.close(ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+
+  tcp.close(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 }

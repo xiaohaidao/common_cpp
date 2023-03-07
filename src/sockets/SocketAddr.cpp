@@ -49,14 +49,6 @@ private:
 
 } g_socket_start;
 
-#if __BIG_ENDIAN__
-#define htonll(x) (x)
-#define ntohll(x) (x)
-#else
-#define htonll(x) ((((uint64_t)htonl(x & 0xFFFFFFFF)) << 32) + htonl(x >> 32))
-#define ntohll(x) ((((uint64_t)ntohl(x & 0xFFFFFFFF)) << 32) + ntohl(x >> 32))
-#endif
-
 #endif // _WIN32
 
 } // namespace
@@ -65,133 +57,7 @@ private:
 typedef int size_type;
 #else
 typedef socklen_t size_type;
-#define INVALID_SOCKET -1
 #endif // _WIN32
-
-socket_type socket(FamilyType family, SocketType type, Protocal protocal,
-                   std::error_code &ec) {
-  socket_type s = ::socket(enumToNative(family), enumToNative(type),
-                           enumToNative(protocal));
-  if (s == INVALID_SOCKET) {
-    ec = getNetErrorCode();
-  }
-  return s;
-}
-
-void setReuseAddr(socket_type s, std::error_code &ec) {
-  constexpr int set = 1;
-#ifdef SO_REUSEPORT
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, (const char *)&set,
-                 sizeof(set))) {
-#else
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&set,
-                 sizeof(set))) {
-#endif // SO_REUSEPORT
-    ec = getNetErrorCode();
-  }
-}
-
-int enumToNative(FamilyType family) {
-  switch (family) {
-  case kIpV4:
-    return AF_INET;
-  case kIpV6:
-    return AF_INET6;
-  case kUnspecified:
-  default:
-    return AF_UNSPEC;
-  }
-}
-
-int enumToNative(SocketType type) {
-  switch (type) {
-  case kDgram:
-    return SOCK_DGRAM;
-  case kRaw:
-    return SOCK_RAW;
-  case kStream:
-  default:
-    return SOCK_STREAM;
-  }
-}
-
-int enumToNative(Protocal protocal) {
-  switch (protocal) {
-  case kUDP:
-    return IPPROTO_UDP;
-  case kIcmp:
-    return IPPROTO_ICMP;
-  case kIcmpV6:
-    return IPPROTO_ICMPV6;
-  case kTCP:
-  default:
-    return IPPROTO_TCP;
-  }
-}
-
-FamilyType nativeToFamily(int family) {
-  switch (family) {
-  case AF_INET:
-    return kIpV4;
-  case AF_INET6:
-    return kIpV6;
-  case AF_UNSPEC:
-  default:
-    return kUnspecified;
-  }
-}
-
-SocketType nativeToType(int type) {
-  switch (type) {
-  case SOCK_DGRAM:
-    return kDgram;
-  case SOCK_RAW:
-    return kRaw;
-  case SOCK_STREAM:
-  default:
-    return kStream;
-  }
-}
-
-Protocal nativeToProtocal(int protocal) {
-  switch (protocal) {
-  case IPPROTO_UDP:
-    return kUDP;
-  case IPPROTO_ICMP:
-    return kIcmp;
-  case IPPROTO_ICMPV6:
-    return kIcmpV6;
-  case IPPROTO_TCP:
-  default:
-    return kTCP;
-  }
-}
-
-uint16_t netToHost(uint16_t v) { return ntohs(v); }
-
-uint32_t netToHost(uint32_t v) { return ntohl(v); }
-
-uint64_t netToHost(uint64_t v) {
-  return
-#ifdef _WIN32
-      ntohll(v);
-#else
-      be64toh(v);
-#endif // _WIN32
-}
-
-uint16_t hostToNet(uint16_t v) { return htons(v); }
-
-uint32_t hostToNet(uint32_t v) { return htonl(v); }
-
-uint64_t hostToNet(uint64_t v) {
-  return
-#ifdef _WIN32
-      htonll(v);
-#else
-      htobe64(v);
-#endif // _WIN32
-}
 
 } // namespace sockets
 

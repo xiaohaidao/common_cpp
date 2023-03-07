@@ -19,12 +19,9 @@ public:
 
   void close(std::error_code &ec);
 
-  void set_read_timeout(size_t timeout, std::error_code &ec);
-
-  void set_write_timeout(size_t timeout, std::error_code &ec);
-
+  void set_read_timeout(size_t timeout_ms, std::error_code &ec);
+  void set_write_timeout(size_t timeout_ms, std::error_code &ec);
   size_t read_timeout(std::error_code &ec) const;
-
   size_t write_timeout(std::error_code &ec) const;
 
   // return read size
@@ -43,6 +40,7 @@ private:
   size_t read_timeout_;
   size_t send_timeout_;
 #endif // _WIN32
-};     // class TcpStream
+
+}; // class TcpStream
 
 #endif // SOCKETS_TCPSTREAM_H

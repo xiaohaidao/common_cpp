@@ -21,7 +21,7 @@ void WriteOp::async_write(native_handle fd, const char *buff, size_t size,
 }
 
 void WriteOp::complete(void *p, const std::error_code &result_ec,
-                      size_t trans_size) {
+                       size_t trans_size) {
 
   if (func_)
     func_(p, result_ec, trans_size);

@@ -9,29 +9,58 @@
 
 #include "sockets/SocketAddr.h"
 
-namespace sockets {
-
 class UdpSocket {
 public:
-  UdpSocket() = default;
-  static UdpSocket connect(const SocketAddr &addr, std::error_code &ec);
+  UdpSocket();
+  explicit UdpSocket(const socket_type &s);
 
-  void set_read_timeout(size_t timeout, std::error_code &ec);
+  static UdpSocket create(FamilyType family, std::error_code &ec);
 
-  void set_write_timeout(size_t timeout, std::error_code &ec);
+  // The default family is ipv4
+  static UdpSocket bind(const char *port_or_service, std::error_code &ec);
+  static UdpSocket bind(const char *port_or_service, FamilyType family,
+                        std::error_code &ec);
 
+  void close(std::error_code &ec);
+
+  void set_read_timeout(size_t timeout_ms, std::error_code &ec);
+  void set_write_timeout(size_t timeout_ms, std::error_code &ec);
   size_t read_timeout(std::error_code &ec) const;
-
   size_t write_timeout(std::error_code &ec) const;
 
   // return receive size
-  std::pair<size_t, SocketAddr> recv_from(char *buf, size_t buf_size,
-                                          std::error_code &ec);
+  std::pair<int, SocketAddr> recv_from(char *buf, size_t buf_size,
+                                       std::error_code &ec);
 
   // return send size
-  size_t send_to(const char *buf, size_t buf_size, std::error_code &ec);
-}; // class UdpSocket
+  int send_to(const char *buf, size_t buf_size, const SocketAddr &to,
+              std::error_code &ec);
 
-} // namespace sockets
+  // void set_broadcast(bool enable, std::error_code &ec);
+  // bool broadcast(std::error_code &ec);
+
+  void joint_multicast(const SocketAddr &multicast, std::error_code &ec);
+  void leave_multicast(const SocketAddr &multicast, std::error_code &ec);
+  void set_multicast_loop(bool enable, std::error_code &ec);
+  bool multicast_loop(std::error_code &ec);
+  void set_multicast_ttl(int ttl, std::error_code &ec);
+  int multicast_ttl(std::error_code &ec);
+
+  void joint_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
+  void leave_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
+  void set_multicast_loop_v6(bool enable, std::error_code &ec);
+  bool multicast_loop_v6(std::error_code &ec);
+
+  socket_type native_handle() const;
+
+private:
+  socket_type socket_;
+
+#ifdef _WIN32
+  size_t read_timeout_;
+  size_t send_timeout_;
+#endif // _WIN32
+
+}; // class UdpSocket
 
 #endif // SOCKETS_UDPSOCKET_H

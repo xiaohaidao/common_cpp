@@ -39,6 +39,10 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec);
 
 void setReuseAddr(socket_type s, std::error_code &ec);
+void setReadTimeout(socket_type s, size_t timeout_ms, std::error_code &ec);
+void setWriteTimeout(socket_type s, size_t timeout_ms, std::error_code &ec);
+size_t readTimeout(socket_type s, std::error_code &ec);
+size_t writeTimeout(socket_type s, std::error_code &ec);
 
 int enumToNative(FamilyType family);
 int enumToNative(SocketType type);
