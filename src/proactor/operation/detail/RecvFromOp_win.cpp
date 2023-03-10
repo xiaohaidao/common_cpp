@@ -18,7 +18,8 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
   buff_ = {(uint32_t)size, buff};
   func_ = async_func;
   from_size_ = from_.native_addr_size();
-  if (::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, nullptr,
+  DWORD recv_flags = 0;
+  if (::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, &recv_flags,
                     (sockaddr *)from_.native_addr(), &from_size_,
                     (LPWSAOVERLAPPED)this, nullptr)) {
     std::error_code re_ec = getNetErrorCode();

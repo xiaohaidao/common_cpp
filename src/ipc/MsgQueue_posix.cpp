@@ -112,7 +112,6 @@ size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
     ec = getErrorCode();
-    printf("get time error\n");
     return 0;
   }
   timeout.tv_sec += timeout_ms / 1000;

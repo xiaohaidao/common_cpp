@@ -36,7 +36,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
     }
   }
   if (proactor == nullptr) {
-    std::error_code re_ec;
+    std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
     return;
   }

@@ -39,17 +39,17 @@ Pipe Pipe::create(const char *name_pipe, std::error_code &ec) {
   constexpr int BUF_SIZE = 512;
   char buff_name[256] = "\\\\.\\pipe\\";
   memcpy(buff_name + strlen(buff_name), name_pipe, strlen(name_pipe));
-  HANDLE server =
-      ::CreateNamedPipe(buff_name,                  // pipe name
-                        PIPE_ACCESS_DUPLEX,         // read/write access
-                        PIPE_TYPE_MESSAGE |         // message type pipe
-                            PIPE_READMODE_MESSAGE | // message-read mode
-                            PIPE_WAIT,              // blocking mode
-                        PIPE_UNLIMITED_INSTANCES,   // max. instances
-                        BUF_SIZE,                   // output buffer size
-                        BUF_SIZE,                   // input buffer size
-                        0,                          // client time-out
-                        NULL);
+  HANDLE server = ::CreateNamedPipe(
+      buff_name,                                 // pipe name
+      PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED, // read/write access
+      PIPE_TYPE_MESSAGE |                        // message type pipe
+          PIPE_READMODE_MESSAGE |                // message-read mode
+          PIPE_WAIT,                             // blocking mode
+      PIPE_UNLIMITED_INSTANCES,                  // max. instances
+      BUF_SIZE,                                  // output buffer size
+      BUF_SIZE,                                  // input buffer size
+      0,                                         // client time-out
+      NULL);
   if (server == INVALID_HANDLE_VALUE) {
     ec = getErrorCode();
     return re;
@@ -67,7 +67,7 @@ Pipe Pipe::connect(const char *name_pipe, std::error_code &ec) {
   char buff_name[256] = "\\\\.\\pipe\\";
   memcpy(buff_name + strlen(buff_name), name_pipe, strlen(name_pipe));
   HANDLE client = ::CreateFile(buff_name, GENERIC_WRITE | GENERIC_READ, 0, NULL,
-                               OPEN_EXISTING, 0, NULL);
+                               OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
   if (client == INVALID_HANDLE_VALUE) {
     ec = getErrorCode();
     return re;

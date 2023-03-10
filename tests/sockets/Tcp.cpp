@@ -6,7 +6,7 @@
 #include "sockets/TcpStream.h"
 #include "utils/log.h"
 
-TEST(SocketsTest, SelectTcpBlock) {
+TEST(SocketsTest, TcpTest) {
   // server
   std::error_code ec;
 

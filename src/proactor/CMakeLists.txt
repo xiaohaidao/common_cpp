@@ -3,6 +3,7 @@ set(library_name "proactor")
 add_library(${library_name}
     Proactor_posix.cpp
     Proactor_win.cpp
+    operation/FilesOp.cpp
     operation/TcpListenerOp.cpp
     operation/TcpStreamOp.cpp
     operation/UdpSocketOp.cpp
@@ -10,6 +11,8 @@ add_library(${library_name}
     operation/detail/AcceptOp_win.cpp
     operation/detail/ConnectOp_posix.cpp
     operation/detail/ConnectOp_win.cpp
+    operation/detail/ReadOp_posix.cpp
+    operation/detail/ReadOp_win.cpp
     operation/detail/RecvFromOp_posix.cpp
     operation/detail/RecvFromOp_win.cpp
     operation/detail/RecvOp_posix.cpp
@@ -18,6 +21,8 @@ add_library(${library_name}
     operation/detail/SendOp_win.cpp
     operation/detail/SendToOp_posix.cpp
     operation/detail/SendToOp_win.cpp
+    operation/detail/WriteOp_posix.cpp
+    operation/detail/WriteOp_win.cpp
 )
 
 target_link_libraries(${library_name} PUBLIC

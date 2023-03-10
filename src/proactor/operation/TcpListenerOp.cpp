@@ -65,11 +65,7 @@ void TcpListenerOp::async_accept(func_type f, std::error_code &ec) {
 void TcpListenerOp::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
-#ifdef _WIN32
-    ctx_->cancel((HANDLE)socket_, t_ec);
-#else
-    ctx_->cancel(socket_, t_ec);
-#endif
+    ctx_->cancel((::native_handle)socket_, t_ec);
   }
   TcpListener listener(socket_);
   listener.close(ec);

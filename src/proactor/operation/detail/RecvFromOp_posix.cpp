@@ -19,7 +19,7 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
   func_ = async_func;
   socket_ = s;
   if (proactor == nullptr) {
-    std::error_code re_ec;
+    std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
     return;
   }

@@ -16,7 +16,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
   func_ = async_func;
   server_ = s;
   if (proactor == nullptr) {
-    std::error_code re_ec;
+    std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
     return;
   }

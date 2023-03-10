@@ -16,7 +16,9 @@ void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
                           std::error_code &ec) {
 
   func_ = async_func;
-  if (!::WriteFileEx(fd, buff, size, (LPWSAOVERLAPPED)this, nullptr)) {
+  // if (!::WriteFileEx(fd, buff, size, (LPWSAOVERLAPPED)this, nullptr)) {
+  DWORD flag = 0;
+  if (!::WriteFile(fd, buff, size, &flag, (LPWSAOVERLAPPED)this)) {
     std::error_code re_ec = getNetErrorCode();
     if (re_ec.value() != ERROR_IO_PENDING) {
       ec = re_ec;

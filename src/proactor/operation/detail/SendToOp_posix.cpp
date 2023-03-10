@@ -20,7 +20,7 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
   to_ = to;
   socket_ = s;
   if (proactor == nullptr) {
-    std::error_code re_ec;
+    std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
     return;
   }

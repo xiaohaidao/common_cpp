@@ -33,6 +33,7 @@ private:
 #endif // #ifndef _WIN32
 
   func_type func_;
+
 }; // class ReadOp
 
 } // namespace detail

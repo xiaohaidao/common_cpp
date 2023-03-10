@@ -18,7 +18,7 @@ void RecvOp::async_recv(void *proactor, socket_type s, char *buff, size_t size,
   func_ = async_func;
   socket_ = s;
   if (proactor == nullptr) {
-    std::error_code re_ec;
+    std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
     return;
   }

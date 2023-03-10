@@ -8,6 +8,8 @@ add_executable(${test_name}
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
     proactor/Proactor.cpp
+    proactor/ProactorFiles.cpp
+    proactor/ProactorUdp.cpp
     process/Process.cpp
     reactor/Reactor.cpp
     reactor/ReactorUdp.cpp

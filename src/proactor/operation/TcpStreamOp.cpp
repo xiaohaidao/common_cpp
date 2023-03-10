@@ -108,11 +108,7 @@ void TcpStreamOp::async_write(const char *buff, size_t buff_size, func_type f,
 void TcpStreamOp::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
-#ifdef _WIN32
-    ctx_->cancel((HANDLE)socket_, t_ec);
-#else
-    ctx_->cancel(socket_, t_ec);
-#endif
+    ctx_->cancel((::native_handle)socket_, t_ec);
   }
   TcpStream tcp(socket_);
   tcp.close(ec);
