@@ -1,0 +1,84 @@
+
+#include "proactor/operation/UdpSocketOp.h"
+
+#include "sockets/UdpSocket.h"
+#include "utils/error_code.h"
+
+UdpSocketOp::UdpSocketOp() : ctx_(nullptr), socket_(-1) {}
+
+UdpSocketOp::UdpSocketOp(Proactor *context) : ctx_(context), socket_(-1) {}
+
+UdpSocketOp::UdpSocketOp(Proactor *context, socket_type s)
+    : ctx_(context), socket_(s) {
+
+#ifdef _WIN32
+  if (ctx_ != nullptr) {
+    std::error_code ec;
+    ctx_->post((HANDLE)socket_, nullptr, ec); // register to io proactor
+    // if (ec) {
+    //   LOG_WARN("overlapped post error %d %s", ec.value(), ec.message());
+    // }
+  }
+#endif
+}
+
+UdpSocketOp::UdpSocketOp(const UdpSocketOp &other)
+    : ctx_(other.ctx_), socket_(other.socket_) {}
+
+const UdpSocketOp &UdpSocketOp::operator=(const UdpSocketOp &other) {
+  this->ctx_ = other.ctx_;
+  this->socket_ = other.socket_;
+  this->recvfrom_op_ = detail::RecvFromOp();
+  this->sendto_op_ = detail::SendToOp();
+  return *this;
+}
+
+std::pair<size_t, SocketAddr>
+UdpSocketOp::recv_from(char *buff, size_t buff_size, std::error_code &ec) {
+
+  UdpSocket tcp(socket_);
+  return tcp.recv_from(buff, buff_size, ec);
+}
+
+size_t UdpSocketOp::send_to(const char *buff, size_t buff_size,
+                            const SocketAddr &to, std::error_code &ec) {
+
+  UdpSocket tcp(socket_);
+  return tcp.send_to(buff, buff_size, to, ec);
+}
+
+void UdpSocketOp::async_read(char *buff, size_t buff_size, func_recv_type f,
+                             std::error_code &ec) {
+
+  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+                       size_t recv_size,
+                       const SocketAddr &from) { f(re_ec, recv_size, from); };
+
+  recvfrom_op_.async_recv_from(ctx_, socket_, buff, buff_size, call_back, ec);
+}
+
+void UdpSocketOp::async_write(const char *buff, size_t buff_size,
+                              const SocketAddr &to, func_send_type f,
+                              std::error_code &ec) {
+
+  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+                       size_t send_size) { f(re_ec, send_size); };
+
+  sendto_op_.async_send_to(ctx_, socket_, buff, buff_size, to, call_back, ec);
+}
+
+void UdpSocketOp::close(std::error_code &ec) {
+  if (ctx_) {
+    std::error_code t_ec;
+#ifdef _WIN32
+    ctx_->cancel((HANDLE)socket_, t_ec);
+#else
+    ctx_->cancel(socket_, t_ec);
+#endif
+  }
+  UdpSocket tcp(socket_);
+  tcp.close(ec);
+  socket_ = -1;
+}
+
+socket_type UdpSocketOp::native_handle() const { return socket_; }

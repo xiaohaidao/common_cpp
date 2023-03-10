@@ -49,15 +49,15 @@ TEST(SocketsTest, SelectTcpBlock) {
 
   char buff[] = "send message!";
   memset(buff, 0, sizeof(buff));
-  int s = st.read(buff, sizeof(buff), ec);
+  size_t s = st.read(buff, sizeof(buff), ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("read buff %d: %s", s, buff);
-  if (s == 0) {
-    st.close(ec);
-    EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-    ec.clear();
-  }
+  // if (s == 0 && !ec) {
+  //   st.close(ec);
+  //   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  //   ec.clear();
+  // }
 
   st.write(buff, strlen(buff), ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

@@ -49,15 +49,14 @@ void Proactor::notify_op(Operation *op, std::error_code &ec) {
   // }
 }
 
-void Proactor::post(const native_handle &file_descriptor, Operation *op,
+void Proactor::post(native_handle file_descriptor, Operation *op,
                     std::error_code &ec) {
 
   Reactor reactor(fd_);
   reactor.post(file_descriptor, op, ec);
 }
 
-void Proactor::cancel(const native_handle &file_descriptor,
-                      std::error_code &ec) {
+void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
   Reactor reactor(fd_);
   reactor.cancel(file_descriptor, ec);

@@ -11,17 +11,22 @@ namespace detail {
 
 SendToOp::SendToOp() {}
 
-void SendToOp::async_send_to(socket_type s, const char *buff, size_t size,
-                             func_type async_func, const SocketAddr &to,
-                             std::error_code &ec) {
+void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
+                             size_t size, const SocketAddr &to,
+                             func_type async_func, std::error_code &ec) {
 
-  WSABUF b = {(uint32_t)size, (char *)buff};
+  buff_ = {(uint32_t)size, (char *)buff};
   func_ = async_func;
   to_ = to;
-  if (!::WSASendTo(s, (WSABUF *)&b, 1, nullptr, 0,
-                   (sockaddr *)to_.native_addr(), to_.native_addr_size(),
-                   (LPWSAOVERLAPPED)this, nullptr)) {
-    ec = getNetErrorCode();
+  if (::WSASendTo(s, (WSABUF *)&buff_, 1, nullptr, 0,
+                  (sockaddr *)to_.native_addr(), to_.native_addr_size(),
+                  (LPWSAOVERLAPPED)this, nullptr)) {
+    std::error_code re_ec = getNetErrorCode();
+    if (re_ec.value() != ERROR_IO_PENDING) {
+      ec = re_ec;
+      complete(proactor, ec, 0);
+      // assert(ec);
+    }
   }
 }
 

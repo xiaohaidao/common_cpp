@@ -11,12 +11,18 @@ namespace detail {
 
 WriteOp::WriteOp() {}
 
-void WriteOp::async_write(native_handle fd, const char *buff, size_t size,
-                          func_type async_func, std::error_code &ec) {
+void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
+                          size_t size, func_type async_func,
+                          std::error_code &ec) {
 
   func_ = async_func;
   if (!::WriteFileEx(fd, buff, size, (LPWSAOVERLAPPED)this, nullptr)) {
-    ec = getNetErrorCode();
+    std::error_code re_ec = getNetErrorCode();
+    if (re_ec.value() != ERROR_IO_PENDING) {
+      ec = re_ec;
+      complete(proactor, ec, 0);
+      // assert(ec);
+    }
   }
 }
 

@@ -29,12 +29,12 @@ public:
   size_t write_timeout(std::error_code &ec) const;
 
   // return receive size
-  std::pair<int, SocketAddr> recv_from(char *buf, size_t buf_size,
-                                       std::error_code &ec);
+  std::pair<size_t, SocketAddr> recv_from(char *buf, size_t buf_size,
+                                          std::error_code &ec);
 
   // return send size
-  int send_to(const char *buf, size_t buf_size, const SocketAddr &to,
-              std::error_code &ec);
+  size_t send_to(const char *buf, size_t buf_size, const SocketAddr &to,
+                 std::error_code &ec);
 
   // void set_broadcast(bool enable, std::error_code &ec);
   // bool broadcast(std::error_code &ec);

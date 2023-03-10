@@ -11,12 +11,12 @@ namespace detail {
 class RecvFromOp : public Operation {
 public:
   typedef std::function<void(void *, const std::error_code &, size_t,
-                             SocketAddr)>
+                             const SocketAddr &)>
       func_type;
 
   RecvFromOp();
 
-  void async_recv_from(socket_type s, char *buff, size_t size,
+  void async_recv_from(void *proactor, socket_type s, char *buff, size_t size,
                        func_type async_func, std::error_code &ec);
 
   // protected:
@@ -32,7 +32,12 @@ private:
 
   func_type func_;
   SocketAddr from_;
+
+#ifdef _WIN32
   int from_size_;
+#else
+  socket_type socket_;
+#endif // #ifdef _WIN32
 
 }; // class RecvFromOp
 

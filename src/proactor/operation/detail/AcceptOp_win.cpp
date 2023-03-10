@@ -12,7 +12,7 @@ namespace detail {
 
 AcceptOp::AcceptOp() : server_(INVALID_SOCKET), client_(INVALID_SOCKET) {}
 
-void AcceptOp::async_accept(socket_type s, func_type async_func,
+void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
                             std::error_code &ec) {
   if (client_ == INVALID_SOCKET || client_ == 0) {
     client_ = sockets::socket(kUnspecified, kStream, kTCP, ec);
@@ -31,6 +31,8 @@ void AcceptOp::async_accept(socket_type s, func_type async_func,
                    sizeof(guid), (void *)&AcceptExPtr, sizeof(AcceptExPtr),
                    &numBytes, NULL, NULL)) {
       ec = getNetErrorCode();
+      complete(proactor, ec, 0);
+      // assert(ec);
       return;
     }
   }
@@ -40,6 +42,8 @@ void AcceptOp::async_accept(socket_type s, func_type async_func,
     std::error_code re_ec = getNetErrorCode();
     if (re_ec.value() != ERROR_IO_PENDING) {
       ec = re_ec;
+      complete(proactor, ec, 0);
+      // assert(ec);
       return;
     }
   }
@@ -60,9 +64,9 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
 
     memset(addresses_, 0, sizeof(addresses_));
     client_ = INVALID_SOCKET;
-    server_ = INVALID_SOCKET;
+    // server_ = INVALID_SOCKET;
 
-    func_(p, result_ec, std::move(ac_addr));
+    func_(p, result_ec, ac_addr);
   }
 }
 

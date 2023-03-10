@@ -15,7 +15,7 @@ public:
 
   WriteOp();
 
-  void async_write(socket_type s, const char *buff, size_t size,
+  void async_write(void *proactor, socket_type s, const char *buff, size_t size,
                    func_type async_func, std::error_code &ec);
 
   // protected:

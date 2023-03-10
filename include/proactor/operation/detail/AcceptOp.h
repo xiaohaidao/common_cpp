@@ -11,12 +11,13 @@ namespace detail {
 class AcceptOp : public Operation {
 public:
   typedef std::function<void(void *, const std::error_code &,
-                             std::pair<socket_type, SocketAddr>)>
+                             const std::pair<socket_type, SocketAddr> &)>
       func_type;
 
   AcceptOp();
 
-  void async_accept(socket_type s, func_type async_func, std::error_code &ec);
+  void async_accept(void *proactor, socket_type s, func_type async_func,
+                    std::error_code &ec);
 
   // protected:
   // Proactor call this function

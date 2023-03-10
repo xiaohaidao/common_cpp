@@ -114,26 +114,29 @@ size_t UdpSocket::write_timeout(std::error_code &ec) const {
 #endif // _WIN32
 }
 
-std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
-                                                std::error_code &ec) {
+std::pair<size_t, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
+                                                   std::error_code &ec) {
 
-  std::pair<int, SocketAddr> re;
+  std::pair<size_t, SocketAddr> re;
   socklen_t len = re.second.native_addr_size();
-  re.first = ::recvfrom(socket_, buf, buf_size, 0,
-                        (sockaddr *)re.second.native_addr(), &len);
-  if (re.first < 0) {
+  int ret = ::recvfrom(socket_, buf, buf_size, 0,
+                       (sockaddr *)re.second.native_addr(), &len);
+  if (ret < 0) {
     ec = getNetErrorCode();
+    return re;
   }
+  re.first = ret;
   return re;
 }
 
-int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
-                       std::error_code &ec) {
+size_t UdpSocket::send_to(const char *buf, size_t buf_size,
+                          const SocketAddr &to, std::error_code &ec) {
 
   int rev = ::sendto(socket_, buf, buf_size, 0,
                      (const sockaddr *)to.native_addr(), to.native_addr_size());
   if (rev < 0) {
     ec = getNetErrorCode();
+    return 0;
   }
   return rev;
 }

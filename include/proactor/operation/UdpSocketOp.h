@@ -10,7 +10,10 @@
 
 class UdpSocketOp {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  typedef std::function<void(const std::error_code &, size_t,
+                             const SocketAddr &)>
+      func_recv_type;
+  typedef std::function<void(const std::error_code &, size_t)> func_send_type;
 
   UdpSocketOp();
   explicit UdpSocketOp(Proactor *context);
@@ -19,16 +22,15 @@ public:
   UdpSocketOp(const UdpSocketOp &);
   const UdpSocketOp &operator=(const UdpSocketOp &);
 
-  void connect(const SocketAddr &addr, std::error_code &ec);
-  void async_connect(const SocketAddr &addr, func_type f, std::error_code &ec);
-
-  void async_read(char *buff, size_t buff_size, func_type f,
+  void async_read(char *buff, size_t buff_size, func_recv_type f,
                   std::error_code &ec);
-  void async_write(const char *buff, size_t buff_size, func_type f,
-                   std::error_code &ec);
+  void async_write(const char *buff, size_t buff_size, const SocketAddr &to,
+                   func_send_type f, std::error_code &ec);
 
-  size_t read(char *buff, size_t buff_size, std::error_code &ec);
-  size_t write(const char *buff, size_t buff_size, std::error_code &ec);
+  std::pair<size_t, SocketAddr> recv_from(char *buff, size_t buff_size,
+                                          std::error_code &ec);
+  size_t send_to(const char *buff, size_t buff_size, const SocketAddr &to,
+                 std::error_code &ec);
 
   void close(std::error_code &ec);
 

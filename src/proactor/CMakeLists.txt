@@ -3,12 +3,9 @@ set(library_name "proactor")
 add_library(${library_name}
     Proactor_posix.cpp
     Proactor_win.cpp
-    operation/TcpListenerOp_posix.cpp
-    operation/TcpListenerOp_win.cpp
     operation/TcpListenerOp.cpp
-    operation/TcpStreamOp_posix.cpp
-    operation/TcpStreamOp_win.cpp
     operation/TcpStreamOp.cpp
+    operation/UdpSocketOp.cpp
     operation/detail/AcceptOp_posix.cpp
     operation/detail/AcceptOp_win.cpp
     operation/detail/ConnectOp_posix.cpp

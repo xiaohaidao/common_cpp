@@ -8,7 +8,7 @@
 class TcpListenerOp {
 public:
   typedef std::function<void(const std::error_code &,
-                             std::pair<TcpStreamOp, SocketAddr>)>
+                             const std::pair<TcpStreamOp, SocketAddr> &)>
       func_type;
 
   TcpListenerOp();

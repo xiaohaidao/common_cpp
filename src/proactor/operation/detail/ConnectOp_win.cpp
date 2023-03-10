@@ -13,8 +13,9 @@ namespace detail {
 
 ConnectOp::ConnectOp() : client_(INVALID_SOCKET) {}
 
-void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
-                              func_type async_func, std::error_code &ec) {
+void ConnectOp::async_connect(void *proactor, socket_type s,
+                              const SocketAddr &addr, func_type async_func,
+                              std::error_code &ec) {
 
   // if (client_ != INVALID_SOCKET && client_ != 0) {
   //   ec = {EINVAL, std::system_category()};
@@ -31,6 +32,8 @@ void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
                    sizeof(guid), (void *)&ConnectExPtr, sizeof(ConnectExPtr),
                    &numBytes, NULL, NULL)) {
       ec = getNetErrorCode();
+      complete(proactor, ec, 0);
+      // assert(ec);
       return;
     }
   }
@@ -43,8 +46,10 @@ void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
   memset(&a, 0, sizeof(a));
   a.base.sa_family = addr.native_family();
 
-  if (::bind(client_, &a.base, addr.native_addr_size())) {
+  if (::bind(client_, &a.base, addr.native_addr_size()) < 0) {
     ec = getNetErrorCode();
+    complete(proactor, ec, 0);
+    // assert(ec);
     return;
   }
 
@@ -54,15 +59,17 @@ void ConnectOp::async_connect(socket_type s, const SocketAddr &addr,
     std::error_code re_ec = getNetErrorCode();
     if (re_ec.value() != ERROR_IO_PENDING) {
       ec = re_ec;
+      complete(proactor, ec, 0);
+      // assert(ec);
+      return;
     }
-    return;
   }
 }
 
 void ConnectOp::complete(void *p, const std::error_code &result_ec,
                          size_t trans_size) {
 
-  if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0)) {
+  if (::setsockopt(client_, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0)) {
     // std::error_code ec = getNetErrorCode();
   }
   if (func_) {

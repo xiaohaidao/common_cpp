@@ -16,7 +16,7 @@ public:
 
   ConnectOp();
 
-  void async_connect(socket_type s, const SocketAddr &addr,
+  void async_connect(void *proactor, socket_type s, const SocketAddr &addr,
                      func_type async_func, std::error_code &ec);
 
   // protected:

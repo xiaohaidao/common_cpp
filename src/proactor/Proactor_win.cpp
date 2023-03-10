@@ -50,7 +50,7 @@ void Proactor::notify_op(Operation *op, std::error_code &ec) {
   }
 }
 
-void Proactor::post(const native_handle &file_descriptor, Operation * /*op*/,
+void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
                     std::error_code &ec) {
   HANDLE han = CreateIoCompletionPort(file_descriptor, fd_, 0, 0);
   if (han == nullptr) {
@@ -60,11 +60,13 @@ void Proactor::post(const native_handle &file_descriptor, Operation * /*op*/,
   // assert(han == fd_);
 }
 
-void Proactor::cancel(const native_handle &file_descriptor,
-                      std::error_code &ec) {
+void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
   if (!::CancelIoEx(file_descriptor, nullptr)) {
-    ec = getErrorCode();
+    std::error_code re_ec = getErrorCode();
+    // if (re_ec.value() != ERROR_NOT_FOUND) {
+    ec = re_ec;
+    // }
   }
 }
 

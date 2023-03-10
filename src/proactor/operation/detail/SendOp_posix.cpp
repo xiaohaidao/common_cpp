@@ -3,21 +3,28 @@
 
 #include "proactor/operation/detail/SendOp.h"
 
-#include <sys/socket.h>
-#include <unistd.h>
-
+#include "proactor/Proactor.h"
+#include "sockets/TcpStream.h"
 #include "utils/error_code.h"
 
 namespace detail {
 
 SendOp::SendOp() : socket_(-1) {}
 
-void SendOp::async_send(socket_type s, const char *buff, size_t size,
-                        func_type async_func, std::error_code &ec) {
+void SendOp::async_send(void *proactor, socket_type s, const char *buff,
+                        size_t size, func_type async_func,
+                        std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
   func_ = async_func;
   socket_ = s;
+  if (proactor == nullptr) {
+    std::error_code re_ec;
+    complete(proactor, re_ec, 0);
+    return;
+  }
+  set_event_data(WRITE_OP_ENUM_ONCE);
+  static_cast<Proactor *>(proactor)->post(s, this, ec);
 }
 
 void SendOp::complete(void *p, const std::error_code &result_ec,
@@ -25,12 +32,10 @@ void SendOp::complete(void *p, const std::error_code &result_ec,
 
   std::error_code re_ec = result_ec;
   if (func_) {
-    int re_size = -1;
+    size_t re_size = 0;
     if (!re_ec) {
-      re_size = ::send(socket_, buff_.buff, buff_.len, 0);
-      if (re_size < 0) {
-        re_ec = getErrorCode();
-      }
+      TcpStream tcp(socket_);
+      re_size = tcp.write(buff_.buff, buff_.len, re_ec);
     }
     func_(p, re_ec, re_size);
   }

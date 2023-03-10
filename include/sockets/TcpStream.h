@@ -25,10 +25,10 @@ public:
   size_t write_timeout(std::error_code &ec) const;
 
   // return read size
-  int read(char *buf, size_t buf_size, std::error_code &ec);
+  size_t read(char *buf, size_t buf_size, std::error_code &ec);
 
   // return write size
-  int write(const char *buf, size_t buf_size, std::error_code &ec);
+  size_t write(const char *buf, size_t buf_size, std::error_code &ec);
 
   socket_type native_handle() const;
 

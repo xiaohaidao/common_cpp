@@ -15,8 +15,8 @@ public:
 
   ReadOp();
 
-  void async_read(native_handle fd, const char *buff, size_t size,
-                  func_type async_func, std::error_code &ec);
+  void async_read(void *proactor, native_handle fd, const char *buff,
+                  size_t size, func_type async_func, std::error_code &ec);
 
   // protected:
   // Proactor call this function

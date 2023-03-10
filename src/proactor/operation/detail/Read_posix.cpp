@@ -5,18 +5,27 @@
 
 #include <unistd.h>
 
+#include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
 namespace detail {
 
 ReadOp::ReadOp() : fd_(0), buff_({}) {}
 
-void ReadOp::async_read(native_handle fd, const char *buff, size_t size,
-                        func_type async_func, std::error_code &ec) {
+void ReadOp::async_read(void *proactor, native_handle fd, const char *buff,
+                        size_t size, func_type async_func,
+                        std::error_code &ec) {
 
   func_ = async_func;
   fd_ = fd;
   buff_ = {(uint32_t)size, (char *)buff};
+  if (proactor == nullptr) {
+    std::error_code re_ec;
+    complete(proactor, re_ec, 0);
+    return;
+  }
+  set_event_data(READ_OP_ENUM_ONCE);
+  static_cast<Proactor *>(proactor)->post(fd, this, ec);
 }
 
 void ReadOp::complete(void *p, const std::error_code &result_ec,
@@ -24,11 +33,12 @@ void ReadOp::complete(void *p, const std::error_code &result_ec,
 
   std::error_code re_ec = result_ec;
   if (func_) {
-    int re_size = -1;
+    int re_size = 0;
     if (!re_ec) {
       re_size = ::read(fd_, buff_.buff, buff_.len);
       if (re_size < 0) {
         re_ec = getErrorCode();
+        re_size = 0;
       }
     }
     func_(p, re_ec, re_size);

@@ -15,8 +15,8 @@ public:
 
   SendToOp();
 
-  void async_send_to(socket_type s, const char *buff, size_t size,
-                     func_type async_func, const SocketAddr &to,
+  void async_send_to(void *proactor, socket_type s, const char *buff,
+                     size_t size, const SocketAddr &to, func_type async_func,
                      std::error_code &ec);
 
   // protected:
@@ -36,7 +36,8 @@ private:
 #ifndef _WIN32
   socket_type socket_;
 #endif // #ifndef _WIN32
-};     // class SendToOp
+
+}; // class SendToOp
 
 } // namespace detail
 

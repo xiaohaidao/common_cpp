@@ -15,7 +15,7 @@ public:
 
   SendOp();
 
-  void async_send(socket_type s, const char *buff, size_t size,
+  void async_send(void *proactor, socket_type s, const char *buff, size_t size,
                   func_type async_func, std::error_code &ec);
 
   // protected:

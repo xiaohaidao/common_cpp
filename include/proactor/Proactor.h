@@ -22,9 +22,8 @@ public:
 
   void notify_op(Operation *op, std::error_code &ec);
 
-  void post(const native_handle &file_descriptor, Operation *op,
-            std::error_code &ec);
-  void cancel(const native_handle &file_descriptor, std::error_code &ec);
+  void post(native_handle file_descriptor, Operation *op, std::error_code &ec);
+  void cancel(native_handle file_descriptor, std::error_code &ec);
 
   void close(std::error_code &ec);
 

@@ -98,18 +98,21 @@ size_t TcpStream::write_timeout(std::error_code &ec) const {
 #endif // _WIN32
 }
 
-int TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
+size_t TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
   int re_size = ::recv(socket_, buff, buff_size, 0);
   if (re_size < 0) {
     ec = getNetErrorCode();
+    return 0;
   }
   return re_size;
 }
 
-int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
+size_t TcpStream::write(const char *buff, size_t buff_size,
+                        std::error_code &ec) {
   int re_size = ::send(socket_, buff, buff_size, 0);
   if (re_size < 0) {
     ec = getNetErrorCode();
+    return 0;
   }
   return re_size;
 }
