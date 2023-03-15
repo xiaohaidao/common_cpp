@@ -4,9 +4,6 @@
 #ifndef SOCKETS_UDPSOCKET_H
 #define SOCKETS_UDPSOCKET_H
 
-#include <map>
-#include <vector>
-
 #include "sockets/SocketAddr.h"
 
 class UdpSocket {

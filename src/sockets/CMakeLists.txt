@@ -1,6 +1,7 @@
 
 set(library_name "sockets")
 add_library(${library_name}
+    IcmpSocket.cpp
     SocketAddr.cpp
     sockets.cpp
     TcpListener.cpp

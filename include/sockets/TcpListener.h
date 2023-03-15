@@ -4,8 +4,6 @@
 #ifndef SOCKETS_TCPLISTENER_H
 #define SOCKETS_TCPLISTENER_H
 
-#include <map>
-
 #include "sockets/TcpStream.h"
 
 class TcpListener {

@@ -4,8 +4,6 @@
 #ifndef SOCKETS_TCPSTREAM_H
 #define SOCKETS_TCPSTREAM_H
 
-#include <vector>
-
 #include "sockets/SocketAddr.h"
 
 class TcpStream {

@@ -13,6 +13,7 @@ add_executable(${test_name}
     process/Process.cpp
     reactor/Reactor.cpp
     reactor/ReactorUdp.cpp
+    sockets/Icmp.cpp
     sockets/SocketAddr.cpp
     sockets/Tcp.cpp
     sockets/Udp.cpp
