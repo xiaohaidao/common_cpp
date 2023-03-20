@@ -1,4 +1,5 @@
 
+add_subdirectory(algorithm)
 add_subdirectory(ipc)
 add_subdirectory(proactor)
 add_subdirectory(process)

@@ -4,6 +4,14 @@
 
 #include "proactor/operation/detail/Operation.h"
 
+#include <mutex>
+
+#include "proactor/operation/detail/TimerQueueSet.h"
+
+#ifndef _WIN32
+#include "proactor/operation/detail/EventOp_posix.h"
+#endif // _WIN32
+
 class ThreadInfo;
 
 class Proactor {
@@ -35,6 +43,15 @@ private:
 
   native_handle fd_;
   bool shutdown_;
+
+  TimerQueueSet<std::chrono::steady_clock> timer_queue_;
+  std::mutex timer_mutex_;
+
+#ifndef _WIN32
+  ::detail::EventOp event_;
+  QueueOp event_queue_;
+  std::mutex event_mutex_;
+#endif // _WIN32
 };
 
 #endif // PROACTOR_PROACTOR_H

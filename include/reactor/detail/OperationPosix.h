@@ -20,18 +20,8 @@ private:
   friend class detail::OperationAccess;
 
   void *next_;
+
 }; // class OperationPosix
-
-class OperationAccess {
-public:
-  static void set_next(void *operation, void *n) {
-    static_cast<OperationPosix *>(operation)->next_ = n;
-  }
-
-  static void *next(void *operation) {
-    return static_cast<OperationPosix *>(operation)->next_;
-  }
-};
 
 } // namespace detail
 

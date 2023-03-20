@@ -50,9 +50,7 @@ TEST(SocketsTest, UdpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   std::pair<size_t, SocketAddr> rev = client.recv_from(buff, sizeof(buff), ec);
-#ifdef _WIN32 // linux default is not multicast
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-#endif
   ec.clear();
 
   LOG_TRACE("client recv from %s:%d message size %d : %s", rev.second.get_ip(),

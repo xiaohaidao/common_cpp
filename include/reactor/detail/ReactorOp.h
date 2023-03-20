@@ -3,10 +3,10 @@
 #define REACTOR_DETAIL_REACTOROP_H
 
 #include "reactor/detail/OperationEpoll.h"
-#include "reactor/detail/OperationPosix.h"
+#include "reactor/detail/OperationWin.h"
 
 #ifdef _WIN32
-typedef detail::OperationPosix ReactorOp;
+typedef detail::OperationWin ReactorOp;
 #else
 typedef detail::OperationEpoll ReactorOp;
 #endif // _WIN32

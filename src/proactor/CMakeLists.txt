@@ -11,6 +11,7 @@ add_library(${library_name}
     operation/detail/AcceptOp_win.cpp
     operation/detail/ConnectOp_posix.cpp
     operation/detail/ConnectOp_win.cpp
+    operation/detail/EventOp_posix.cpp
     operation/detail/ReadOp_posix.cpp
     operation/detail/ReadOp_win.cpp
     operation/detail/RecvFromOp_posix.cpp
@@ -26,7 +27,8 @@ add_library(${library_name}
 )
 
 target_link_libraries(${library_name} PUBLIC
-  sockets
+    sockets
+    algorithm
 )
 
 if(WIN32)
@@ -34,6 +36,8 @@ target_link_libraries(${library_name} PUBLIC
     mswsock
 )
 elseif(UNIX)
+target_link_libraries(${library_name} PUBLIC
+)
 endif()
 
 target_include_directories(${library_name} PRIVATE

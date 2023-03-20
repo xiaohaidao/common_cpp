@@ -2,7 +2,11 @@
 set(test_name "cpp_common_test")
 add_executable(${test_name}
     main.cpp
-    min_heap.cpp
+    algorithm/interrupt_thread_test1.cpp
+    algorithm/lock_free_queue_test1.cpp
+    algorithm/lock_free_stack_test1.cpp
+    algorithm/min_heap.cpp
+    algorithm/thread_pool_test1.cpp
     ipc/MsgQueue.cpp
     ipc/Pipe.cpp
     ipc/Semaphores.cpp
@@ -36,6 +40,7 @@ target_link_libraries(${test_name} PRIVATE
     sockets
     stun
     utils
+    algorithm
 )
 
 add_test(NAME ${test_name}

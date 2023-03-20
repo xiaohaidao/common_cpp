@@ -15,7 +15,8 @@ struct ThreadInfo {
 Proactor::Proactor() : fd_(0), shutdown_(false) {}
 
 Proactor::Proactor(std::error_code &ec)
-    : fd_(Reactor(ec).native_handle()), shutdown_(false) {}
+    : fd_(Reactor(ec).native_handle()), shutdown_(false),
+      event_(::detail::EventOp::create(ec)) {}
 
 void Proactor::shutdown() {
   shutdown_ = true;
@@ -37,16 +38,23 @@ size_t Proactor::run() {
 }
 
 size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
-  ThreadInfo tread_info;
-  return call_one(timeout_us, tread_info, ec);
+  ThreadInfo thread_info;
+  size_t n = call_one(timeout_us, thread_info, ec);
+  while (thread_info.queue.begin()) {
+    call_one(timeout_us, thread_info, ec);
+    ++n;
+  }
+  return n;
 }
 
 void Proactor::notify_op(Operation *op, std::error_code &ec) {
   // TODO
-  // queue.push(op);
-  // if (!PostQueuedCompletionStatus(fd_, 0, 0, op)) {
-  //   ec = getErrorCode();
-  // }
+  if (op) {
+    std::lock_guard<std::mutex> lck(event_mutex_);
+    event_queue_.push(op);
+  }
+  auto call = [](const std::error_code &re_ec, size_t re_size) {};
+  event_.async_wait(this, call, ec);
 }
 
 void Proactor::post(native_handle file_descriptor, Operation *op,
@@ -73,11 +81,31 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
   Reactor reactor(fd_);
   QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
+    if (!queue.begin()) {
+      int timeout_ms = timer_queue_.wait_duration_ms(timeout_us / 1000);
+      bool get_time_out = false;
+      if (timeout_ms <= 0) {
+        get_time_out = true;
+      } else {
+        if (reactor.run_once_timeout(queue, timeout_ms, ec) == 0) {
+          if (ec) {
+            return 0;
+          }
+          get_time_out = true;
+        }
+      }
+      if (get_time_out) {
+        std::lock_guard<std::mutex> lck(timer_mutex_);
+        timer_queue_.get_all_task(queue);
+      }
+    }
+    if (queue.begin() == &event_) {
+      reactor.call_one(queue); // pop event
+      std::lock_guard<std::mutex> lck(event_mutex_);
+      queue.push(event_queue_);
+    }
     if (reactor.call_one(queue)) {
       return 1;
-    }
-    if (reactor.run_once_timeout(queue, timeout_us / 1000, ec) == 0) {
-      return 0;
     }
   }
   return 0;

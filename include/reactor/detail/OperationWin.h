@@ -1,14 +1,16 @@
 
 #ifdef _WIN32
 
-#ifndef PROACTOR_OPERATION_DETAIL_WIN_H
-#define PROACTOR_OPERATION_DETAIL_WIN_H
+#ifndef REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
+#define REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
 
 #include <winsock2.h>
 
 #include <system_error>
 
 namespace detail {
+
+class OperationAccess;
 
 class OperationWin : public OVERLAPPED {
 public:
@@ -23,10 +25,15 @@ public:
   // protected:
   virtual void complete(void *proactor, const std::error_code &result_ec,
                         size_t trans_size) = 0;
+
+private:
+  friend class OperationAccess;
+
+  void *next_;
 };
 
 } // namespace detail
 
-#endif // PROACTOR_OPERATION_DETAIL_WIN_H
+#endif // REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
 
 #endif // _WIN32

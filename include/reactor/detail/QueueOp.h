@@ -2,30 +2,30 @@
 #ifndef REACTOR_DETAIL_QUEUEOP_H
 #define REACTOR_DETAIL_QUEUEOP_H
 
-#include "reactor/detail/ReactorOp.h"
+#include "reactor/detail/Operation.h"
 
 class QueueOp {
 public:
   QueueOp() : begin_(nullptr), end_(nullptr) {}
   ~QueueOp() {
-    while (ReactorOp *op = begin_) {
+    while (Operation *op = begin_) {
       pop();
       op->complete(0, std::error_code(), 0);
     }
   }
 
-  ReactorOp *begin() const { return begin_; }
+  Operation *begin() const { return begin_; }
 
   bool empty() const { return begin_ == nullptr; }
 
-  bool exist(ReactorOp *op) const {
+  bool exist(Operation *op) const {
     return detail::OperationAccess::next((void *)op) != nullptr || end_ == op;
   }
 
   void pop() {
     if (begin_) {
-      ReactorOp *tmp = begin_;
-      begin_ = static_cast<ReactorOp *>(
+      Operation *tmp = begin_;
+      begin_ = static_cast<Operation *>(
           detail::OperationAccess::next((void *)begin_));
       if (begin_ == nullptr) {
         end_ = nullptr;
@@ -34,7 +34,7 @@ public:
     }
   }
 
-  void push(ReactorOp *op) {
+  void push(Operation *op) {
     if (begin_) {
       detail::OperationAccess::set_next((void *)end_, (void *)op);
       end_ = op;
@@ -59,8 +59,9 @@ public:
   }
 
 private:
-  ReactorOp *begin_;
-  ReactorOp *end_;
+  Operation *begin_;
+  Operation *end_;
+
 }; // class QueueOp
 
 #endif // REACTOR_DETAIL_QUEUEOP_H

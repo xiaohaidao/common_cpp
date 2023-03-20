@@ -8,7 +8,9 @@
 
 #include "utils/error_code.h"
 
-struct ThreadInfo {};
+struct ThreadInfo {
+  QueueOp queue;
+};
 
 Proactor::Proactor() : fd_(nullptr), shutdown_(false) {}
 
@@ -41,7 +43,13 @@ size_t Proactor::run() {
 
 size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
   ThreadInfo thread_info;
-  return call_one(timeout_us, thread_info, ec);
+  // return call_one(timeout_us, thread_info, ec);
+  size_t n = call_one(timeout_us, thread_info, ec);
+  while (thread_info.queue.begin()) {
+    call_one(timeout_us, thread_info, ec);
+    ++n;
+  }
+  return n;
 }
 
 void Proactor::notify_op(Operation *op, std::error_code &ec) {
@@ -79,15 +87,25 @@ void Proactor::close(std::error_code &ec) {
 size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
                           std::error_code &ec) {
 
+  QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
+    if (!queue.empty()) {
+      auto op = static_cast<Operation *>(queue.begin());
+      queue.pop();
+      op->complete(this, std::error_code(), 0);
+      return 1;
+    }
+    int timeout_ms = timer_queue_.wait_duration_ms(timeout_us / 1000);
+    if (timeout_ms <= 0) {
+      std::lock_guard<std::mutex> lck(timer_mutex_);
+      timer_queue_.get_all_task(queue);
+      continue;
+    }
     DWORD bytes_transferred = 0;
     ULONG_PTR completion_key = 0;
     LPOVERLAPPED overlapped = nullptr;
-    BOOL ok =
-        GetQueuedCompletionStatus(fd_, &bytes_transferred, &completion_key,
-                                  &overlapped, timeout_us / 1000);
-    // timeout_us < gqcs_timeout_ ? timeout_us : gqcs_timeout_);
-
+    BOOL ok = GetQueuedCompletionStatus(
+        fd_, &bytes_transferred, &completion_key, &overlapped, timeout_ms);
     std::error_code result_ec = getErrorCode();
     if (result_ec.value() == ERROR_IO_PENDING) {
       result_ec = {0, result_ec.category()};

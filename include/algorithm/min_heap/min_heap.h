@@ -45,7 +45,7 @@ public:
     down_heap(0);
   }
 
-  void erase(const value_type &v) {
+  template <typename T = value_type> void erase(const T &v) {
     auto iter = std::find(heap_.begin(), heap_.end(), v);
     if (iter == heap_.end())
       return;
