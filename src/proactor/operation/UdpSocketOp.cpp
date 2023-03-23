@@ -6,10 +6,10 @@
 
 UdpSocketOp::UdpSocketOp() : ctx_(nullptr), socket_(-1) {}
 
-UdpSocketOp::UdpSocketOp(Proactor *context) : ctx_(context), socket_(-1) {}
+UdpSocketOp::UdpSocketOp(Proactor &context) : ctx_(&context), socket_(-1) {}
 
-UdpSocketOp::UdpSocketOp(Proactor *context, socket_type s)
-    : ctx_(context), socket_(s) {
+UdpSocketOp::UdpSocketOp(Proactor &context, socket_type s)
+    : ctx_(&context), socket_(s) {
 
 #ifdef _WIN32
   if (ctx_ != nullptr) {

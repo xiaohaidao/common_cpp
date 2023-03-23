@@ -16,6 +16,8 @@ class ThreadInfo;
 
 class Proactor {
 public:
+  typedef std::chrono::steady_clock time_clock;
+
   Proactor(const Proactor &) = delete;
   const Proactor &operator=(const Proactor &) = delete;
 
@@ -35,6 +37,16 @@ public:
 
   void close(std::error_code &ec);
 
+  // timeout operation
+  void cancel_timeout(Operation *op, std::error_code &ec);
+  void post_timeout(Operation *op,
+                    const typename time_clock::time_point &expire,
+                    std::error_code &ec);
+  void post_timeout(Operation *op,
+                    const typename time_clock::time_point &expire,
+                    const typename time_clock::duration &interval,
+                    std::error_code &ec);
+
 private:
   Proactor();
 
@@ -44,7 +56,7 @@ private:
   native_handle fd_;
   bool shutdown_;
 
-  TimerQueueSet<std::chrono::steady_clock> timer_queue_;
+  TimerQueueSet<time_clock> timer_queue_;
   std::mutex timer_mutex_;
 
 #ifndef _WIN32

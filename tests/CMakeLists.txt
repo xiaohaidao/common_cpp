@@ -13,6 +13,7 @@ add_executable(${test_name}
     ipc/SharedMemory.cpp
     proactor/Proactor.cpp
     proactor/ProactorFiles.cpp
+    proactor/ProactorTimer.cpp
     proactor/ProactorUdp.cpp
     process/Process.cpp
     reactor/Reactor.cpp

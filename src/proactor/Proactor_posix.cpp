@@ -41,20 +41,21 @@ size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
   ThreadInfo thread_info;
   size_t n = call_one(timeout_us, thread_info, ec);
   while (thread_info.queue.begin()) {
-    call_one(timeout_us, thread_info, ec);
-    ++n;
+    if (call_one(timeout_us, thread_info, ec)) {
+      ++n;
+    }
   }
   return n;
 }
 
 void Proactor::notify_op(Operation *op, std::error_code &ec) {
-  // TODO
   if (op) {
     std::lock_guard<std::mutex> lck(event_mutex_);
     event_queue_.push(op);
   }
   auto call = [](const std::error_code &re_ec, size_t re_size) {};
   event_.async_wait(this, call, ec);
+  event_.notify(ec);
 }
 
 void Proactor::post(native_handle file_descriptor, Operation *op,
@@ -83,20 +84,13 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
   for (; !shutdown_;) {
     if (!queue.begin()) {
       int timeout_ms = timer_queue_.wait_duration_ms(timeout_us / 1000);
-      bool get_time_out = false;
       if (timeout_ms <= 0) {
-        get_time_out = true;
-      } else {
-        if (reactor.run_once_timeout(queue, timeout_ms, ec) == 0) {
-          if (ec) {
-            return 0;
-          }
-          get_time_out = true;
-        }
-      }
-      if (get_time_out) {
         std::lock_guard<std::mutex> lck(timer_mutex_);
         timer_queue_.get_all_task(queue);
+      } else {
+        if (reactor.run_once_timeout(queue, timeout_ms, ec) == 0) {
+          return 0;
+        }
       }
     }
     if (queue.begin() == &event_) {

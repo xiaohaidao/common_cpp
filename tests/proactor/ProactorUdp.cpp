@@ -11,8 +11,7 @@ using namespace std::placeholders; // for _1, _2, _3...
 
 class Udp {
 public:
-  Udp(Proactor &p, const char *module)
-      : buff_{}, udp_op_(&p), module_(module) {}
+  Udp(Proactor &p, const char *module) : buff_{}, udp_op_(p), module_(module) {}
   ~Udp() {}
 
   socket_type native_handle() const { return udp_op_.native_handle(); }

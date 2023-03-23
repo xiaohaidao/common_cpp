@@ -16,8 +16,8 @@ public: //! construct
   typedef std::function<void(const std::error_code &, size_t)> func_send_type;
 
   UdpSocketOp();
-  explicit UdpSocketOp(Proactor *context);
-  UdpSocketOp(Proactor *context, socket_type s);
+  explicit UdpSocketOp(Proactor &context);
+  UdpSocketOp(Proactor &context, socket_type s);
 
   UdpSocketOp(const UdpSocketOp &);
   const UdpSocketOp &operator=(const UdpSocketOp &);

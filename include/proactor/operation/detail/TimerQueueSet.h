@@ -15,15 +15,29 @@ public:
 
   TimerQueueSet() {}
 
-  void push(size_t timeout_us, Operation *op) { push(timeout_us, 0, op); }
+  void push_ms(size_t timeout_ms, Operation *op) {
+    push_us(timeout_ms * 1000, 0, op);
+  }
+  void push_ms(size_t timeout_ms, size_t interval_ms, Operation *op) {
+    push_us(timeout_ms * 1000, interval_ms * 1000, op);
+  }
 
-  void push(size_t timeout_us, size_t interval_us, Operation *op) {
-    timer_queue_t timeout;
+  void push_us(size_t timeout_us, Operation *op) { push_us(timeout_us, 0, op); }
+  void push_us(size_t timeout_us, size_t interval_us, Operation *op) {
     using namespace std::chrono;
-    timeout.expire = clock_type::now() + microseconds(timeout_us);
-    timeout.interval = microseconds(interval_us);
-    timeout.op = op;
-    heap_.push(timeout);
+    push(clock_type::now() + microseconds(timeout_us),
+         microseconds(interval_us));
+  }
+
+  void push(const time_type &timeout,
+            const typename time_type::duration &interval, Operation *op) {
+
+    timer_queue_t queue_op;
+    using namespace std::chrono;
+    queue_op.expire = timeout;
+    queue_op.interval = interval;
+    queue_op.op = op;
+    heap_.push(queue_op);
   }
 
   void cancel(Operation *op) { heap_.erase(op); }
@@ -33,9 +47,10 @@ public:
       return max_us;
     }
     using namespace std::chrono;
-    int us =
-        duration_cast<microseconds>(heap_.front()->expire - clock_type::now());
-    return us > max_us ? max_us : us;
+    auto diff = heap_.front()->expire - clock_type::now();
+    return (microseconds(max_us) < diff)
+               ? static_cast<int>(max_us)
+               : duration_cast<microseconds>(diff).count();
   }
 
   int wait_duration_ms(size_t max_ms) {
@@ -43,10 +58,10 @@ public:
       return max_ms;
     }
     using namespace std::chrono;
-    int ms =
-        duration_cast<milliseconds>(heap_.front()->expire - clock_type::now())
-            .count();
-    return ms > max_ms ? max_ms : ms;
+    auto diff = heap_.front()->expire - clock_type::now();
+    return (milliseconds(max_ms) < diff)
+               ? static_cast<int>(max_ms)
+               : duration_cast<milliseconds>(diff).count();
   }
 
   void get_all_task(QueueOp &ops) {
@@ -55,11 +70,9 @@ public:
       timer_queue_t timeout = *heap_.front();
       heap_.pop();
       ops.push(timeout.op);
-      if (timeout.interval.time_since_epoch() > time_type::duration::zero()) {
-        int p =
-            (now - timeout.expire) / timeout.interval.time_since_epoch() + 1;
-        printf("timer_queue_set get all task p value %d\n", p);
-        timeout.expire += (timeout.interval.time_since_epoch() * p);
+      if (timeout.interval > time_type::duration::zero()) {
+        int p = (now - timeout.expire) / timeout.interval + 1;
+        timeout.expire += (timeout.interval * p);
         heap_.push(timeout);
       }
     }
@@ -67,16 +80,19 @@ public:
 
 private:
   struct timer_queue_t {
-    timer_queue_t() : expire(0), interval(0), op(0) {}
+    timer_queue_t() : op(0) {}
 
     time_type expire;
-    time_type interval;
+    typename time_type::duration interval;
     Operation *op;
 
     bool operator<(const timer_queue_t &other) const {
       return expire < other.expire;
     }
-    bool operator<(const Operation *other_op) const { return op != other_op; }
+    // bool operator<(const Operation *other_op) const { return op != other_op;
+    // } bool operator==(const timer_queue_t &other) const { return op ==
+    // other.op; }
+    bool operator==(const Operation *other_op) const { return op == other_op; }
   };
 
   min_heap<timer_queue_t> heap_;

@@ -14,7 +14,7 @@ class OperationAccess;
 
 class OperationWin : public OVERLAPPED {
 public:
-  OperationWin() {
+  OperationWin() : next_(nullptr) {
     Internal = 0;
     InternalHigh = 0;
     Offset = 0;

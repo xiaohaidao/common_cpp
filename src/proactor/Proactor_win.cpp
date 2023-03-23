@@ -43,11 +43,11 @@ size_t Proactor::run() {
 
 size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
   ThreadInfo thread_info;
-  // return call_one(timeout_us, thread_info, ec);
   size_t n = call_one(timeout_us, thread_info, ec);
   while (thread_info.queue.begin()) {
-    call_one(timeout_us, thread_info, ec);
-    ++n;
+    if (call_one(timeout_us, thread_info, ec)) {
+      ++n;
+    }
   }
   return n;
 }
@@ -86,7 +86,6 @@ void Proactor::close(std::error_code &ec) {
 
 size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
                           std::error_code &ec) {
-
   QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.empty()) {
@@ -106,6 +105,7 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
     LPOVERLAPPED overlapped = nullptr;
     BOOL ok = GetQueuedCompletionStatus(
         fd_, &bytes_transferred, &completion_key, &overlapped, timeout_ms);
+
     std::error_code result_ec = getErrorCode();
     if (result_ec.value() == ERROR_IO_PENDING) {
       result_ec = {0, result_ec.category()};

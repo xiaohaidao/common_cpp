@@ -31,17 +31,18 @@ EventOp EventOp::create(std::error_code &ec) {
 }
 
 void EventOp::notify(std::error_code &ec) {
-  uint64_t exp = 0;
+  uint64_t exp = 1;
   if (::write(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
     ec = getErrorCode();
   }
 }
 
-void EventOp::wait(std::error_code &ec) {
+uint64_t EventOp::wait(std::error_code &ec) {
   uint64_t exp = 0;
   if (::read(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
     ec = getErrorCode();
   }
+  return exp;
 }
 
 void EventOp::async_wait(void *proactor, func_type async_func,
@@ -62,8 +63,8 @@ void EventOp::complete(void *p, const std::error_code &result_ec,
 
   std::error_code re_ec = result_ec;
   if (func_) {
-    wait(re_ec);
-    func_(re_ec, 0);
+    uint64_t count = wait(re_ec);
+    func_(re_ec, count);
   }
 }
 

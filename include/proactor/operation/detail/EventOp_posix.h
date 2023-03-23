@@ -16,7 +16,7 @@ public:
   static EventOp create(std::error_code &ec);
 
   void notify(std::error_code &ec);
-  void wait(std::error_code &ec);
+  uint64_t wait(std::error_code &ec);
 
   void close(std::error_code &ec);
 

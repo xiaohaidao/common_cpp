@@ -124,11 +124,10 @@ void logPrint(LogLevel level, const char *filename, int line,
   size_t size = vsnprintf(nullptr, 0, fmt, args);
   va_end(args);
 
-  std::string log(size + 1, 0);
+  std::string log(size, 0);
   va_start(args, fmt);
-  vsnprintf((char *)log.c_str(), log.size(), fmt, args);
+  vsnprintf((char *)log.c_str(), log.size() + 1, fmt, args);
   va_end(args);
-  log.resize(size);
 
   formatLog(log_data, log);
 
