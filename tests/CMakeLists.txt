@@ -1,5 +1,5 @@
 
-include(StringVerison)
+include(StringVersion)
 
 set(test_name "cpp_common_test")
 add_executable(${test_name}

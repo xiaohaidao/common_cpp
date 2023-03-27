@@ -13,8 +13,10 @@ file(GLOB_RECURSE  cxx_format_files
     "tests/*.cpp"
 )
 
+if (NOT TARGET clang_format)
 add_custom_target(clang_format
     COMMAND clang-format -style=file -i ${cxx_format_files}
     WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
     COMMENT "Format code with clang-format"
 )
+endif()
