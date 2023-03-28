@@ -81,7 +81,7 @@ void formatLog(const LogData &data, std::string &log) {
   std::stringstream ss_h;
   // ISO 8601 data format
   struct tm buff;
-  ss_h << "[" << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "(%z)%F %T.")
+  ss_h << "[" << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "(%z)%Y-%m-%d %H:%M:%S.")
        << std::setfill('0') << std::setw(3) << ms << "]"
        << "[" << data.thread_id << "]"
        << "[" << getEnumStr(data.level) << "]"
