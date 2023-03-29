@@ -8,6 +8,7 @@
 #include <ws2tcpip.h>
 #else
 #include <netinet/in.h>
+#include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -34,6 +35,28 @@ struct icmphdr {
       uint16_t mtu;
     } frag; /* path mtu discovery */
   } un;
+};
+
+struct iphdr {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+  unsigned int ihl : 4;
+  unsigned int version : 4;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+  unsigned int version : 4;
+  unsigned int ihl : 4;
+#else
+#error "Please fix <bits/endian.h>"
+#endif
+  uint8_t tos;
+  uint16_t tot_len;
+  uint16_t id;
+  uint16_t frag_off;
+  uint8_t ttl;
+  uint8_t protocol;
+  uint16_t check;
+  uint32_t saddr;
+  uint32_t daddr;
+  /*The options start here. */
 };
 
 #define ICMP_ECHOREPLY 0       /* Echo Reply			*/
@@ -164,11 +187,13 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
   }
 
   struct icmphdr icmp_hdr = {};
-  ret -= sizeof(icmp_hdr);
-  ret -= 20; // ip protocal struct size
-  memcpy(&icmp_hdr, buf + 20, sizeof(icmp_hdr));
-  memcpy(buf, buf + sizeof(icmp_hdr) + 20, ret);
-  memset(buf + sizeof(icmp_hdr) + 20, 0, sizeof(icmp_hdr) + 20);
+  constexpr size_t icmp_head_size = sizeof(icmphdr);
+  constexpr size_t ip_head_size = sizeof(iphdr);
+  ret -= icmp_head_size;
+  ret -= ip_head_size; // ip protocal struct size
+  memcpy(&icmp_hdr, buf + ip_head_size, icmp_head_size);
+  memcpy(buf, buf + icmp_head_size + ip_head_size, ret);
+  memset(buf + icmp_head_size + ip_head_size, 0, icmp_head_size + ip_head_size);
   if (icmp_hdr.type == ICMP_ECHOREPLY) {
     //
   }
