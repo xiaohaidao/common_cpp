@@ -34,7 +34,11 @@ TEST(SocketsTest, TcpTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(st.native_handle() > 0);
-  LOG_TRACE("clinet socket value %d", st.native_handle());
+  SocketAddr local_addr = SocketAddr::get_local_socket(st.native_handle(), ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  LOG_TRACE("clinet socket value %d  %s:%d", st.native_handle(),
+            local_addr.get_ip(), local_addr.get_port());
 
   st.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

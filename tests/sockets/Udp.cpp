@@ -25,6 +25,23 @@ TEST(SocketsTest, UdpSocketTest) {
   UdpSocket client = UdpSocket::bind("8981", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
+
+  SocketAddr local_addr =
+      SocketAddr::get_local_socket(client.native_handle(), ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  LOG_TRACE("clinet socket value %d  %s:%d", client.native_handle(),
+            local_addr.get_ip(), local_addr.get_port());
+
+  client.connected({"www.baidu.com", "80"}, ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  local_addr = SocketAddr::get_local_socket(client.native_handle(), ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+  LOG_TRACE("clinet socket value %d  %s:%d", client.native_handle(),
+            local_addr.get_ip(), local_addr.get_port());
+
   client.set_multicast_loop(true, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();

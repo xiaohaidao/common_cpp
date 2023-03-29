@@ -84,6 +84,14 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
   return re;
 }
 
+void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
+  if (::connect(socket_, (const sockaddr *)addr.native_addr(),
+                (int)addr.native_addr_size())) {
+    ec = getNetErrorCode();
+    ::closesocket(socket_);
+  }
+}
+
 void UdpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   read_timeout_ = timeout_ms;

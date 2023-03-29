@@ -18,6 +18,7 @@ public:
   static UdpSocket bind(const char *port_or_service, FamilyType family,
                         std::error_code &ec);
 
+  void connected(const SocketAddr &addr, std::error_code &ec);
   void close(std::error_code &ec);
 
   void set_read_timeout(size_t timeout_ms, std::error_code &ec);
