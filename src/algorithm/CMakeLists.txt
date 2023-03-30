@@ -6,7 +6,10 @@ add_library(${library_name} INTERFACE
 target_link_libraries(${library_name} INTERFACE
 )
 
-if(WIN32)
+if(MSVC)
+target_link_libraries(${library_name} INTERFACE
+)
+elseif(WIN32)
 target_link_libraries(${library_name} INTERFACE
     atomic
     pthread

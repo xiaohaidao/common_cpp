@@ -77,7 +77,7 @@ public:
 
     LOG_TRACE("module: %s, client write message %d \"%s\"", module_.c_str(), n,
               buff_);
-    int s = client_.write(buff_, n, ec);
+    client_.write(buff_, n, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
@@ -155,7 +155,7 @@ template <typename T> void ReactorFunc() {
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
-  sprintf(port, "%d", addr.get_port());
+  snprintf(port, sizeof(port), "%d", addr.get_port());
   Server<T> server(port, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();

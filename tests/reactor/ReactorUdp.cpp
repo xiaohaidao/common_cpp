@@ -79,7 +79,7 @@ public:
     SocketAddr &to = recv.second;
     LOG_TRACE("module: %s, client write to %s:%d message %d \"%s\"",
               module_.c_str(), to.get_ip(), to.get_port(), n, buff_);
-    int s = client_.send_to(buff_, n, to, ec);
+    client_.send_to(buff_, n, to, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();

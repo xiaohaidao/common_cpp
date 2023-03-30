@@ -188,7 +188,7 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
 
   struct icmphdr icmp_hdr = {};
   constexpr size_t icmp_head_size = sizeof(icmphdr);
-  constexpr size_t ip_head_size = sizeof(iphdr);
+  size_t ip_head_size = reinterpret_cast<iphdr *>(buf)->ihl * 4;
   ret -= icmp_head_size;
   ret -= ip_head_size; // ip protocal struct size
   memcpy(&icmp_hdr, buf + ip_head_size, icmp_head_size);

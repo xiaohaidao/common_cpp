@@ -14,17 +14,17 @@ namespace {
 
 using time_clock_t = std::chrono::time_point<std::chrono::system_clock>;
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #define LOCALTIME_S(timer, buf)                                                \
-  ({                                                                           \
-    localtime_s(buf, timer);                                                   \
-    buf;                                                                       \
-  })
+  [](const std::time_t *timers, struct tm *buff) {                             \
+    localtime_s(buff, timers);                                                 \
+    return buff;                                                               \
+  }(timer, buf)
 #else
 #define LOCALTIME_S localtime_r
 #endif
 
-#if __GNUC__ < 5
+#if !defined(_MSC_VER) && __GNUC__ < 5
 #define FORMAT_TM(tm, format)                                                  \
   ({                                                                           \
     char buf[32];                                                              \

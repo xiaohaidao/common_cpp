@@ -76,7 +76,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
     return re;
   }
 
-  if (::bind(s, (sockaddr *)addr.native_addr(), addr.native_addr_size())) {
+  if (::bind(s, (sockaddr *)addr.native_addr(), (int)addr.native_addr_size())) {
     ::closesocket(s);
     ec = getNetErrorCode();
     return re;
@@ -126,27 +126,28 @@ std::pair<size_t, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
                                                    std::error_code &ec) {
 
   std::pair<size_t, SocketAddr> re;
-  socklen_t len = re.second.native_addr_size();
-  int ret = ::recvfrom(socket_, buf, buf_size, 0,
+  socklen_t len = (int)re.second.native_addr_size();
+  int ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
     ec = getNetErrorCode();
     return re;
   }
-  re.first = ret;
+  re.first = (size_t)ret;
   return re;
 }
 
 size_t UdpSocket::send_to(const char *buf, size_t buf_size,
                           const SocketAddr &to, std::error_code &ec) {
 
-  int rev = ::sendto(socket_, buf, buf_size, 0,
-                     (const sockaddr *)to.native_addr(), to.native_addr_size());
+  int rev =
+      ::sendto(socket_, buf, (int)buf_size, 0,
+               (const sockaddr *)to.native_addr(), (int)to.native_addr_size());
   if (rev < 0) {
     ec = getNetErrorCode();
     return 0;
   }
-  return rev;
+  return (size_t)rev;
 }
 
 void UdpSocket::close(std::error_code &ec) {

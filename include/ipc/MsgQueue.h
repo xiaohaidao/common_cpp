@@ -36,16 +36,17 @@ public:
     return open(std::to_string(key), ec);
   }
 
-  void send(const char *data, size_t size,
-            std::error_code &ec); /// 当队列满时，命令会阻塞
+  // when queue is full, it will be blocked
+  void send(const char *data, size_t size, std::error_code &ec);
 
   bool sendTimeout(const char *data, size_t size, size_t timeout_ms,
                    std::error_code &ec);
 
-  /// 当队列空时，命令会阻塞, data_size建议不小于8192
+  // when queue is full, it will be blocked. data_size recommendation is not
+  // less than 8192
   size_t recv(char *data, size_t data_size, std::error_code &ec);
 
-  /// data_size建议不小于8192
+  // data_size recommendation is not less than 8192
   size_t recvTimeout(char *data, size_t data_size, size_t timeout_ms,
                      std::error_code &ec);
 
