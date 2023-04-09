@@ -17,7 +17,7 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
 
   buff_ = {(uint32_t)size, buff};
   func_ = async_func;
-  from_size_ = from_.native_addr_size();
+  from_size_ = static_cast<int>(from_.native_addr_size());
   DWORD recv_flags = 0;
   if (::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, &recv_flags,
                     (sockaddr *)from_.native_addr(), &from_size_,

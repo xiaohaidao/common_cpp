@@ -112,13 +112,13 @@ size_t Select::run_once_timeout(QueueOp &queue, size_t timeout_ms,
                                 std::error_code &ec) {
   struct timeval time = {};
   time.tv_usec = timeout_ms % 1000 * 1000;
-  time.tv_sec = timeout_ms / 1000;
+  time.tv_sec = static_cast<long>(timeout_ms / 1000);
   fd_type readability = read_;
   fd_type writability = write_;
   fd_type check_except = except_;
-  int re = ::select(fd_, &readability, &writability, &check_except,
-                    timeout_ms == (std::numeric_limits<size_t>::max)() ? nullptr
-                                                                       : &time);
+  int re = ::select(
+      static_cast<int>(fd_), &readability, &writability, &check_except,
+      timeout_ms == (std::numeric_limits<size_t>::max)() ? nullptr : &time);
   if (re < 0) {
     ec = getNetErrorCode();
     return 0;

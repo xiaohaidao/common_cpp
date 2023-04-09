@@ -12,7 +12,7 @@
 #include "proactor/operation/detail/EventOp_posix.h"
 #endif // _WIN32
 
-class ThreadInfo;
+struct ThreadInfo;
 
 class Proactor {
 public:

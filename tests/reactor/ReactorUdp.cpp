@@ -103,7 +103,7 @@ template <typename T> void ReactorUdpFunc() {
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
-  sprintf(port, "%d", addr.get_port());
+  snprintf(port, sizeof(port), "%d", addr.get_port());
   Udp<T> server("server");
   server.bind(port);
   EXPECT_TRUE(server.native_handle() > 0);

@@ -85,7 +85,7 @@ public:
       } else if (ptr->internal_count.fetch_add(-1, std::memory_order_relaxed) ==
                  1) {
 
-        ptr->internal_count.load(std::memory_order_acquire);
+        static_cast<void>(ptr->internal_count.load(std::memory_order_acquire));
         delete ptr;
       }
     }

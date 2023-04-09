@@ -46,7 +46,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
   memset(&a, 0, sizeof(a));
   a.base.sa_family = addr.native_family();
 
-  if (::bind(client_, &a.base, addr.native_addr_size()) < 0) {
+  if (::bind(client_, &a.base, static_cast<int>(addr.native_addr_size())) < 0) {
     ec = getNetErrorCode();
     complete(proactor, ec, 0);
     // assert(ec);
@@ -54,8 +54,8 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
   }
 
   if (ConnectExPtr(client_, (sockaddr *)addr.native_addr(),
-                   addr.native_addr_size(), nullptr, 0, nullptr,
-                   (OVERLAPPED *)this)) {
+                   static_cast<int>(addr.native_addr_size()), nullptr, 0,
+                   nullptr, (OVERLAPPED *)this)) {
     std::error_code re_ec = getNetErrorCode();
     if (re_ec.value() != ERROR_IO_PENDING) {
       ec = re_ec;

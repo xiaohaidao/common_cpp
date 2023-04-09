@@ -88,7 +88,8 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
     ::closesocket(listen);
     return re;
   }
-  if (::bind(listen, (sockaddr *)addr.native_addr(), addr.native_addr_size())) {
+  if (::bind(listen, (sockaddr *)addr.native_addr(),
+             static_cast<int>(addr.native_addr_size()))) {
     ::closesocket(listen);
     ec = getNetErrorCode();
     return re;

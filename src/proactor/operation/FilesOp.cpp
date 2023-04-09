@@ -70,7 +70,7 @@ void FilesOp::open(const char *file_path, bool create, std::error_code &ec) {
 size_t FilesOp::read(char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
-  if (!::ReadFile(fd_, buff, buff_size, &num, NULL)) {
+  if (!::ReadFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
     ec = getErrorCode();
   }
   return num;
@@ -87,7 +87,7 @@ size_t FilesOp::read(char *buff, size_t buff_size, std::error_code &ec) {
 size_t FilesOp::write(const char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
-  if (!::WriteFile(fd_, buff, buff_size, &num, NULL)) {
+  if (!::WriteFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
     ec = getErrorCode();
   }
   return num;

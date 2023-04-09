@@ -5,7 +5,7 @@
  * @file
  *
  *
- * @brief posix的共享内存
+ * @brief shared memory of posix
  *
  * 参看：https://man7.org/linux/man-pages/man7/shm_overview.7.html
  *

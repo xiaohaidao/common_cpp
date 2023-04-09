@@ -89,7 +89,8 @@ size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
     }
   }
   DWORD num = 0;
-  if (!::ReadFile(read_pipe_, buff, buff_size, &num, NULL)) {
+  if (!::ReadFile(read_pipe_, buff, static_cast<DWORD>(buff_size), &num,
+                  NULL)) {
     ec = getErrorCode();
   }
   return num;
@@ -106,7 +107,8 @@ size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
     }
   }
   DWORD num = 0;
-  if (!::WriteFile(write_pipe_, buff, buff_size, &num, NULL)) {
+  if (!::WriteFile(write_pipe_, buff, static_cast<DWORD>(buff_size), &num,
+                   NULL)) {
     ec = getErrorCode();
   }
   return num;

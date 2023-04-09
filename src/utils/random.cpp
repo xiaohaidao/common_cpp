@@ -13,14 +13,16 @@ class xorshift32 {
   uint32_t seed_;
 
 public:
-  xorshift32() : seed_(time_type::clock::now().time_since_epoch().count()) {}
+  xorshift32()
+      : seed_(static_cast<uint32_t>(
+            time_type::clock::now().time_since_epoch().count())) {}
 
   uint32_t operator()() {
     uint64_t x = seed_;
     x ^= x << 13;
     x ^= x >> 17;
     x ^= x << 5;
-    return seed_ = x;
+    return seed_ = static_cast<uint32_t>(x);
   }
 };
 
@@ -49,7 +51,7 @@ public:
   void gen32(uint32_t *dst, size_t size) {
     xorshift32 xor32;
     for (size_t i = 0; i < size; ++i) {
-      dst[i] = fix_seed_ ? (FIX_SEED | i) : xor32();
+      dst[i] = static_cast<uint32_t>(fix_seed_ ? (FIX_SEED | i) : xor32());
     }
   }
 

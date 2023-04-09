@@ -5,7 +5,7 @@
  * @file
  *
  *
- * @brief system v 的共享内存
+ * @brief shared memory of system v
  *
  * ipcs -a show the all system information
  * ipcrm remove the system struct

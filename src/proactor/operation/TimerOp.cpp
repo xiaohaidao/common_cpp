@@ -20,7 +20,7 @@ void TimerOp::wait(std::error_code &ec) {
     if (!(op_.interval > time_clock::duration::zero())) {
       return;
     }
-    int p = (now - op_.expire) / op_.interval + 1;
+    int64_t p = (now - op_.expire) / op_.interval + 1;
     op_.expire += (op_.interval * p);
   }
   std::this_thread::sleep_until(op_.expire);

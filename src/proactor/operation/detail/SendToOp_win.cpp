@@ -19,7 +19,8 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
   func_ = async_func;
   to_ = to;
   if (::WSASendTo(s, (WSABUF *)&buff_, 1, nullptr, 0,
-                  (sockaddr *)to_.native_addr(), to_.native_addr_size(),
+                  (sockaddr *)to_.native_addr(),
+                  static_cast<int>(to_.native_addr_size()),
                   (LPWSAOVERLAPPED)this, nullptr)) {
     std::error_code re_ec = getNetErrorCode();
     if (re_ec.value() != ERROR_IO_PENDING) {

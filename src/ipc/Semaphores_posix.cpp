@@ -4,7 +4,7 @@
 /**
  * @file
  *
- * @brief posix的信号量
+ * @brief semaphores of posix
  *
  *
  * 参看：https://man7.org/linux/man-pages/man7/sem_overview.7.html

@@ -4,9 +4,9 @@
 /**
  * @file
  *
- * @brief posix的消息队列
+ * @brief posix message queue
  *
- * 队列大小默认为10，消息大小默认最大为8192
+ * the queue size defaule is 10，the message size default is the most 8192
  * constexpr size_t msg_size = 8192;
  * constexpr size_t msg_queue_size = 10;
  *

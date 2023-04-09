@@ -55,13 +55,13 @@ public:
 
   int wait_duration_ms(size_t max_ms) {
     if (heap_.empty()) {
-      return max_ms;
+      return static_cast<int>(max_ms);
     }
     using namespace std::chrono;
     auto diff = heap_.front()->expire - clock_type::now();
     return (milliseconds(max_ms) < diff)
                ? static_cast<int>(max_ms)
-               : duration_cast<milliseconds>(diff).count();
+               : static_cast<int>(duration_cast<milliseconds>(diff).count());
   }
 
   void get_all_task(QueueOp &ops) {
@@ -71,7 +71,7 @@ public:
       heap_.pop();
       ops.push(timeout.op);
       if (timeout.interval > time_type::duration::zero()) {
-        int p = (now - timeout.expire) / timeout.interval + 1;
+        int64_t p = (now - timeout.expire) / timeout.interval + 1;
         timeout.expire += (timeout.interval * p);
         heap_.push(timeout);
       }

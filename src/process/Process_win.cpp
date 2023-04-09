@@ -58,7 +58,7 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
 Process Process::open(uint64_t pid, std::error_code &ec) {
   Process p;
   CHECK_EC(ec, p);
-  HANDLE han = OpenProcess(PROCESS_ALL_ACCESS, false, pid);
+  HANDLE han = OpenProcess(PROCESS_ALL_ACCESS, false, static_cast<DWORD>(pid));
   if (han == nullptr) {
     ec = getErrorCode();
     return p;

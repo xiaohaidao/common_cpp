@@ -4,7 +4,7 @@
 /**
  * @file
  *
- * @brief windows的信号量
+ * @brief semaphores of windows
  *
  *
  * 参看：https://learn.microsoft.com/en-us/windows/win32/sync/semaphore-objects
@@ -61,7 +61,7 @@ bool Semaphores::tryWait(std::error_code &ec) { return tryWaitFor(0, ec); }
 bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
   CHECK_EC(ec, false);
 
-  DWORD re = WaitForSingleObject(sem_, timeout_ms);
+  DWORD re = ::WaitForSingleObject(sem_, static_cast<DWORD>(timeout_ms));
   if (re == WAIT_FAILED) {
     ec = getErrorCode();
     return false;

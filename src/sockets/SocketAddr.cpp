@@ -123,7 +123,7 @@ size_t SocketAddr::native_addr_size() const {
 SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
   sockaddr *addr = (sockaddr *)re.sock_addr_;
-  size_type size = re.native_addr_size();
+  size_type size = static_cast<size_type>(re.native_addr_size());
   if (::getsockname(s, addr, &size)) {
     ec = getNetErrorCode();
     return re;
@@ -135,7 +135,7 @@ SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
 SocketAddr SocketAddr::get_remote_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
   sockaddr *addr = (sockaddr *)re.sock_addr_;
-  size_type size = re.native_addr_size();
+  size_type size = static_cast<size_type>(re.native_addr_size());
   if (::getpeername(s, addr, &size)) {
     ec = getNetErrorCode();
     return re;
@@ -147,8 +147,10 @@ SocketAddr SocketAddr::get_remote_socket(socket_type s, std::error_code &ec) {
 void SocketAddr::get_nameinfo(char *host, size_t host_size, char *service,
                               size_t service_size, std::error_code &ec) const {
 
-  if (::getnameinfo((const sockaddr *)native_addr(), native_addr_size(), host,
-                    host_size, service, service_size, NI_NUMERICSERV)) {
+  if (::getnameinfo((const sockaddr *)native_addr(),
+                    static_cast<size_type>(native_addr_size()), host,
+                    static_cast<size_type>(host_size), service,
+                    static_cast<size_type>(service_size), NI_NUMERICSERV)) {
 
     ec = getNetErrorCode();
   }

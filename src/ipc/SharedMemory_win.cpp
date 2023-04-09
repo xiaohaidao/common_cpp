@@ -5,7 +5,7 @@
  * @file
  *
  *
- * @brief windows的共享内存
+ * @brief shared memory of windows
  *
  * 参看：https://learn.microsoft.com/en-us/windows/win32/memory/creating-named-shared-memory
  *
@@ -50,13 +50,13 @@ SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
   CHECK_EC(ec, SharedMemory());
 
   std::string key_g = std::string("Global\\") + key;
-  HANDLE map_file =
-      CreateFileMapping(INVALID_HANDLE_VALUE, // use paging file
-                        NULL,                 // default security
-                        PAGE_READWRITE,       // read/write access
-                        0,        // maximum object size (high-order DWORD)
-                        mem_size, // maximum object size (low-order DWORD)
-                        key_g.c_str()); // name of mapping object
+  HANDLE map_file = CreateFileMapping(
+      INVALID_HANDLE_VALUE,         // use paging file
+      NULL,                         // default security
+      PAGE_READWRITE,               // read/write access
+      0,                            // maximum object size (high-order DWORD)
+      static_cast<DWORD>(mem_size), // maximum object size (low-order DWORD)
+      key_g.c_str());               // name of mapping object
 
   SharedMemory result;
   std::error_code er = getErrorCode();

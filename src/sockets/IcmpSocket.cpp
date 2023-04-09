@@ -178,8 +178,8 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
                                                     std::error_code &ec) {
 
   std::pair<size_t, SocketAddr> re;
-  socklen_t len = re.second.native_addr_size();
-  int ret = ::recvfrom(socket_, buf, buf_size, 0,
+  socklen_t len = static_cast<socklen_t>(re.second.native_addr_size());
+  int ret = ::recvfrom(socket_, buf, static_cast<int>(buf_size), 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
     ec = getNetErrorCode();
@@ -189,8 +189,8 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
   struct icmphdr icmp_hdr = {};
   constexpr size_t icmp_head_size = sizeof(icmphdr);
   size_t ip_head_size = reinterpret_cast<iphdr *>(buf)->ihl * 4;
-  ret -= icmp_head_size;
-  ret -= ip_head_size; // ip protocal struct size
+  ret -= static_cast<int>(icmp_head_size);
+  ret -= static_cast<int>(ip_head_size); // ip protocal struct size
   memcpy(&icmp_hdr, buf + ip_head_size, icmp_head_size);
   memcpy(buf, buf + icmp_head_size + ip_head_size, ret);
   memset(buf + icmp_head_size + ip_head_size, 0, icmp_head_size + ip_head_size);
@@ -210,11 +210,14 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
   icmp_hdr.un.echo.id = 1234; // arbitrary id
   memcpy(buf, &icmp_hdr, sizeof(icmp_hdr));
   memcpy(buf + sizeof(icmp_hdr), data, data_size);
-  icmp_hdr.checksum = in_cksum(buf, data_size + sizeof(icmp_hdr), 0);
+  icmp_hdr.checksum =
+      in_cksum(buf, static_cast<int>(data_size + sizeof(icmp_hdr)), 0);
   memcpy(buf, &icmp_hdr, sizeof(icmp_hdr));
 
-  int rev = ::sendto(socket_, buf, data_size + sizeof(icmp_hdr), 0,
-                     (const sockaddr *)to.native_addr(), to.native_addr_size());
+  int rev =
+      ::sendto(socket_, buf, static_cast<int>(data_size + sizeof(icmp_hdr)), 0,
+               (const sockaddr *)to.native_addr(),
+               static_cast<int>(to.native_addr_size()));
   if (rev < 0) {
     ec = getNetErrorCode();
     return 0;
