@@ -15,6 +15,7 @@ target_link_libraries(${library_name} PUBLIC
 if(WIN32)
 target_link_libraries(${library_name} PUBLIC
     Ws2_32
+    IPHLPAPI
 )
 elseif(UNIX)
 endif()

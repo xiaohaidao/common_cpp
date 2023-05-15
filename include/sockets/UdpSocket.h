@@ -34,8 +34,8 @@ public:
   size_t send_to(const char *buf, size_t buf_size, const SocketAddr &to,
                  std::error_code &ec);
 
-  // void set_broadcast(bool enable, std::error_code &ec);
-  // bool broadcast(std::error_code &ec);
+  void set_broadcast(bool enable, std::error_code &ec);
+  bool broadcast(std::error_code &ec);
 
   void joint_multicast(const SocketAddr &multicast, std::error_code &ec);
   void leave_multicast(const SocketAddr &multicast, std::error_code &ec);

@@ -6,8 +6,11 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+
+#include <iphlpapi.h>
 #else
 #include <arpa/inet.h>
+#include <ifaddrs.h>
 #include <netdb.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -105,6 +108,10 @@ unsigned short SocketAddr::native_port() const {
   return ((struct sockaddr_in *)native_addr())->sin_port;
 }
 
+void SocketAddr::set_port(unsigned short port) {
+  ((struct sockaddr_in *)native_addr())->sin_port = ::htons(port);
+}
+
 FamilyType SocketAddr::get_family() const {
   return nativeToFamily(native_family());
 }
@@ -118,6 +125,12 @@ void *SocketAddr::native_addr() const { return (void *)sock_addr_; }
 size_t SocketAddr::native_addr_size() const {
   return get_family() == kIpV4 ? sizeof(struct sockaddr_in)
                                : sizeof(struct sockaddr_in6);
+}
+
+void *SocketAddr::native_ip_addr() const {
+  return get_family() == kIpV4
+             ? (void *)&(((struct sockaddr_in *)sock_addr_)->sin_addr)
+             : (void *)&(((struct sockaddr_in6 *)sock_addr_)->sin6_addr);
 }
 
 SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
@@ -217,14 +230,117 @@ SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
   }
 
   for (auto ptr = result; ptr != NULL; ptr = ptr->ai_next) {
-    SocketAddr address;
+    SocketAddr address = {};
     memcpy(address.sock_addr_, ptr->ai_addr,
            ptr->ai_family == AF_INET ? sizeof(sockaddr_in)
                                      : sizeof(sockaddr_in6));
+    if (re.size() != 0 && memcmp(address.sock_addr_, re.rbegin()->sock_addr_,
+                                 sizeof(address.sock_addr_)) == 0) {
+      continue;
+    }
     address.get_ip(address.ip_addr_, sizeof(address.ip_addr_), ec);
     re.push_back(std::move(address));
   }
 
   ::freeaddrinfo(result);
+  return re;
+}
+
+std::vector<std::tuple<SocketAddr, SocketAddr, SocketAddr> >
+SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
+  std::vector<std::tuple<SocketAddr, SocketAddr, SocketAddr> > re;
+
+#ifdef _WIN32
+
+  IP_ADAPTER_ADDRESSES addresses[64];
+  ULONG address_number = sizeof(addresses);
+  if (GetAdaptersAddresses(enumToNative(family), 0, 0, addresses,
+                           &address_number) != ERROR_SUCCESS) {
+
+    ec = getNetErrorCode();
+    return re;
+  }
+
+  size_t address_size = enumToNative(family) == AF_INET ? sizeof(sockaddr_in)
+                                                        : sizeof(sockaddr_in6);
+
+  for (PIP_ADAPTER_ADDRESSES addr = addresses; addr; addr = addr->Next) {
+    for (PIP_ADAPTER_UNICAST_ADDRESS pu = addr->FirstUnicastAddress; pu;
+         pu = pu->Next) {
+      if (pu->Address.lpSockaddr->sa_family != enumToNative(family)) {
+        continue;
+      }
+
+      SocketAddr address = {};
+      memcpy(address.sock_addr_, pu->Address.lpSockaddr, address_size);
+      address.get_ip(address.ip_addr_, sizeof(address.ip_addr_), ec);
+
+      SocketAddr mask = {};
+      ((struct sockaddr_in *)mask.native_addr())->sin_family =
+          enumToNative(family);
+      size_t mask_len = pu->OnLinkPrefixLength;
+      uint8_t *m = (uint8_t *)mask.native_ip_addr();
+      static const uint8_t CONST_NUMBER[] = {128, 192, 224, 240,
+                                             248, 252, 254, 255};
+      for (size_t i = 0; i * 8 < mask_len; ++i) {
+        size_t index = (mask_len - i * 8) >= 8 ? 8 : (mask_len - i * 8);
+        m[i] |= CONST_NUMBER[index - 1];
+      }
+      mask.get_ip(mask.ip_addr_, sizeof(mask.ip_addr_), ec);
+
+      SocketAddr broadaddr = {};
+      ((struct sockaddr_in *)broadaddr.native_addr())->sin_family =
+          enumToNative(family);
+      if (family != kIpV6) {
+        uint8_t *ip = (uint8_t *)address.native_ip_addr();
+        uint8_t *m_ip = (uint8_t *)mask.native_ip_addr();
+        uint8_t *b_ip = (uint8_t *)broadaddr.native_ip_addr();
+        for (size_t i = 0; i < 4; ++i) {
+          b_ip[i] = ip[i] | ~m_ip[i];
+        }
+        broadaddr.get_ip(broadaddr.ip_addr_, sizeof(broadaddr.ip_addr_), ec);
+      }
+
+      re.push_back(std::make_tuple(std::move(address), std::move(mask),
+                                   std::move(broadaddr)));
+      break;
+    }
+  }
+  return re;
+
+#else
+  struct ifaddrs *ifap = nullptr, *ifa = nullptr;
+
+  if (::getifaddrs(&ifap) < 0) {
+    ec = getNetErrorCode();
+    return re;
+  }
+  size_t address_size = enumToNative(family) == AF_INET ? sizeof(sockaddr_in)
+                                                        : sizeof(sockaddr_in6);
+  for (ifa = ifap; ifa; ifa = ifa->ifa_next) {
+    if (ifa->ifa_addr && ifa->ifa_addr->sa_family == enumToNative(family)) {
+      SocketAddr address = {};
+      memcpy(address.sock_addr_, ifa->ifa_addr, address_size);
+      address.get_ip(address.ip_addr_, sizeof(address.ip_addr_), ec);
+
+      SocketAddr mask = {};
+      memcpy(mask.sock_addr_, ifa->ifa_netmask, address_size);
+      mask.get_ip(mask.ip_addr_, sizeof(mask.ip_addr_), ec);
+
+      SocketAddr broadaddr = {};
+      ((struct sockaddr_in *)broadaddr.native_addr())->sin_family =
+          enumToNative(family);
+      if (family != kIpV6) {
+        memcpy(broadaddr.sock_addr_, ifa->ifa_broadaddr, address_size);
+        broadaddr.get_ip(broadaddr.ip_addr_, sizeof(broadaddr.ip_addr_), ec);
+      }
+
+      re.push_back(std::make_tuple(std::move(address), std::move(mask),
+                                   std::move(broadaddr)));
+    }
+  }
+
+  ::freeifaddrs(ifap);
+#endif // _WIN32
   return re;
 }

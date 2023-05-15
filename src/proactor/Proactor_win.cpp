@@ -33,8 +33,9 @@ size_t Proactor::run() {
   std::error_code ec;
   size_t n = 0;
   ThreadInfo thread_info;
-  while (call_one(INFINITE, thread_info, ec)) {
-    if (n <= (std::numeric_limits<size_t>::max)()) {
+  while (shutdown_) {
+    if (call_one(INFINITE, thread_info, ec) &&
+        n <= (std::numeric_limits<size_t>::max)()) {
       ++n;
     }
   }

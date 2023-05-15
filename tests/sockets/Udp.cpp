@@ -18,6 +18,20 @@ TEST(SocketsTest, UdpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
+  // braodcast
+  LOG_TRACE("server braodcast enable %d", server.broadcast(ec));
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+
+  LOG_TRACE("set server braodcast enable 1");
+  server.set_broadcast(true, ec);
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+
+  LOG_TRACE("server braodcast enable %d", server.broadcast(ec));
+  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+  ec.clear();
+
   SocketAddr addr("224.0.0.5", "8981");
   LOG_TRACE("multicast ip is %s port %d", addr.get_ip(), addr.get_port());
 

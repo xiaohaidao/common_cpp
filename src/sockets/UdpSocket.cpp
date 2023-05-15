@@ -161,6 +161,24 @@ void UdpSocket::close(std::error_code &ec) {
     ec = getNetErrorCode();
   }
 }
+
+void UdpSocket::set_broadcast(bool enable, std::error_code &ec) {
+  int en = enable ? 1 : 0;
+  if (::setsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, sizeof(en)) <
+      0) {
+    ec = getNetErrorCode();
+  }
+}
+
+bool UdpSocket::broadcast(std::error_code &ec) {
+  int en = 0;
+  socklen_t len = sizeof(en);
+  if (::getsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, &len) < 0) {
+    ec = getNetErrorCode();
+  }
+  return en;
+}
+
 void UdpSocket::joint_multicast(const SocketAddr &multicast,
                                 std::error_code &ec) {
 

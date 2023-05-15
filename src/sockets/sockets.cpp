@@ -152,6 +152,8 @@ int enumToNative(SocketType type) {
 
 int enumToNative(Protocal protocal) {
   switch (protocal) {
+  case kIp:
+    return IPPROTO_IP;
   case kUDP:
     return IPPROTO_UDP;
   case kIcmp:

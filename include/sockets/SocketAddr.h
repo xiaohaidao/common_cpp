@@ -6,6 +6,7 @@
 
 #include <string>
 #include <system_error>
+#include <tuple>
 #include <vector>
 
 enum FamilyType {
@@ -21,6 +22,7 @@ enum SocketType {
 };
 
 enum Protocal {
+  kIp,
   kTCP,
   kUDP,
   kIcmp,
@@ -71,6 +73,10 @@ public:
 
   static const char *get_localhost(std::error_code &ec);
 
+  // @return [ip, mask, broadaddr]
+  static std::vector<std::tuple<SocketAddr, SocketAddr, SocketAddr> >
+  get_local_ip_mask(std::error_code &ec, FamilyType family = kIpV4);
+
   static SocketAddr resolve_host(const char *host, const char *port_or_service,
                                  std::error_code &ec, FamilyType family = kIpV4,
                                  bool bind = false);
@@ -84,12 +90,14 @@ public:
 
   unsigned short get_port() const;
   unsigned short native_port() const;
+  void set_port(unsigned short port);
 
   FamilyType get_family() const;
   int native_family() const;
 
   void *native_addr() const;
   size_t native_addr_size() const;
+  void *native_ip_addr() const;
 
   // private:
   void get_nameinfo(char *host, size_t host_size, char *service,
