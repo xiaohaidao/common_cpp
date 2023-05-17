@@ -101,7 +101,9 @@ void SocketAddr::get_ip(char *ip, size_t size, std::error_code &ec) const {
   }
 }
 
-unsigned short SocketAddr::get_port() const { return ::ntohs(native_port()); }
+unsigned short SocketAddr::get_port() const {
+  return sockets::netToHost(native_port());
+}
 
 unsigned short SocketAddr::native_port() const {
   // ((struct sockaddr_in *)native_addr())->sin_port = ::htons(port);
@@ -109,7 +111,7 @@ unsigned short SocketAddr::native_port() const {
 }
 
 void SocketAddr::set_port(unsigned short port) {
-  ((struct sockaddr_in *)native_addr())->sin_port = ::htons(port);
+  ((struct sockaddr_in *)native_addr())->sin_port = sockets::hostToNet(port);
 }
 
 FamilyType SocketAddr::get_family() const {
