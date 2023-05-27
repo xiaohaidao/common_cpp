@@ -28,8 +28,6 @@ public:
   size_t run();
   size_t run_one(size_t timeout_us, std::error_code &ec);
 
-  void stop(std::error_code &ec);
-
   void notify_op(Operation *op, std::error_code &ec);
 
   void post(native_handle file_descriptor, Operation *op, std::error_code &ec);

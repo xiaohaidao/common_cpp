@@ -66,7 +66,7 @@ public:
 
   void get_all_task(QueueOp &ops) {
     time_type now = clock_type::now();
-    while (heap_.front()->expire <= now) {
+    while (!heap_.empty() && heap_.front()->expire <= now) {
       timer_queue_t timeout = *heap_.front();
       heap_.pop();
       ops.push(timeout.op);

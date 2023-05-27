@@ -30,6 +30,7 @@ private:
     func_type func;
     time_clock::time_point expire;
     time_clock::duration interval;
+    int64_t timeout_num;
 
     virtual void complete(void *proactor, const std::error_code &result_ec,
                           size_t trans_size) override;

@@ -39,6 +39,7 @@ size_t Proactor::run() {
       ++n;
     }
   }
+  shutdown();
   return n;
 }
 

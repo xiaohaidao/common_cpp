@@ -111,6 +111,9 @@ class thread_pool {
     size_t queues_size = queues.size();
     for (size_t i = 0; i < queues_size; ++i) {
       size_t index = (my_index + i + 1) % queues_size;
+      if (!queues[index]) {
+        break;
+      }
       if (queues[index]->try_steal(task)) {
         return true;
       }
@@ -125,8 +128,9 @@ public:
       thread_count = thread_number;
     }
     try {
+      queues.resize(thread_count);
       for (uint32_t i = 0; i < thread_count; ++i) {
-        queues.push_back(
+        queues[i] = std::move(
             std::unique_ptr<work_stealing_queue>(new work_stealing_queue));
 
         threads.push_back(std::thread(&thread_pool::work_thread, this, i));
@@ -157,6 +161,8 @@ public:
     }
     return res;
   }
+
+  size_t thread_size() const { return threads.size(); }
 
   void run_pending_task() {
     task_type task;

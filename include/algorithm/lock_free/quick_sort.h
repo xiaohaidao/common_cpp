@@ -13,7 +13,6 @@
 namespace thread {
 
 template <typename T> struct sorter {
-  sorter() : pool(4) {}
   thread_pool pool;
   std::list<T> do_sort(std::list<T> &chunk_data) {
     if (chunk_data.empty()) {
