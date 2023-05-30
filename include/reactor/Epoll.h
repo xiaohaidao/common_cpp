@@ -30,10 +30,13 @@ public:
 
   int native_handle() const { return fd_; }
 
+  void set_proactor(void *proactor);
+
 private:
   Epoll();
 
   int fd_;
+  void *proactor_;
 };
 
 #endif // __linux__

@@ -68,7 +68,10 @@ const char *getEnumStr(LogLevel level) {
   }
 }
 
-bool isSkipLog(const LogData &data) { return false; }
+static LogLevel SKIP_LOG_LEVEL = kTrace;
+static void (*EXPORT_CALLBACK)(LogLevel, const char *, int) = nullptr;
+
+bool isSkipLog(const LogData &data) { return data.level < SKIP_LOG_LEVEL; }
 
 void formatLog(const LogData &data, std::string &log) {
   // log head
@@ -88,20 +91,32 @@ void formatLog(const LogData &data, std::string &log) {
        << "[" << getEnumStr(data.level) << "]"
        << "[" << data.filename << ":" << data.line << "]"
        << "[" << data.func_name << "]"
-       << " "
-       << log.c_str()
-       // log tail
-       << ("\n");
+       << " " << log.c_str();
+  // log tail
+
+  if (!(log.size() > 0 && *log.rbegin() == '\n')) {
+    ss_h << ("\n");
+  }
 
   log = ss_h.str();
 }
 
 void exportLog(const LogData &data, const std::string &log) {
+  if (EXPORT_CALLBACK) {
+    EXPORT_CALLBACK(data.level, log.c_str(), log.size());
+    return;
+  }
   auto out_stream = data.level >= kError ? stderr : stdout;
   fprintf(out_stream, "%s", log.c_str());
 }
 
 } // namespace
+
+void setLogLevel(LogLevel level) { SKIP_LOG_LEVEL = level; }
+
+void setExportCallback(void (*callback)(LogLevel, const char *, int)) {
+  EXPORT_CALLBACK = callback;
+}
 
 void logPrint(LogLevel level, const char *filename, int line,
               const char *func_name, const char *fmt, ...) {

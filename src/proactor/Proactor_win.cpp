@@ -109,7 +109,8 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
         fd_, &bytes_transferred, &completion_key, &overlapped, timeout_ms);
 
     std::error_code result_ec = getErrorCode();
-    if (result_ec.value() == ERROR_IO_PENDING) {
+    if (result_ec.value() == ERROR_IO_PENDING ||
+        result_ec.value() == WAIT_TIMEOUT) {
       result_ec = {0, result_ec.category()};
     }
     if (overlapped) {

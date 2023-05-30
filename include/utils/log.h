@@ -42,6 +42,10 @@ enum LogLevel {
 void logPrint(LogLevel level, const char *filename, int line,
               const char *func_name, const char *fmt, ...);
 
+void setLogLevel(LogLevel level);
+
+void setExportCallback(void (*)(LogLevel, const char *, int));
+
 #ifdef __cplusplus
 }
 #endif

@@ -129,11 +129,12 @@ public:
     }
     try {
       queues.resize(thread_count);
+      threads.resize(thread_count);
       for (uint32_t i = 0; i < thread_count; ++i) {
         queues[i] = std::move(
             std::unique_ptr<work_stealing_queue>(new work_stealing_queue));
 
-        threads.push_back(std::thread(&thread_pool::work_thread, this, i));
+        threads[i] = std::move(std::thread(&thread_pool::work_thread, this, i));
       }
     } catch (...) {
       done = true;

@@ -8,11 +8,12 @@
 
 #include "utils/error_code.h"
 
-Epoll::Epoll() : fd_(-1) {}
+Epoll::Epoll() : fd_(-1), proactor_(nullptr) {}
 
-Epoll::Epoll(int fd) : fd_(fd) {}
+Epoll::Epoll(int fd) : fd_(fd), proactor_(nullptr) {}
 
-Epoll::Epoll(std::error_code &ec) : fd_(epoll_create1(EPOLL_CLOEXEC)) {
+Epoll::Epoll(std::error_code &ec)
+    : fd_(epoll_create1(EPOLL_CLOEXEC)), proactor_(nullptr) {
   if (fd_ == -1) {
     ec = getErrorCode();
   }
@@ -61,7 +62,8 @@ size_t Epoll::call(QueueOp &queue) {
 size_t Epoll::call_one(QueueOp &queue) {
   if (ReactorOp *op = (ReactorOp *)queue.begin()) {
     queue.pop();
-    op->complete(this, std::error_code(), 0);
+    void *p = proactor_ ? proactor_ : this;
+    op->complete(p, std::error_code(), 0);
     return 1;
   }
   return 0;
@@ -93,5 +95,7 @@ void Epoll::close(std::error_code &ec) {
     ec = getErrorCode();
   }
 }
+
+void Epoll::set_proactor(void *proactor) { proactor_ = proactor; }
 
 #endif // __linux__

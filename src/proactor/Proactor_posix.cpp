@@ -83,6 +83,7 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
                           std::error_code &ec) {
 
   Reactor reactor(fd_);
+  reactor.set_proactor(this);
   QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.begin()) {
