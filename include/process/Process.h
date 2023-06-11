@@ -2,7 +2,6 @@
 #ifndef PROCESS_PROCESS_H
 #define PROCESS_PROCESS_H
 
-#include <string>
 #include <system_error>
 #include <vector>
 
@@ -19,9 +18,11 @@ public:
 #endif // _WIN32
   Process();
 
-  static Process call(const char *command, const std::vector<std::string> &argv,
+  static Process call(const char *command,
+                      const std::vector<const char *> &argv,
                       const ipc::Pipe &pipe, std::error_code &ec);
-  static Process call(const char *command, const std::vector<std::string> &argv,
+  static Process call(const char *command,
+                      const std::vector<const char *> &argv,
                       std::error_code &ec);
 
   static Process open(uint64_t pid, std::error_code &ec);

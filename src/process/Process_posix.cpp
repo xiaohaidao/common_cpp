@@ -11,21 +11,28 @@
 #include "utils/error_code.h"
 #include "utils/macro.h"
 
+extern char **environ;
+
 Process::Process() : child_handle_(0) {}
 
-Process Process::call(const char *command, const std::vector<std::string> &argv,
+Process Process::call(const char *command,
+                      const std::vector<const char *> &argv,
                       std::error_code &ec) {
 
   ipc::Pipe pipe = ipc::Pipe::std_in_out();
   return call(command, argv, pipe, ec);
 }
 
-Process Process::call(const char *command, const std::vector<std::string> &argv,
+Process Process::call(const char *command,
+                      const std::vector<const char *> &argv,
                       const ipc::Pipe &pipe, std::error_code &ec) {
 
-  std::vector<const char *> arg, env;
+  std::vector<const char *> arg;
+  arg.push_back(command);
   for (auto const &i : argv) {
-    arg.push_back(i.c_str());
+    if (i) {
+      arg.push_back(i);
+    }
   }
   arg.push_back(nullptr);
 
@@ -51,7 +58,8 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
 
   pid_t pid = 0;
   if (posix_spawnp(&pid, command, &file_actions, &attr,
-                   const_cast<char *const *>(arg.data()), nullptr) != 0) {
+                   const_cast<char *const *>(arg.data()), environ) != 0) {
+
     ec = getErrorCode();
     return sys;
   }

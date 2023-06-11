@@ -9,13 +9,15 @@
 
 Process::Process() : child_handle_(0) {}
 
-Process Process::call(const char *command, const std::vector<std::string> &argv,
+Process Process::call(const char *command,
+                      const std::vector<const char *> &argv,
                       const ipc::Pipe &pipe, std::error_code &ec) {
 
   std::string arg;
+  arg.append(command);
   for (auto const &i : argv) {
-    arg.append(i);
     arg.append(" ");
+    arg.append(i);
   }
 
   Process sys;
@@ -30,16 +32,16 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
   si.hStdOutput = pipe.write_native();
   si.hStdInput = pipe.read_native();
   ZeroMemory(&pi, sizeof(pi));
-  if (!CreateProcess(command, // module name (use command line)
-                     const_cast<LPSTR>(arg.c_str()), // Command line
-                     NULL,             // Process handle not inheritable
-                     NULL,             // Thread handle not inheritable
-                     FALSE,            // Set handle inheritance to FALSE
-                     CREATE_NO_WINDOW, // No creation flags
-                     NULL,             // Use parent's environment block
-                     NULL,             // Use parent's starting directory
-                     &si,              // Pointer to STARTUPINFO structure
-                     &pi) // Pointer to PROCESS_INFORMATION structure
+  if (!CreateProcess(NULL, // module name (use command line)
+                     const_cast<LPSTR>(arg.data()), // Command line
+                     NULL, // Process handle not inheritable
+                     NULL, // Thread handle not inheritable
+                     TRUE, // Set handle inheritance to FALSE
+                     0,    // No creation flags
+                     NULL, // Use parent's environment block
+                     NULL, // Use parent's starting directory
+                     &si,  // Pointer to STARTUPINFO structure
+                     &pi)  // Pointer to PROCESS_INFORMATION structure
   ) {
     ec = getErrorCode();
     return sys;
@@ -48,7 +50,8 @@ Process Process::call(const char *command, const std::vector<std::string> &argv,
   return sys;
 }
 
-Process Process::call(const char *command, const std::vector<std::string> &argv,
+Process Process::call(const char *command,
+                      const std::vector<const char *> &argv,
                       std::error_code &ec) {
 
   ipc::Pipe pipe = ipc::Pipe::std_in_out();
