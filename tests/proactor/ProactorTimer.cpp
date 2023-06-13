@@ -36,9 +36,7 @@ TEST(ProactorTest, ProactorTimer) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  timer1.wait(ec);
-  EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-  ec.clear();
+  timer1.wait();
 
   TimerOp timer3(p);
   timer3.set_timeout(100, 300);

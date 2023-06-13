@@ -15,7 +15,7 @@ void TimerOp::set_timeout(size_t expire_ms, size_t interval_ms) {
   op_.timeout_num = 0;
 }
 
-void TimerOp::wait(std::error_code &ec) {
+void TimerOp::wait() {
   auto now = time_clock::now();
   if (op_.expire < now) {
     if (!(op_.interval > time_clock::duration::zero())) {
@@ -27,13 +27,13 @@ void TimerOp::wait(std::error_code &ec) {
   std::this_thread::sleep_until(op_.expire);
 }
 
-TimerOp::time_clock::duration TimerOp::expire_us(std::error_code &ec) {
+TimerOp::time_clock::duration TimerOp::expire() {
   return op_.expire - time_clock::now();
 }
 
 void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
   if (!ctx_) {
-    wait(ec);
+    wait();
     return;
   }
   op_.func = async_func;
@@ -41,6 +41,7 @@ void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
 }
 
 void TimerOp::close(std::error_code &ec) {
+  set_timeout(0);
   if (ctx_) {
     ctx_->cancel_timeout(&op_, ec);
   }

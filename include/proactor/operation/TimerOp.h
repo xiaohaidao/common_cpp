@@ -16,8 +16,9 @@ public:
 
   void set_timeout(size_t expire_ms);
   void set_timeout(size_t expire_ms, size_t interval_ms);
-  void wait(std::error_code &ec);
-  time_clock::duration expire_us(std::error_code &ec);
+
+  void wait();
+  time_clock::duration expire();
 
   void async_wait(func_type async_func, std::error_code &ec);
 
