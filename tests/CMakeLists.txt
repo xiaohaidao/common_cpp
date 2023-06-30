@@ -9,6 +9,7 @@ add_executable(${test_name}
     algorithm/lock_free_stack_test1.cpp
     algorithm/min_heap.cpp
     algorithm/thread_pool_test1.cpp
+    coroutine/test_coroutine.cpp
     ipc/MsgQueue.cpp
     ipc/Pipe.cpp
     ipc/Semaphores.cpp
@@ -42,6 +43,7 @@ target_link_libraries(${test_name} PRIVATE
     sockets
     utils
     algorithm
+    coroutine
 )
 
 add_test(NAME ${test_name}
