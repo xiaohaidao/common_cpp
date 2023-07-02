@@ -10,6 +10,7 @@ add_executable(${test_name}
     algorithm/min_heap.cpp
     algorithm/thread_pool_test1.cpp
     coroutine/test_coroutine.cpp
+    ipc/mm_socket.cpp
     ipc/MsgQueue.cpp
     ipc/Pipe.cpp
     ipc/Semaphores.cpp

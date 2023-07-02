@@ -17,20 +17,28 @@ public:
   static SharedMemory create(const std::string &key, size_t mem_size,
                              std::error_code &ec);
 
-  static SharedMemory create(const char *key, size_t block_num,
+  static SharedMemory create(const char *key, size_t mem_size,
                              std::error_code &ec) {
-    return create(std::string(key), block_num, ec);
+    return create(std::string(key), mem_size, ec);
+  }
+
+  static SharedMemory create(char *key, size_t mem_size, std::error_code &ec) {
+    return create(std::string(key), mem_size, ec);
   }
 
   template <typename T>
-  static SharedMemory create(const T &key, size_t block_num,
+  static SharedMemory create(const T &key, size_t mem_size,
                              std::error_code &ec) {
-    return create(std::to_string(key), block_num, ec);
+    return create(std::to_string(key), mem_size, ec);
   }
 
   static SharedMemory open(const std::string &key, std::error_code &ec);
 
   static SharedMemory open(const char *key, std::error_code &ec) {
+    return open(std::string(key), ec);
+  }
+
+  static SharedMemory open(char *key, std::error_code &ec) {
     return open(std::string(key), ec);
   }
 
@@ -40,7 +48,7 @@ public:
   }
 
   void *memory() const;
-  size_t size() const;
+  // size_t size() const; // it's error on windows
 
   void close(std::error_code &ec);
 

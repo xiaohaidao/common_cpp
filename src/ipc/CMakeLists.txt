@@ -1,6 +1,7 @@
 
 set(library_name "ipc")
 add_library(${library_name}
+    mm_socket.cpp
     MsgQueue_null.cpp
     MsgQueue_posix.cpp
     MsgQueue.cpp
