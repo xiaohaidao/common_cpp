@@ -34,7 +34,8 @@ struct context {
     if (!fiber) {
       fiber = ConvertThreadToFiber(nullptr);
       if (!fiber) {
-        fprintf(stderr, "ConvertThreadToFiber error %d\n", GetLastError());
+        fiber = GetCurrentFiber();
+        // fprintf(stderr, "ConvertThreadToFiber error %d\n", GetLastError());
       }
     }
     SwitchToFiber(next.fiber);
@@ -48,7 +49,7 @@ struct context {
 private:
   void free_stack() {
     if (fiber) {
-      DeleteFiber(fiber);
+      // DeleteFiber(fiber);
       fiber = nullptr;
     }
   }

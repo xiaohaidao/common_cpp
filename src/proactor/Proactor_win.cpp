@@ -100,6 +100,8 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
     if (timeout_ms <= 0) {
       std::lock_guard<std::mutex> lck(timer_mutex_);
       timer_queue_.get_all_task(queue);
+    }
+    if (!queue.empty()) {
       continue;
     }
     DWORD bytes_transferred = 0;

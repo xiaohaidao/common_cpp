@@ -20,7 +20,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
     complete(proactor, re_ec, 0);
     return;
   }
-  set_event_data(READ_OP_ENUM_ONCE);
+  set_event_data(READ_OP_ET_ENUM_ONCE);
   static_cast<Proactor *>(proactor)->post(s, this, ec);
 }
 

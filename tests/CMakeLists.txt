@@ -16,6 +16,7 @@ add_executable(${test_name}
     ipc/Semaphores.cpp
     ipc/SharedMemory.cpp
     proactor/Proactor.cpp
+    proactor/ProactorCo.cpp
     proactor/ProactorFiles.cpp
     proactor/ProactorTimer.cpp
     proactor/ProactorUdp.cpp

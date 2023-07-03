@@ -25,6 +25,9 @@ enum OpEnum {
    ::detail::EPOLLET)
 #define WRITE_OP_ENUM                                                          \
   (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP)
+#define READ_OP_ET_ENUM_ONCE                                                   \
+  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
+   ::detail::EPOLLONESHOT | ::detail::EPOLLET)
 #define READ_OP_ENUM_ONCE                                                      \
   (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
    ::detail::EPOLLONESHOT)

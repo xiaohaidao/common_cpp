@@ -126,6 +126,16 @@ size_t writeTimeout(socket_type s, std::error_code &ec) {
 #endif // _WIN32
 }
 
+int getErrorStatus(socket_type s, std::error_code &ec) {
+  int set = 0;
+  socklen_t ret = sizeof(set);
+  if (::getsockopt(s, SOL_SOCKET, SO_ERROR, (char *)&set, &ret) < 0) {
+    ec = getNetErrorCode();
+    return -1;
+  }
+  return set;
+}
+
 int enumToNative(FamilyType family) {
   switch (family) {
   case kIpV4:

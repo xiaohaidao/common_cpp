@@ -4,6 +4,7 @@ add_library(${library_name}
     Proactor_posix.cpp
     Proactor_win.cpp
     Proactor.cpp
+    ProactorCo.cpp
     operation/FilesOp.cpp
     operation/TcpListenerOp.cpp
     operation/TcpStreamOp.cpp

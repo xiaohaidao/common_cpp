@@ -19,10 +19,15 @@ public:
   void append_task(std::function<void()> f, uint32_t block_size = 256);
   void append_task(std::function<void(coroutine &)> f,
                    uint32_t block_size = 256);
+
   void yield();
+  void loop();
+  void clear();
+  bool empty();
 
 private:
-  void loop();
+  void swap(size_t index);
+
   template <typename T> struct vec {
     size_t v_size;
     std::vector<T> v;
@@ -81,5 +86,18 @@ private:
   bool is_exit_to_main_;
 
 }; // class coroutine
+
+extern thread_local coroutine STATIC_GLOBOAL_CO_XBREFW;
+
+#define co_yield() STATIC_GLOBOAL_CO_XBREFW.yield()
+#define co_await(...) STATIC_GLOBOAL_CO_XBREFW.append_task(__VA_ARGS__)
+#define co_loop() STATIC_GLOBOAL_CO_XBREFW.loop()
+#define co_stop() STATIC_GLOBOAL_CO_XBREFW.clear()
+#define co_empty() STATIC_GLOBOAL_CO_XBREFW.empty()
+#define co_loop_call(...)                                                      \
+  while (!co_empty()) {                                                        \
+    co_yield();                                                                \
+    __VA_ARGS__();                                                             \
+  }
 
 #endif // COROUTINE_H
