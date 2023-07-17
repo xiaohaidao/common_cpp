@@ -87,12 +87,13 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
   QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.begin()) {
-      int timeout_ms = timer_queue_.wait_duration_ms(timeout_us / 1000);
+      size_t timeout_ms = timer_queue_.wait_duration_ms(INT32_MAX);
       if (timeout_ms <= 0) {
         std::lock_guard<std::mutex> lck(timer_mutex_);
         timer_queue_.get_all_task(queue);
       }
       if (queue.empty()) {
+        timeout_ms = (std::min)(timeout_ms, timeout_us / 1000);
         if (reactor.run_once_timeout(queue, timeout_ms, ec) == 0) {
           return 0;
         }

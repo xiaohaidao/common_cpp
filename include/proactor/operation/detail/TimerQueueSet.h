@@ -42,26 +42,30 @@ public:
 
   void cancel(Operation *op) { heap_.erase(op); }
 
-  int wait_duration_usec(size_t max_us) {
+  size_t wait_duration_usec(size_t max_us) {
     if (heap_.empty()) {
       return max_us;
     }
     using namespace std::chrono;
     auto diff = heap_.front()->expire - clock_type::now();
-    return (microseconds(max_us) < diff)
-               ? static_cast<int>(max_us)
-               : duration_cast<microseconds>(diff).count();
+    return diff <= time_type::duration::zero()
+               ? 0
+               : (microseconds(max_us) < diff)
+                     ? max_us
+                     : duration_cast<microseconds>(diff).count();
   }
 
-  int wait_duration_ms(size_t max_ms) {
+  size_t wait_duration_ms(size_t max_ms) {
     if (heap_.empty()) {
-      return static_cast<int>(max_ms);
+      return max_ms;
     }
     using namespace std::chrono;
     auto diff = heap_.front()->expire - clock_type::now();
-    return (milliseconds(max_ms) < diff)
-               ? static_cast<int>(max_ms)
-               : static_cast<int>(duration_cast<milliseconds>(diff).count());
+    return diff <= time_type::duration::zero()
+               ? 0
+               : (milliseconds(max_ms) < diff)
+                     ? max_ms
+                     : duration_cast<milliseconds>(diff).count();
   }
 
   void get_all_task(QueueOp &ops) {
