@@ -9,6 +9,8 @@
 #else
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -47,6 +49,59 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
     ec = getNetErrorCode();
   }
   return s;
+}
+
+void setKeepLive(socket_type s, int enable, int time_s, int intvl, int times,
+                 std::error_code &ec) {
+
+#ifdef _WIN32
+  struct tcp_keepalive {
+    u_long onoff;
+    u_long keepalivetime;
+    u_long keepaliveinterval;
+  } keepalive;
+
+  // times is 10, can't be changed
+
+  keepalive.onoff = enable;
+  keepalive.keepalivetime = time_s * 1000;
+  keepalive.keepaliveinterval = intvl * 1000;
+  if (::WSAIoctl(s,                        // descriptor identifying a socket
+                 SIO_KEEPALIVE_VALS,       // dwIoControlCode
+                 (LPVOID)&keepalive,       // pointer to tcp_keepalive struct
+                 (DWORD)sizeof(keepalive), // length of input buffer
+                 NULL,                     // output buffer
+                 0,                        // size of output buffer
+                 nullptr,                  // number of bytes returned
+                 nullptr,                  // OVERLAPPED structure
+                 nullptr                   // completion routine
+                 ) != 0) {
+    ec = getNetErrorCode();
+  }
+
+#else
+
+  if (::setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (const char *)&enable,
+                   sizeof(enable)) < 0) {
+    ec = getNetErrorCode();
+    return;
+  }
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPIDLE, (const char *)&time_s,
+                   sizeof(time_s)) < 0) {
+    ec = getNetErrorCode();
+    return;
+  }
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPINTVL, (const char *)&intvl,
+                   sizeof(intvl)) < 0) {
+    ec = getNetErrorCode();
+    return;
+  }
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPCNT, (const char *)&times,
+                   sizeof(times)) < 0) {
+    ec = getNetErrorCode();
+    return;
+  }
+#endif // _WIN32
 }
 
 void setReuseAddr(socket_type s, std::error_code &ec) {

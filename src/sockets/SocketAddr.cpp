@@ -10,6 +10,7 @@
 #include <iphlpapi.h>
 #else
 #include <arpa/inet.h>
+#include <csignal>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <string.h>
@@ -50,6 +51,13 @@ private:
     }
   }
 
+} g_socket_start;
+
+#else
+
+class SocketStart {
+public:
+  SocketStart() { std::signal(SIGPIPE, SIG_IGN); }
 } g_socket_start;
 
 #endif // _WIN32
