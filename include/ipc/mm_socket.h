@@ -2,6 +2,8 @@
 #ifndef IPC_MM_SOCKET_H
 #define IPC_MM_SOCKET_H
 
+#include <cstdint>
+
 #include "ipc/SharedMemory.h"
 
 class mm_client {

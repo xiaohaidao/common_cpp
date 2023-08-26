@@ -4,6 +4,7 @@
 #ifndef SOCKETS_SOCKETADDR_H
 #define SOCKETS_SOCKETADDR_H
 
+#include <cstdint>
 #include <system_error>
 #include <tuple>
 #include <vector>

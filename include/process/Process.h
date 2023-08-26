@@ -2,6 +2,7 @@
 #ifndef PROCESS_PROCESS_H
 #define PROCESS_PROCESS_H
 
+#include <cstdint>
 #include <system_error>
 #include <vector>
 
