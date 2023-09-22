@@ -18,7 +18,7 @@ public:
                              std::error_code &ec);
 
   static SharedMemory create(char *key, size_t mem_size, std::error_code &ec) {
-    return create(key, mem_size, ec);
+    return create((const char *)key, mem_size, ec);
   }
 
   template <typename T>
@@ -28,7 +28,7 @@ public:
 
   static SharedMemory open(const char *key, std::error_code &ec);
   static SharedMemory open(char *key, std::error_code &ec) {
-    return open(key, ec);
+    return open((const char *)key, ec);
   }
 
   template <typename T> static SharedMemory open(T &&key, std::error_code &ec) {

@@ -4,6 +4,7 @@
 
 #include "sockets/SocketAddr.h"
 
+// set nullptr when need to stop
 void set_proactor(void *proactor);
 
 socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec);

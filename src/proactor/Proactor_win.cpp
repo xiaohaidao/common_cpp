@@ -14,7 +14,7 @@ struct ThreadInfo {
 
 Proactor::Proactor() : fd_(nullptr), shutdown_(false) {}
 
-Proactor::Proactor(std::error_code &ec) {
+Proactor::Proactor(std::error_code &ec) : fd_(nullptr), shutdown_(false) {
   HANDLE han = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
   if (han == nullptr) {
     ec = getErrorCode();
@@ -108,8 +108,9 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
     DWORD bytes_transferred = 0;
     ULONG_PTR completion_key = 0;
     LPOVERLAPPED overlapped = nullptr;
-    BOOL ok = GetQueuedCompletionStatus(
-        fd_, &bytes_transferred, &completion_key, &overlapped, timeout_ms);
+    BOOL ok =
+        GetQueuedCompletionStatus(fd_, &bytes_transferred, &completion_key,
+                                  &overlapped, (DWORD)timeout_ms);
 
     std::error_code result_ec = getErrorCode();
     if (result_ec.value() == ERROR_IO_PENDING ||

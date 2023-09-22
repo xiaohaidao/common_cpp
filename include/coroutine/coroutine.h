@@ -22,11 +22,11 @@ public:
 
   void yield();
   void loop();
-  void clear();
   bool empty();
 
 private:
   void swap(size_t index);
+  void clear();
 
   template <typename T> struct vec {
     size_t v_size;
@@ -40,20 +40,11 @@ private:
       return &v[v_size++];
     }
 
-    void push_back(const T &t) {
-      if (v_size == v.size()) {
-        v.push_back(t);
-      } else {
-        v[v_size] = t;
-      }
-      ++v_size;
-    }
-
     void push_back(T &&t) {
       if (v_size == v.size()) {
-        v.push_back(std::forward<T>(t));
+        v.emplace_back(std::forward<T>(t));
       } else {
-        v[v_size] = std::move(t);
+        v[v_size] = std::forward<T>(t);
       }
       ++v_size;
     }
@@ -87,13 +78,12 @@ private:
 
 }; // class coroutine
 
-extern thread_local coroutine STATIC_GLOBOAL_CO_XBREFW;
+coroutine &get_global_coroutine();
 
-#define co_yield() STATIC_GLOBOAL_CO_XBREFW.yield()
-#define co_await(...) STATIC_GLOBOAL_CO_XBREFW.append_task(__VA_ARGS__)
-#define co_loop() STATIC_GLOBOAL_CO_XBREFW.loop()
-#define co_stop() STATIC_GLOBOAL_CO_XBREFW.clear()
-#define co_empty() STATIC_GLOBOAL_CO_XBREFW.empty()
+#define co_yield() get_global_coroutine().yield()
+#define co_await(...) get_global_coroutine().append_task(__VA_ARGS__)
+#define co_loop() get_global_coroutine().loop()
+#define co_empty() get_global_coroutine().empty()
 #define co_loop_call(...)                                                      \
   while (!co_empty()) {                                                        \
     co_yield();                                                                \

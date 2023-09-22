@@ -11,7 +11,7 @@ struct context {
   LPVOID fiber;
 
   context() : fiber(nullptr) {}
-  ~context() { free_stack(); }
+  ~context() {} /*free_stack();*/
 
   void make_context(context &end_ctx, std::function<void()> f,
                     uint32_t block_size) {
@@ -35,7 +35,7 @@ struct context {
       fiber = ConvertThreadToFiber(nullptr);
       if (!fiber) {
         fiber = GetCurrentFiber();
-        // fprintf(stderr, "ConvertThreadToFiber error %d\n", GetLastError());
+        fprintf(stderr, "ConvertThreadToFiber error %d\n", GetLastError());
       }
     }
     SwitchToFiber(next.fiber);
@@ -49,7 +49,7 @@ struct context {
 private:
   void free_stack() {
     if (fiber) {
-      // DeleteFiber(fiber);
+      DeleteFiber(fiber);
       fiber = nullptr;
     }
   }

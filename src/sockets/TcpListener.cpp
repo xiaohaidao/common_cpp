@@ -20,24 +20,9 @@
 #define INVALID_SOCKET (socket_type)(~0)
 #endif // _WIN32
 
-TcpListener::TcpListener()
-    : socket_(INVALID_SOCKET)
+TcpListener::TcpListener() : socket_(INVALID_SOCKET) {}
 
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
-
-TcpListener::TcpListener(const socket_type &s)
-    : socket_(s)
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
+TcpListener::TcpListener(const socket_type &s) : socket_(s) {}
 
 TcpListener TcpListener::bind(const char *port_or_service,
                               std::error_code &ec) {
@@ -113,18 +98,11 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
 }
 
 void TcpListener::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-#ifdef _WIN32
-  read_timeout_ = timeout_ms;
-#endif // _WIN32
   sockets::setReadTimeout(socket_, timeout_ms, ec);
 }
 
 size_t TcpListener::read_timeout(std::error_code &ec) const {
-#ifdef _WIN32
-  return read_timeout_;
-#else
   return sockets::readTimeout(socket_, ec);
-#endif // _WIN32
 }
 
 void TcpListener::close(std::error_code &ec) {

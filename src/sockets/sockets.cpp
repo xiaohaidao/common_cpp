@@ -54,32 +54,35 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
 void setKeepLive(socket_type s, int enable, int time_s, int intvl, int times,
                  std::error_code &ec) {
 
-#ifdef _WIN32
-  struct tcp_keepalive {
-    u_long onoff;
-    u_long keepalivetime;
-    u_long keepaliveinterval;
-  } keepalive;
+  // #ifdef _WIN32
+  //   struct tcp_keepalive {
+  //     u_long onoff;
+  //     u_long keepalivetime;
+  //     u_long keepaliveinterval;
+  //   } keepalive;
 
-  // times is 10, can't be changed
+  //   // times is 10, can't be changed
+  // #define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)
 
-  keepalive.onoff = enable;
-  keepalive.keepalivetime = time_s * 1000;
-  keepalive.keepaliveinterval = intvl * 1000;
-  if (::WSAIoctl(s,                        // descriptor identifying a socket
-                 SIO_KEEPALIVE_VALS,       // dwIoControlCode
-                 (LPVOID)&keepalive,       // pointer to tcp_keepalive struct
-                 (DWORD)sizeof(keepalive), // length of input buffer
-                 NULL,                     // output buffer
-                 0,                        // size of output buffer
-                 nullptr,                  // number of bytes returned
-                 nullptr,                  // OVERLAPPED structure
-                 nullptr                   // completion routine
-                 ) != 0) {
-    ec = getNetErrorCode();
-  }
+  //   keepalive.onoff = enable;
+  //   keepalive.keepalivetime = time_s * 1000;
+  //   keepalive.keepaliveinterval = intvl * 1000;
+  //   if (::WSAIoctl(s,                        // descriptor identifying a
+  //   socket
+  //                  SIO_KEEPALIVE_VALS,       // dwIoControlCode
+  //                  (LPVOID)&keepalive,       // pointer to tcp_keepalive
+  //                  struct (DWORD)sizeof(keepalive), // length of input buffer
+  //                  NULL,                     // output buffer
+  //                  0,                        // size of output buffer
+  //                  nullptr,                  // number of bytes returned
+  //                  nullptr,                  // OVERLAPPED structure
+  //                  nullptr                   // completion routine
+  //                  ) != 0) {
+  //     ec = getNetErrorCode();
+  //   }
 
-#else
+  // #else // Windows 10, version 1709. support
+  // #endif // _WIN32
 
   if (::setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (const char *)&enable,
                    sizeof(enable)) < 0) {
@@ -101,18 +104,17 @@ void setKeepLive(socket_type s, int enable, int time_s, int intvl, int times,
     ec = getNetErrorCode();
     return;
   }
-#endif // _WIN32
 }
 
 void setReuseAddr(socket_type s, std::error_code &ec) {
   constexpr int set = 1;
 #ifdef SO_REUSEPORT
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, (const char *)&set, sizeof(set)) <
-      0) {
+  int optname = SO_REUSEPORT;
 #else
-  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (const char *)&set, sizeof(set)) <
-      0) {
+  int optname = SO_REUSEADDR;
 #endif // SO_REUSEPORT
+  if (::setsockopt(s, SOL_SOCKET, optname, (const char *)&set, sizeof(set)) <
+      0) {
     ec = getNetErrorCode();
   }
 }
@@ -120,44 +122,40 @@ void setReuseAddr(socket_type s, std::error_code &ec) {
 void setReadTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
-  if (::setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&time_out,
-                   sizeof(time_out)) < 0) {
-    ec = getNetErrorCode();
-    return;
-  }
 #else
   struct timeval time_out = {};
   time_out.tv_usec = timeout_ms % 1000 * 1000;
   time_out.tv_sec = timeout_ms / 1000;
+#endif // _WIN32
   if (::setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&time_out,
                    sizeof(time_out)) < 0) {
     ec = getNetErrorCode();
     return;
   }
-#endif // _WIN32
 }
 
 void setWriteTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
-  if (::setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (const char *)&time_out,
-                   sizeof(time_out)) < 0) {
-    ec = getNetErrorCode();
-  }
 #else
   struct timeval time_out = {};
   time_out.tv_usec = timeout_ms % 1000 * 1000;
   time_out.tv_sec = timeout_ms / 1000;
+#endif // _WIN32
   if (::setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (const char *)&time_out,
                    sizeof(time_out)) < 0) {
     ec = getNetErrorCode();
   }
-#endif // _WIN32
 }
 
 size_t readTimeout(socket_type s, std::error_code &ec) {
 #ifdef _WIN32
-  return 0;
+  size_t v = 0;
+  socklen_t size = sizeof(v);
+  if (::getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&v, &size) < 0) {
+    ec = getNetErrorCode();
+  }
+  return v;
 #else
   struct timeval v = {};
   socklen_t size = sizeof(v);
@@ -170,7 +168,12 @@ size_t readTimeout(socket_type s, std::error_code &ec) {
 
 size_t writeTimeout(socket_type s, std::error_code &ec) {
 #ifdef _WIN32
-  return 0;
+  size_t v = 0;
+  socklen_t size = sizeof(v);
+  if (::getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&v, &size) < 0) {
+    ec = getNetErrorCode();
+  }
+  return v;
 #else
   struct timeval v = {};
   socklen_t size = sizeof(v);

@@ -20,7 +20,7 @@ void SendOp::async_send(void *proactor, socket_type s, const char *buff,
   if (::WSASend(s, (WSABUF *)&buff_, 1, nullptr, 0, (LPWSAOVERLAPPED)this,
                 nullptr)) {
     std::error_code re_ec = getNetErrorCode();
-    if (re_ec.value() != ERROR_IO_PENDING) {
+    if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
       // assert(ec);

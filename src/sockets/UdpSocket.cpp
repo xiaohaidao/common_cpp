@@ -22,23 +22,9 @@
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
-UdpSocket::UdpSocket()
-    : socket_(INVALID_SOCKET)
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
+UdpSocket::UdpSocket() : socket_(INVALID_SOCKET) {}
 
-UdpSocket::UdpSocket(const socket_type &s)
-    : socket_(s)
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
+UdpSocket::UdpSocket(const socket_type &s) : socket_(s) {}
 
 UdpSocket UdpSocket::create(FamilyType family, std::error_code &ec) {
 
@@ -93,61 +79,45 @@ void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
 }
 
 void UdpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-#ifdef _WIN32
-  read_timeout_ = timeout_ms;
-#endif // _WIN32
   sockets::setReadTimeout(socket_, timeout_ms, ec);
 }
 
 void UdpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
-#ifdef _WIN32
-  send_timeout_ = timeout_ms;
-#endif // _WIN32
   sockets::setWriteTimeout(socket_, timeout_ms, ec);
 }
 
 size_t UdpSocket::read_timeout(std::error_code &ec) const {
-#ifdef _WIN32
-  return read_timeout_;
-#else
   return sockets::readTimeout(socket_, ec);
-#endif // _WIN32
 }
 
 size_t UdpSocket::write_timeout(std::error_code &ec) const {
-#ifdef _WIN32
-  return send_timeout_;
-#else
   return sockets::writeTimeout(socket_, ec);
-#endif // _WIN32
 }
 
-std::pair<size_t, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
-                                                   std::error_code &ec) {
+std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
+                                                std::error_code &ec) {
 
-  std::pair<size_t, SocketAddr> re;
+  std::pair<int, SocketAddr> re;
   socklen_t len = (int)re.second.native_addr_size();
   int ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
     ec = getNetErrorCode();
-    return re;
   }
-  re.first = (size_t)ret;
+  re.first = ret;
   return re;
 }
 
-size_t UdpSocket::send_to(const char *buf, size_t buf_size,
-                          const SocketAddr &to, std::error_code &ec) {
+int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
+                       std::error_code &ec) {
 
   int rev =
       ::sendto(socket_, buf, (int)buf_size, 0,
                (const sockaddr *)to.native_addr(), (int)to.native_addr_size());
   if (rev < 0) {
     ec = getNetErrorCode();
-    return 0;
   }
-  return (size_t)rev;
+  return rev;
 }
 
 void UdpSocket::close(std::error_code &ec) {

@@ -58,7 +58,7 @@ TEST(IPCTest, MMSocket) {
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
-    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100d", message, i);
+    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     ret = client.send(msg_buff, strlen(msg_buff) + 1);
     // LOG_TRACE("client send msg size %d:%d", ret, strlen(msg_buff));
     EXPECT_TRUE(ret == strlen(msg_buff) + 1);

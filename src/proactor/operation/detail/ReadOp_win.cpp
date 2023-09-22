@@ -22,7 +22,7 @@ void ReadOp::async_read(void *proactor, native_handle fd, const char *buff,
   if (!::ReadFile(fd, (void *)buff, static_cast<DWORD>(size), &flag,
                   (LPWSAOVERLAPPED)this)) {
     std::error_code re_ec = getNetErrorCode();
-    if (re_ec.value() != ERROR_IO_PENDING) {
+    if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
       // assert(ec);

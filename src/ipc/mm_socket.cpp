@@ -60,7 +60,7 @@ ipc::SharedMemory create(const char *address, size_t mm_size, bool force) {
 void mm_client::connect_server(const char *address) {
   close();
   server_handle_ = open(address);
-  id_ = randNum();
+  id_ = (uint32_t)randNum();
 }
 
 mm_client::mm_client() : id_(0), is_server_(false) {}
@@ -138,7 +138,7 @@ int mm_client::send(const char *data, size_t data_size) {
   remain_size -= 1;
 
   // write data
-  size_t write_size = (std::min)((size_t)remain_size, data_size);
+  uint32_t write_size = (std::min)(remain_size, (int)data_size);
   int cover_edge = (write_address + write_size) / mm_size;
   int append_size = (write_address + write_size) % mm_size;
   if (cover_edge > 0) {
@@ -179,7 +179,7 @@ int mm_client::recv(char *data, size_t data_size) {
   }
 
   // read data
-  size_t read_size = (std::min)((size_t)remain_size, data_size);
+  uint32_t read_size = (std::min)(remain_size, (int)data_size);
   int cover_edge = (read_address + read_size) / mm_size;
   int append_size = (read_address + read_size) % mm_size;
   if (cover_edge > 0) {

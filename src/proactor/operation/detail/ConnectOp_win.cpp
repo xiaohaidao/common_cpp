@@ -57,7 +57,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
                    static_cast<int>(addr.native_addr_size()), nullptr, 0,
                    nullptr, (OVERLAPPED *)this)) {
     std::error_code re_ec = getNetErrorCode();
-    if (re_ec.value() != ERROR_IO_PENDING) {
+    if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
       // assert(ec);

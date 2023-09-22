@@ -23,21 +23,16 @@ public:
   size_t write_timeout(std::error_code &ec) const;
 
   // return read size
-  size_t read(char *buf, size_t buf_size, std::error_code &ec);
+  int read(char *buf, size_t buf_size, std::error_code &ec);
 
   // return write size
-  size_t write(const char *buf, size_t buf_size, std::error_code &ec);
+  int write(const char *buf, size_t buf_size, std::error_code &ec);
 
   socket_type native_handle() const;
 
 private:
   friend class TcpListener;
   socket_type socket_;
-
-#ifdef _WIN32
-  size_t read_timeout_;
-  size_t send_timeout_;
-#endif // _WIN32
 
 }; // class TcpStream
 

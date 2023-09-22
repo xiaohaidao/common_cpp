@@ -33,11 +33,6 @@ public:
 private:
   socket_type socket_;
 
-#ifdef _WIN32
-  size_t read_timeout_;
-  size_t send_timeout_;
-#endif // _WIN32
-
 }; // class TcpListener
 
 #endif // SOCKETS_TCPLISTENER_H

@@ -21,7 +21,7 @@ public:
   static Semaphores create(char *key, std::error_code &ec,
                            unsigned int number = 1) {
 
-    return create(key, ec, number);
+    return create((const char *)key, ec, number);
   }
 
   template <typename T>
@@ -32,7 +32,7 @@ public:
 
   static Semaphores open(const char *key, std::error_code &ec);
   static Semaphores open(char *key, std::error_code &ec) {
-    return open(key, ec);
+    return open((const char *)key, ec);
   }
 
   template <typename T> static Semaphores open(T &&key, std::error_code &ec) {

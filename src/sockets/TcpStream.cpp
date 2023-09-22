@@ -22,23 +22,9 @@
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
-TcpStream::TcpStream()
-    : socket_(INVALID_SOCKET)
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
+TcpStream::TcpStream() : socket_(INVALID_SOCKET) {}
 
-TcpStream::TcpStream(const socket_type &s)
-    : socket_(s)
-#ifdef _WIN32
-      ,
-      read_timeout_(0), send_timeout_(0)
-#endif // _WIN32
-{
-}
+TcpStream::TcpStream(const socket_type &s) : socket_(s) {}
 
 TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
   TcpStream re;
@@ -69,50 +55,33 @@ void TcpStream::connected(const SocketAddr &addr, std::error_code &ec) {
 }
 
 void TcpStream::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-#ifdef _WIN32
-  read_timeout_ = timeout_ms;
-#endif // _WIN32
   sockets::setReadTimeout(socket_, timeout_ms, ec);
 }
 
 void TcpStream::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
-#ifdef _WIN32
-  send_timeout_ = timeout_ms;
-#endif // _WIN32
   sockets::setWriteTimeout(socket_, timeout_ms, ec);
 }
 
 size_t TcpStream::read_timeout(std::error_code &ec) const {
-#ifdef _WIN32
-  return read_timeout_;
-#else
   return sockets::readTimeout(socket_, ec);
-#endif // _WIN32
 }
 
 size_t TcpStream::write_timeout(std::error_code &ec) const {
-#ifdef _WIN32
-  return send_timeout_;
-#else
   return sockets::writeTimeout(socket_, ec);
-#endif // _WIN32
 }
 
-size_t TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
+int TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
   int re_size = ::recv(socket_, buff, static_cast<int>(buff_size), 0);
   if (re_size < 0) {
     ec = getNetErrorCode();
-    return 0;
   }
   return re_size;
 }
 
-size_t TcpStream::write(const char *buff, size_t buff_size,
-                        std::error_code &ec) {
+int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
   int re_size = ::send(socket_, buff, static_cast<int>(buff_size), 0);
   if (re_size < 0) {
     ec = getNetErrorCode();
-    return 0;
   }
   return re_size;
 }

@@ -23,7 +23,7 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
                   static_cast<int>(to_.native_addr_size()),
                   (LPWSAOVERLAPPED)this, nullptr)) {
     std::error_code re_ec = getNetErrorCode();
-    if (re_ec.value() != ERROR_IO_PENDING) {
+    if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
       // assert(ec);

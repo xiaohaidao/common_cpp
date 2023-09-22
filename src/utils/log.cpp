@@ -103,7 +103,7 @@ void formatLog(const LogData &data, std::string &log) {
 
 void exportLog(const LogData &data, const std::string &log) {
   if (EXPORT_CALLBACK) {
-    EXPORT_CALLBACK(data.level, log.c_str(), log.size());
+    EXPORT_CALLBACK(data.level, log.c_str(), (int)log.size());
     return;
   }
   auto out_stream = data.level >= kError ? stderr : stdout;

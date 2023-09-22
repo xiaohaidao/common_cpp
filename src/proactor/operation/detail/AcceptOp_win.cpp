@@ -40,7 +40,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
   DWORD p = 0;
   if (!AcceptExPtr(s, client_, addresses_, 0, 0, 32, &p, (OVERLAPPED *)this)) {
     std::error_code re_ec = getNetErrorCode();
-    if (re_ec.value() != ERROR_IO_PENDING) {
+    if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
       // assert(ec);

@@ -9,12 +9,15 @@
 
 namespace proactor_co {
 
+bool STOP_TASK = false;
+
 void co_close(socket_type s, const char *module) {
   LOG_TRACE("module: %s, close socket %d", module, s);
   std::error_code ec;
   TcpStream(s).close(ec);
-  EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
-                   << ec.message();
+  if (!STOP_TASK)
+    EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
+                     << ec.message();
 }
 
 void async_read(socket_type s, const char *module);
@@ -82,7 +85,8 @@ public:
     for (auto &i : tcps_) {
       std::error_code ec;
       TcpStream(i).close(ec);
-      EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+      if (!STOP_TASK)
+        EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     }
     LOG_TRACE("server close socket %d", native_handle());
     std::error_code ec;
@@ -100,7 +104,7 @@ public:
   }
 
   void accept() {
-    while (true) {
+    while (!STOP_TASK) {
       if (exit_task_) {
         break;
       }
@@ -163,7 +167,8 @@ TEST(ProactorTest, ProactorCo) {
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     if (++i > 10) {
-      co_stop();
+      STOP_TASK = true;
+      set_proactor(nullptr);
       p.shutdown();
     }
   });

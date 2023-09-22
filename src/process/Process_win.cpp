@@ -84,12 +84,10 @@ int Process::wait(std::error_code &ec) {
   if (WaitForSingleObject(child_handle_, INFINITE) == WAIT_FAILED) {
     ec = getErrorCode();
   }
-  if (!ec) {
-    if (GetExitCodeProcess(child_handle_, (DWORD *)&status) == 0) {
-      ec = getErrorCode();
-    }
-    // STILL_ACTIVE == exit_code // Still running
+  if (GetExitCodeProcess(child_handle_, (DWORD *)&status) == 0) {
+    ec = getErrorCode();
   }
+  // STILL_ACTIVE == exit_code // Still running
   return status;
 }
 
