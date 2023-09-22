@@ -36,7 +36,6 @@ std::string transferName(const std::string &name) {
 }
 
 MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, MsgQueue());
   MsgQueue result;
   if ((result.msgid_ = mq_open(transferName(key).c_str(), O_RDWR)) == -1) {
     ec = getErrorCode();
@@ -47,7 +46,6 @@ MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
 }
 
 MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, MsgQueue());
   MsgQueue result;
   //  delete O_EXCL will create force
   if ((result.msgid_ =
@@ -61,7 +59,6 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
 }
 
 void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
-  CHECK_EC(ec, );
   constexpr int priority = 0; // the priority in [0-31], highest priority first
   if (mq_send(msgid_, data, size, priority) == -1) {
     ec = getErrorCode();
@@ -71,8 +68,6 @@ void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
 
 bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
                            std::error_code &ec) {
-
-  CHECK_EC(ec, false);
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
@@ -96,7 +91,6 @@ bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
 }
 
 size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
-  CHECK_EC(ec, 0);
   size_t size;
   if ((size = mq_receive(msgid_, data, data_size, nullptr)) == -1) {
     ec = getErrorCode();
@@ -107,7 +101,6 @@ size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
 
 size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
                              std::error_code &ec) {
-  CHECK_EC(ec, 0);
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
@@ -132,8 +125,6 @@ size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
 }
 
 void MsgQueue::close(std::error_code &ec) {
-  CHECK_EC(ec, );
-
   if (msgid_ <= 0) {
     return;
   }
@@ -145,7 +136,6 @@ void MsgQueue::close(std::error_code &ec) {
 }
 
 void MsgQueue::remove(std::error_code &ec) {
-  CHECK_EC(ec, );
   close(ec);
   CHECK_EC(ec, );
 

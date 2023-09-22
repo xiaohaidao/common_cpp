@@ -23,7 +23,6 @@
 namespace ipc {
 
 Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, Semaphores());
   Semaphores result;
   std::string key_g = std::string("Global\\") + key;
   HANDLE han = OpenSemaphore(SEMAPHORE_ALL_ACCESS, false, key_g.c_str());
@@ -36,7 +35,6 @@ Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
 }
 
 Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, Semaphores());
   Semaphores result;
   std::string key_g = std::string("Global\\") + key;
   HANDLE han = CreateSemaphore(nullptr, 1, 256, key_g.c_str());
@@ -50,7 +48,6 @@ Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
 }
 
 void Semaphores::wait(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (WaitForSingleObject(sem_, INFINITE) == WAIT_FAILED) {
     ec = getErrorCode();
   }
@@ -59,8 +56,6 @@ void Semaphores::wait(std::error_code &ec) {
 bool Semaphores::tryWait(std::error_code &ec) { return tryWaitFor(0, ec); }
 
 bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
-  CHECK_EC(ec, false);
-
   DWORD re = ::WaitForSingleObject(sem_, static_cast<DWORD>(timeout_ms));
   if (re == WAIT_FAILED) {
     ec = getErrorCode();
@@ -73,7 +68,6 @@ bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
 }
 
 void Semaphores::notifyOne(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (ReleaseSemaphore(sem_, 1, nullptr) == 0) {
     ec = getErrorCode();
     return;
@@ -81,7 +75,6 @@ void Semaphores::notifyOne(std::error_code &ec) {
 }
 
 void Semaphores::close(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (sem_ == nullptr) {
     return;
   }
@@ -93,11 +86,7 @@ void Semaphores::close(std::error_code &ec) {
   sem_ = nullptr;
 }
 
-void Semaphores::remove(std::error_code &ec) {
-  CHECK_EC(ec, );
-  close(ec);
-  CHECK_EC(ec, );
-}
+void Semaphores::remove(std::error_code &ec) { close(ec); }
 
 } // namespace ipc
 

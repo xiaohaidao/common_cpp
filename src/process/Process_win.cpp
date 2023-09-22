@@ -21,7 +21,6 @@ Process Process::call(const char *command,
   }
 
   Process sys;
-  CHECK_EC(ec, sys);
 
   STARTUPINFO si;
   PROCESS_INFORMATION pi;
@@ -60,7 +59,6 @@ Process Process::call(const char *command,
 
 Process Process::open(uint64_t pid, std::error_code &ec) {
   Process p;
-  CHECK_EC(ec, p);
   HANDLE han = OpenProcess(PROCESS_ALL_ACCESS, false, static_cast<DWORD>(pid));
   if (han == nullptr) {
     ec = getErrorCode();
@@ -71,8 +69,6 @@ Process Process::open(uint64_t pid, std::error_code &ec) {
 }
 
 bool Process::running(std::error_code &ec) {
-  CHECK_EC(ec, false);
-
   DWORD re = WaitForSingleObject(child_handle_, 0);
   if (re == WAIT_FAILED) {
     ec = getErrorCode();
@@ -83,16 +79,21 @@ bool Process::running(std::error_code &ec) {
   return true;
 }
 
-void Process::wait(std::error_code &ec) {
-  CHECK_EC(ec, );
-
+int Process::wait(std::error_code &ec) {
+  int status = -1;
   if (WaitForSingleObject(child_handle_, INFINITE) == WAIT_FAILED) {
     ec = getErrorCode();
   }
+  if (!ec) {
+    if (GetExitCodeProcess(child_handle_, (DWORD *)&status) == 0) {
+      ec = getErrorCode();
+    }
+    // STILL_ACTIVE == exit_code // Still running
+  }
+  return status;
 }
 
 void Process::terminate(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (!TerminateProcess(child_handle_, -1)) {
     ec = getErrorCode();
   }

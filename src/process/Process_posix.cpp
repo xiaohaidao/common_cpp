@@ -37,7 +37,6 @@ Process Process::call(const char *command,
   arg.push_back(nullptr);
 
   Process sys;
-  CHECK_EC(ec, sys);
 
   posix_spawn_file_actions_t file_actions = {};
   posix_spawn_file_actions_init(&file_actions);
@@ -74,14 +73,11 @@ Process Process::call(const char *command,
 
 Process Process::open(uint64_t pid, std::error_code &ec) {
   Process p;
-  CHECK_EC(ec, p);
   p.child_handle_ = pid;
   return p;
 }
 
 bool Process::running(std::error_code &ec) {
-  CHECK_EC(ec, false);
-
   int status = -1;
   if (::waitpid(child_handle_, &status, WNOHANG) == -1) {
     int e = errno;
@@ -99,9 +95,7 @@ bool Process::running(std::error_code &ec) {
   return true;
 }
 
-void Process::wait(std::error_code &ec) {
-  CHECK_EC(ec, );
-
+int Process::wait(std::error_code &ec) {
   int status = -1;
   if (::waitpid(child_handle_, &status, 0) == -1) {
     int e = errno;
@@ -109,10 +103,10 @@ void Process::wait(std::error_code &ec) {
       ec = {e, std::system_category()};
     }
   }
+  return WEXITSTATUS(status);
 }
 
 void Process::terminate(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (::kill(child_handle_, SIGKILL) == -1) {
     ec = getErrorCode();
   }

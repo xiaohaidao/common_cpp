@@ -31,7 +31,7 @@ public:
   bool running(std::error_code &ec);
 
   // just wait child process
-  void wait(std::error_code &ec);
+  int wait(std::error_code &ec);
   // bool waitFor(size_t timeout_ms, std::error_code &ec);
 
   void terminate(std::error_code &ec);

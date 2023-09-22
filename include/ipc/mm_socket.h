@@ -12,6 +12,7 @@ class mm_client {
 public:
   mm_client();
 
+  // @return < 0 is error, == 0 is success, otherwise is RETRY
   int connect(const char *address);
 
   void close();
@@ -34,8 +35,10 @@ private:
 
 class mm_socket {
 public:
-  int bind(const char *address);
+  // @return < 0 is error, == 0 is success
+  int bind(const char *address, bool force = false);
 
+  // @return < 0 is error, == 0 is success, otherwise is RETRY
   int accept(mm_client &client);
 
   void close();

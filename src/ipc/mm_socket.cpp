@@ -9,7 +9,7 @@
 namespace {
 
 constexpr char SERVER_PREFIX[] = "MMSOCKET";
-constexpr size_t CLIENT_SIZE = 1024 * 4096; // 4M
+constexpr size_t CLIENT_SIZE = 512 * 4096; // 2M
 
 struct Protocal {
   uint32_t id;
@@ -41,11 +41,18 @@ ipc::SharedMemory open(const char *address) {
   return ipc::SharedMemory::open(pre_address, ec);
 }
 
-ipc::SharedMemory create(const char *address, size_t mm_size) {
+ipc::SharedMemory create(const char *address, size_t mm_size, bool force) {
   char pre_address[256] = {};
   snprintf(pre_address, sizeof(pre_address), "%s_%s", SERVER_PREFIX, address);
   std::error_code ec;
-  return ipc::SharedMemory::create(pre_address, mm_size, ec);
+  ipc::SharedMemory re = ipc::SharedMemory::create(pre_address, mm_size, ec);
+  if (force && ec) {
+    ipc::SharedMemory exist = open(address);
+    exist.close(ec);
+    exist.remove(ec);
+    re = ipc::SharedMemory::create(pre_address, mm_size, ec);
+  }
+  return re;
 }
 
 } // namespace
@@ -194,13 +201,13 @@ void mm_socket::init_protocal(void *p) {
   pro->status = 0;
 }
 
-int mm_socket::bind(const char *address) {
+int mm_socket::bind(const char *address, bool force) {
   std::error_code ec;
   if (bind_handle_.memory()) {
     bind_handle_.close(ec);
     ec.clear();
   }
-  bind_handle_ = create(address, 128);
+  bind_handle_ = create(address, 128, force);
   bind_name_ = address;
   if (ec) {
     // fprintf(stderr, "create mm error %s\n", ec.message().c_str());

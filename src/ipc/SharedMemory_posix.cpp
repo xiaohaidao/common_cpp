@@ -28,7 +28,6 @@ namespace ipc {
 SharedMemory::~SharedMemory() {}
 
 SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, SharedMemory());
   SharedMemory result;
   if ((result.shmid_ = shm_open(key.c_str(), O_RDWR, 0)) == -1) {
     ec = getErrorCode();
@@ -49,7 +48,6 @@ SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
 
 SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
                                   std::error_code &ec) {
-  CHECK_EC(ec, SharedMemory());
   SharedMemory result;
   //  delete O_EXCL will create force
   if ((result.shmid_ = shm_open(key.c_str(), O_CREAT | O_EXCL | O_RDWR,
@@ -71,7 +69,6 @@ SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
 }
 
 void SharedMemory::deatch(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (memory_ == nullptr) {
     return;
   }
@@ -85,7 +82,6 @@ void SharedMemory::deatch(std::error_code &ec) {
 }
 
 void SharedMemory::attach(std::error_code &ec) {
-  CHECK_EC(ec, );
   if ((memory_ = mmap(nullptr, size_, PROT_READ | PROT_WRITE, MAP_SHARED,
                       shmid_, 0)) == MAP_FAILED) {
     ec = getErrorCode();
@@ -95,7 +91,6 @@ void SharedMemory::attach(std::error_code &ec) {
 }
 
 void SharedMemory::close(std::error_code &ec) {
-  CHECK_EC(ec, );
   deatch(ec);
   CHECK_EC(ec, );
   if (shmid_ <= 0) {
@@ -109,7 +104,6 @@ void SharedMemory::close(std::error_code &ec) {
 }
 
 void SharedMemory::remove(std::error_code &ec) {
-  CHECK_EC(ec, );
   close(ec);
   CHECK_EC(ec, );
   if (shm_unlink(key_.c_str()) == -1) {

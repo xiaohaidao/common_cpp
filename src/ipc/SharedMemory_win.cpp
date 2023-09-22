@@ -28,7 +28,6 @@ SharedMemory::~SharedMemory() {
 }
 
 SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
-  CHECK_EC(ec, SharedMemory());
   SharedMemory result;
 
   std::string key_g = std::string("Global\\") + key;
@@ -47,7 +46,6 @@ SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
 
 SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
                                   std::error_code &ec) {
-  CHECK_EC(ec, SharedMemory());
 
   std::string key_g = std::string("Global\\") + key;
   HANDLE map_file = CreateFileMapping(
@@ -73,7 +71,6 @@ SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
 }
 
 void SharedMemory::deatch(std::error_code &ec) {
-  CHECK_EC(ec, );
   if (memory_ == nullptr) {
     return;
   }
@@ -87,8 +84,6 @@ void SharedMemory::deatch(std::error_code &ec) {
 }
 
 void SharedMemory::attach(std::error_code &ec) {
-  CHECK_EC(ec, );
-
   if ((memory_ = MapViewOfFile(shmid_,              // handle to map object
                                FILE_MAP_ALL_ACCESS, // read/write permission
                                0, 0, size_)) == nullptr) {
@@ -108,7 +103,6 @@ void SharedMemory::attach(std::error_code &ec) {
 }
 
 void SharedMemory::close(std::error_code &ec) {
-  CHECK_EC(ec, );
   deatch(ec);
   CHECK_EC(ec, );
   if (shmid_ == nullptr) {
