@@ -15,26 +15,28 @@ public:
   ~Semaphores();
 
   // the initial number is 1
-  static Semaphores create(const std::string &key, std::error_code &ec);
+  static Semaphores create(const char *key, std::error_code &ec,
+                           unsigned int number = 1);
 
-  static Semaphores create(const char *key, std::error_code &ec) {
-    return create(std::string(key), ec);
+  static Semaphores create(char *key, std::error_code &ec,
+                           unsigned int number = 1) {
+
+    return create(key, ec, number);
   }
 
   template <typename T>
-  static Semaphores create(const T &key, std::error_code &ec) {
-    return create(std::to_string(key), ec);
+  static Semaphores create(T &&key, std::error_code &ec,
+                           unsigned int number = 1) {
+    return create(std::to_string(std::forward<T>(key)).c_str(), ec, number);
   }
 
-  static Semaphores open(const std::string &key, std::error_code &ec);
-
-  static Semaphores open(const char *key, std::error_code &ec) {
-    return open(std::string(key), ec);
+  static Semaphores open(const char *key, std::error_code &ec);
+  static Semaphores open(char *key, std::error_code &ec) {
+    return open(key, ec);
   }
 
-  template <typename T>
-  static Semaphores open(const T &key, std::error_code &ec) {
-    return open(std::to_string(key), ec);
+  template <typename T> static Semaphores open(T &&key, std::error_code &ec) {
+    return open(std::to_string(std::forward<T>(key)).c_str(), ec);
   }
 
   void wait(std::error_code &ec);

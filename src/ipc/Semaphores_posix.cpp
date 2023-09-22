@@ -24,9 +24,16 @@
 
 namespace ipc {
 
-Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
+Semaphores::Semaphores() : sem_(nullptr) {}
+
+Semaphores::~Semaphores() {
+  std::error_code ec;
+  close(ec);
+}
+
+Semaphores Semaphores::open(const char *key, std::error_code &ec) {
   Semaphores result;
-  if ((result.sem_ = sem_open(key.c_str(), O_RDWR, 0, 0)) == SEM_FAILED) {
+  if ((result.sem_ = sem_open(key, O_RDWR, 0, 0)) == SEM_FAILED) {
     ec = getErrorCode();
     return result;
   }
@@ -34,11 +41,12 @@ Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
+Semaphores Semaphores::create(const char *key, std::error_code &ec,
+                              unsigned int number) {
   Semaphores result;
   //  delete O_EXCL will create force
-  if ((result.sem_ = sem_open(key.c_str(), O_RDWR | O_CREAT | O_EXCL,
-                              DEFFILEMODE, 1)) == SEM_FAILED) {
+  if ((result.sem_ = sem_open(key, O_RDWR | O_CREAT | O_EXCL, DEFFILEMODE,
+                              number)) == SEM_FAILED) {
     ec = getErrorCode();
     return result;
   }

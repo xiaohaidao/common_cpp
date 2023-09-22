@@ -9,7 +9,6 @@ add_library(${library_name}
     Pipe_win.cpp
     Semaphores_posix.cpp
     Semaphores_win.cpp
-    Semaphores.cpp
     SharedMemory_posix.cpp
     SharedMemory_win.cpp
     SharedMemory.cpp

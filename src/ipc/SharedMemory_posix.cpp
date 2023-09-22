@@ -27,9 +27,9 @@ namespace ipc {
 
 SharedMemory::~SharedMemory() {}
 
-SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
+SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   SharedMemory result;
-  if ((result.shmid_ = shm_open(key.c_str(), O_RDWR, 0)) == -1) {
+  if ((result.shmid_ = shm_open(key, O_RDWR, 0)) == -1) {
     ec = getErrorCode();
     return result;
   }
@@ -46,12 +46,13 @@ SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
+SharedMemory SharedMemory::create(const char *key, size_t mem_size,
                                   std::error_code &ec) {
   SharedMemory result;
   //  delete O_EXCL will create force
-  if ((result.shmid_ = shm_open(key.c_str(), O_CREAT | O_EXCL | O_RDWR,
-                                DEFFILEMODE)) == -1) {
+  if ((result.shmid_ = shm_open(key, O_CREAT | O_EXCL | O_RDWR, DEFFILEMODE)) ==
+      -1) {
+
     ec = getErrorCode();
     return result;
   }

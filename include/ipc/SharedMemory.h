@@ -14,37 +14,25 @@ public:
   SharedMemory();
   ~SharedMemory();
 
-  static SharedMemory create(const std::string &key, size_t mem_size,
+  static SharedMemory create(const char *key, size_t mem_size,
                              std::error_code &ec);
 
-  static SharedMemory create(const char *key, size_t mem_size,
-                             std::error_code &ec) {
-    return create(std::string(key), mem_size, ec);
-  }
-
   static SharedMemory create(char *key, size_t mem_size, std::error_code &ec) {
-    return create(std::string(key), mem_size, ec);
+    return create(key, mem_size, ec);
   }
 
   template <typename T>
-  static SharedMemory create(const T &key, size_t mem_size,
-                             std::error_code &ec) {
-    return create(std::to_string(key), mem_size, ec);
+  static SharedMemory create(T &&key, size_t mem_size, std::error_code &ec) {
+    return create(std::to_string(std::forward<T>(key)).c_str(), mem_size, ec);
   }
 
-  static SharedMemory open(const std::string &key, std::error_code &ec);
-
-  static SharedMemory open(const char *key, std::error_code &ec) {
-    return open(std::string(key), ec);
-  }
-
+  static SharedMemory open(const char *key, std::error_code &ec);
   static SharedMemory open(char *key, std::error_code &ec) {
-    return open(std::string(key), ec);
+    return open(key, ec);
   }
 
-  template <typename T>
-  static SharedMemory open(const T &key, std::error_code &ec) {
-    return open(std::to_string(key), ec);
+  template <typename T> static SharedMemory open(T &&key, std::error_code &ec) {
+    return open(std::to_string(std::forward<T>(key)).c_str(), ec);
   }
 
   void *memory() const;

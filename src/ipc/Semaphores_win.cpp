@@ -22,7 +22,11 @@
 
 namespace ipc {
 
-Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
+Semaphores::Semaphores() : sem_(nullptr) {}
+
+Semaphores::~Semaphores() {}
+
+Semaphores Semaphores::open(const char *key, std::error_code &ec) {
   Semaphores result;
   std::string key_g = std::string("Global\\") + key;
   HANDLE han = OpenSemaphore(SEMAPHORE_ALL_ACCESS, false, key_g.c_str());
@@ -34,10 +38,11 @@ Semaphores Semaphores::open(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-Semaphores Semaphores::create(const std::string &key, std::error_code &ec) {
+Semaphores Semaphores::create(const char *key, std::error_code &ec,
+                              unsigned int number) {
   Semaphores result;
   std::string key_g = std::string("Global\\") + key;
-  HANDLE han = CreateSemaphore(nullptr, 1, 256, key_g.c_str());
+  HANDLE han = CreateSemaphore(nullptr, number, 256, key_g.c_str());
   std::error_code er_code = getErrorCode();
   if (han == nullptr || er_code.value() == ERROR_ALREADY_EXISTS) {
     ec = er_code;

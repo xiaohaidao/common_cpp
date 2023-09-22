@@ -27,7 +27,7 @@ SharedMemory::~SharedMemory() {
   // close(ec);
 }
 
-SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
+SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   SharedMemory result;
 
   std::string key_g = std::string("Global\\") + key;
@@ -44,7 +44,7 @@ SharedMemory SharedMemory::open(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-SharedMemory SharedMemory::create(const std::string &key, size_t mem_size,
+SharedMemory SharedMemory::create(const char *key, size_t mem_size,
                                   std::error_code &ec) {
 
   std::string key_g = std::string("Global\\") + key;
