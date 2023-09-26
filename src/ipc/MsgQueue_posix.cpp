@@ -137,7 +137,6 @@ void MsgQueue::close(std::error_code &ec) {
 
 void MsgQueue::remove(std::error_code &ec) {
   close(ec);
-  CHECK_EC(ec, );
 
   if (mq_unlink(key_.c_str()) == -1) {
     ec = getErrorCode();

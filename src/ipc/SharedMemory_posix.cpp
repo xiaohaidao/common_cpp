@@ -93,7 +93,6 @@ void SharedMemory::attach(std::error_code &ec) {
 
 void SharedMemory::close(std::error_code &ec) {
   deatch(ec);
-  CHECK_EC(ec, );
   if (shmid_ <= 0) {
     return;
   }
@@ -106,7 +105,6 @@ void SharedMemory::close(std::error_code &ec) {
 
 void SharedMemory::remove(std::error_code &ec) {
   close(ec);
-  CHECK_EC(ec, );
   if (shm_unlink(key_.c_str()) == -1) {
     ec = getErrorCode();
     return;

@@ -104,7 +104,6 @@ void SharedMemory::attach(std::error_code &ec) {
 
 void SharedMemory::close(std::error_code &ec) {
   deatch(ec);
-  CHECK_EC(ec, );
   if (shmid_ == nullptr) {
     return;
   }
