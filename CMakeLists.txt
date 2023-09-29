@@ -6,7 +6,7 @@ project("common_cpp"
 )
 
 # import common configure
-include(cmake/common.cmake)
+include(cmake/common_cmake.cmake)
 
 # import configure
 include(clang_format)
@@ -18,7 +18,7 @@ add_subdirectory(src)
 
 option(BUILD_TESTING "Build test" OFF)
 include(CTest)
-if(BUILD_TESTING)
+if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
     include(googletest)
 
     ADD_SUBDIRECTORY(tests)
