@@ -46,7 +46,7 @@ socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
   TcpStreamOp op(PROACTOR);
   std::error_code r_ec;
   bool ready = false;
-  size_t recv_size;
+  size_t recv_size = 0;
   op.async_connect(
       addr,
       [&ec, &ready, &recv_size](const std::error_code &re_ec, size_t size) {
@@ -76,7 +76,7 @@ int co_tcp_read(socket_type s, char *data, size_t data_size,
   TcpStreamOp op(PROACTOR, s);
   std::error_code r_ec;
   bool ready = false;
-  size_t recv_size;
+  size_t recv_size = 0;
   op.async_read(
       data, data_size,
       [&ec, &ready, &recv_size](const std::error_code &re_ec, size_t size) {
@@ -120,7 +120,7 @@ int co_udp_readfrom(socket_type s, SocketAddr &from, char *data,
   UdpSocketOp op(*PROACTOR, s);
   std::error_code r_ec;
   bool ready = false;
-  size_t recv_size;
+  size_t recv_size = 0;
   op.async_read(data, data_size,
                 [&from, &ec, &ready, &recv_size](const std::error_code &re_ec,
                                                  size_t size,

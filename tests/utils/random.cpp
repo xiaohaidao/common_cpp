@@ -5,34 +5,34 @@
 
 TEST(RandomTest, randomScopeTest) {
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(899, 1099);
+    auto v = rand_scope(899, 1099);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 1099);
   }
 
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(1099, 899);
+    auto v = rand_scope(1099, 899);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 1099);
   }
 
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(899, 899);
+    auto v = rand_scope(899, 899);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 899);
   }
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(899, 900);
+    auto v = rand_scope(899, 900);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 900);
   }
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(899, 901);
+    auto v = rand_scope(899, 901);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 901);
   }
   for (size_t i = 0; i < 100; ++i) {
-    auto v = randScope(899, 902);
+    auto v = rand_scope(899, 902);
     EXPECT_TRUE(v >= 899);
     EXPECT_TRUE(v <= 902);
   }
@@ -41,12 +41,12 @@ TEST(RandomTest, randomScopeTest) {
 TEST(RandomTest, randomNumTest) {
   std::set<uint64_t> exist;
   for (size_t i = 0; i < 1000; ++i) {
-    auto v = randNum();
+    auto v = rand_num();
     EXPECT_TRUE(exist.find(v) == exist.end());
     exist.insert(v);
   }
 
-  fixSeed(); // fix seed 15011051792192176828u
+  fix_seed(); // fix seed 15011051792192176828u
   size_t mem[] = {
       3768849550270110920u,  3768849550270122440u,  5288703135886362264u,
       5003422398985123289u,  4543665650187777649u,  4382799437429908962u,
@@ -56,6 +56,6 @@ TEST(RandomTest, randomNumTest) {
       3618716850736863959u,  15043758070891452689u, 13653306181875854466u,
       582806529032327977u,   5780455872252895938u};
   for (size_t i = 0; i < 20; ++i) {
-    EXPECT_TRUE(mem[i] == randNum());
+    EXPECT_TRUE(mem[i] == rand_num());
   }
 }

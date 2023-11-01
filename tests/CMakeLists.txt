@@ -3,7 +3,7 @@ include(StringVersion)
 
 set(test_name "cpp_common_test")
 add_executable(${test_name}
-    main.cpp
+    # main.cpp
     algorithm/interrupt_thread_test1.cpp
     algorithm/lock_free_queue_test1.cpp
     algorithm/lock_free_stack_test1.cpp
@@ -54,7 +54,7 @@ if(MSVC)
 endif()
 
 target_link_libraries(${test_name} PRIVATE
-    gtest_main
+    GTest::gtest_main
     ipc
     proactor
     process

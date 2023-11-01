@@ -12,14 +12,17 @@ include(cmake/common_cmake.cmake)
 include(clang_format)
 include(clang_tidy)
 include(CPackSourceConfig)
+include(doxygen)
+
+#import dependencies
+include(dependencies)
 
 add_subdirectory(src)
-# add_subdirectory(example)
 
 option(BUILD_TESTING "Build test" OFF)
 include(CTest)
 if(BUILD_TESTING AND PROJECT_IS_TOP_LEVEL)
-    include(googletest)
+    include(dependencies_dev)
 
     ADD_SUBDIRECTORY(tests)
 endif()

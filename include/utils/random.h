@@ -8,9 +8,9 @@
 extern "C" {
 #endif
 
-void fixSeed();
-uint64_t randNum();
-uint64_t randScope(uint64_t min, uint64_t max);
+void fix_seed();
+uint64_t rand_num();
+uint64_t rand_scope(uint64_t min, uint64_t max);
 
 #ifdef __cplusplus
 }

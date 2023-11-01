@@ -60,7 +60,7 @@ ipc::SharedMemory create(const char *address, size_t mm_size, bool force) {
 void mm_client::connect_server(const char *address) {
   close();
   server_handle_ = open(address);
-  id_ = (uint32_t)randNum();
+  id_ = (uint32_t)rand_num();
 }
 
 mm_client::mm_client() : id_(0), is_server_(false) {}

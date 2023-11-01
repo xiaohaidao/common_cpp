@@ -68,7 +68,7 @@ void UdpSocketOp::async_write(const char *buff, size_t buff_size,
 }
 
 void UdpSocketOp::create(FamilyType family, std::error_code &ec) {
-  if (socket_ <= 0) {
+  if (socket_ > 0) {
     std::error_code t_ec;
     close(t_ec);
   }
@@ -92,7 +92,7 @@ void UdpSocketOp::bind(const char *port_or_service, std::error_code &ec) {
 
 void UdpSocketOp::bind(const char *port_or_service, FamilyType family,
                        std::error_code &ec) {
-  if (socket_ <= 0) {
+  if (socket_ > 0) {
     std::error_code t_ec;
     close(t_ec);
   }
@@ -108,60 +108,6 @@ void UdpSocketOp::bind(const char *port_or_service, FamilyType family,
                ec); // register to io proactor
   }
 #endif
-}
-
-void UdpSocketOp::joint_multicast(const SocketAddr &multicast,
-                                  std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.joint_multicast(multicast, ec);
-}
-
-void UdpSocketOp::leave_multicast(const SocketAddr &multicast,
-                                  std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.leave_multicast(multicast, ec);
-}
-
-void UdpSocketOp::set_multicast_loop(bool enable, std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.set_multicast_loop(enable, ec);
-}
-
-bool UdpSocketOp::multicast_loop(std::error_code &ec) {
-  UdpSocket udp(socket_);
-  return udp.multicast_loop(ec);
-}
-
-void UdpSocketOp::set_multicast_ttl(int ttl, std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.set_multicast_ttl(ttl, ec);
-}
-
-int UdpSocketOp::multicast_ttl(std::error_code &ec) {
-  UdpSocket udp(socket_);
-  return udp.multicast_ttl(ec);
-}
-
-void UdpSocketOp::joint_multicast_v6(const SocketAddr &multicast,
-                                     std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.joint_multicast_v6(multicast, ec);
-}
-
-void UdpSocketOp::leave_multicast_v6(const SocketAddr &multicast,
-                                     std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.leave_multicast_v6(multicast, ec);
-}
-
-void UdpSocketOp::set_multicast_loop_v6(bool enable, std::error_code &ec) {
-  UdpSocket udp(socket_);
-  udp.set_multicast_loop_v6(enable, ec);
-}
-
-bool UdpSocketOp::multicast_loop_v6(std::error_code &ec) {
-  UdpSocket udp(socket_);
-  return udp.multicast_loop_v6(ec);
 }
 
 void UdpSocketOp::close(std::error_code &ec) {

@@ -1,6 +1,14 @@
 // Copyright (C) 2022 All rights reserved.
 // Email: oxox0@qq.com. Created in 202207
 
+// windows
+// netsh interface ipv4 show joins
+// netsh interface ipv4 show interfaces
+// netsh interface ipv4 set interface 1 forwarding=enabled
+// linux
+// ip link set dev eth0 multicast on
+// netstat -g
+
 #include "sockets/UdpSocket.h"
 
 #ifdef _WIN32
@@ -43,6 +51,13 @@ UdpSocket UdpSocket::bind(const char *port_or_service, std::error_code &ec) {
 
 UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
                           std::error_code &ec) {
+  SocketAddr addr =
+      SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+
+  if (ec) {
+    return UdpSocket();
+  }
+
   UdpSocket re;
   socket_type s = sockets::socket(family, kDgram, kUDP, ec);
   if (ec) {
@@ -50,13 +65,6 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
   }
   re.socket_ = s;
   sockets::setReuseAddr(s, ec);
-  if (ec) {
-    ::closesocket(s);
-    return re;
-  }
-
-  SocketAddr addr =
-      SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
   if (ec) {
     ::closesocket(s);
     return re;
@@ -150,13 +158,12 @@ bool UdpSocket::broadcast(std::error_code &ec) {
 }
 
 void UdpSocket::joint_multicast(const SocketAddr &multicast,
-                                std::error_code &ec) {
+                                const SocketAddr &iface, std::error_code &ec) {
 
   struct ip_mreq mreq = {};
   mreq.imr_multiaddr =
       ((struct sockaddr_in *)multicast.native_addr())->sin_addr;
-  // mreq.imr_interface =
-  //     ((struct sockaddr_in *)interface.native_addr())->sin_addr;
+  mreq.imr_interface = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
   if (::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
     ec = getNetErrorCode();
@@ -164,11 +171,23 @@ void UdpSocket::joint_multicast(const SocketAddr &multicast,
 }
 
 void UdpSocket::leave_multicast(const SocketAddr &multicast,
-                                std::error_code &ec) {
+                                const SocketAddr &iface, std::error_code &ec) {
   struct ip_mreq mreq = {};
   mreq.imr_multiaddr =
       ((struct sockaddr_in *)multicast.native_addr())->sin_addr;
+  mreq.imr_interface = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
   if (::setsockopt(socket_, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mreq,
+                   sizeof(mreq)) < 0) {
+    ec = getNetErrorCode();
+  }
+}
+
+void UdpSocket::set_multicast_interface(const SocketAddr &iface,
+                                        std::error_code &ec) {
+
+  // struct ip_mreq mreq = {};
+  in_addr mreq = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
+  if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_IF, (char *)&mreq,
                    sizeof(mreq)) < 0) {
     ec = getNetErrorCode();
   }
@@ -210,11 +229,13 @@ int UdpSocket::multicast_ttl(std::error_code &ec) {
 }
 
 void UdpSocket::joint_multicast_v6(const SocketAddr &multicast,
+                                   unsigned int interface_index,
                                    std::error_code &ec) {
 
   struct ipv6_mreq mreq = {};
   mreq.ipv6mr_multiaddr =
       ((struct sockaddr_in6 *)multicast.native_addr())->sin6_addr;
+  mreq.ipv6mr_interface = interface_index;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
     ec = getNetErrorCode();
@@ -222,12 +243,23 @@ void UdpSocket::joint_multicast_v6(const SocketAddr &multicast,
 }
 
 void UdpSocket::leave_multicast_v6(const SocketAddr &multicast,
+                                   unsigned int interface_index,
                                    std::error_code &ec) {
   struct ipv6_mreq mreq = {};
   mreq.ipv6mr_multiaddr =
       ((struct sockaddr_in6 *)multicast.native_addr())->sin6_addr;
+  mreq.ipv6mr_interface = interface_index;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
+    ec = getNetErrorCode();
+  }
+}
+
+void UdpSocket::set_multicast_interface_v6(unsigned int interface_index,
+                                           std::error_code &ec) {
+
+  if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+                   (char *)&interface_index, sizeof(interface_index)) < 0) {
     ec = getNetErrorCode();
   }
 }

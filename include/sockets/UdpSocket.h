@@ -37,15 +37,23 @@ public:
   void set_broadcast(bool enable, std::error_code &ec);
   bool broadcast(std::error_code &ec);
 
-  void joint_multicast(const SocketAddr &multicast, std::error_code &ec);
-  void leave_multicast(const SocketAddr &multicast, std::error_code &ec);
+  void joint_multicast(const SocketAddr &multicast, const SocketAddr &iface,
+                       std::error_code &ec);
+  void leave_multicast(const SocketAddr &multicast, const SocketAddr &iface,
+                       std::error_code &ec);
+  void set_multicast_interface(const SocketAddr &multicast,
+                               std::error_code &ec);
   void set_multicast_loop(bool enable, std::error_code &ec);
   bool multicast_loop(std::error_code &ec);
   void set_multicast_ttl(int ttl, std::error_code &ec);
   int multicast_ttl(std::error_code &ec);
 
-  void joint_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
-  void leave_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
+  void joint_multicast_v6(const SocketAddr &multicast,
+                          unsigned int interface_index, std::error_code &ec);
+  void leave_multicast_v6(const SocketAddr &multicast,
+                          unsigned int interface_index, std::error_code &ec);
+  void set_multicast_interface_v6(unsigned int interface_index,
+                                  std::error_code &ec);
   void set_multicast_loop_v6(bool enable, std::error_code &ec);
   bool multicast_loop_v6(std::error_code &ec);
 

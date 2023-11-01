@@ -140,14 +140,14 @@ xoshiro256ss g_xorshfit;
 
 } // namespace
 
-void fixSeed() { g_xorshfit.setFixSeed(true); }
+void fix_seed() { g_xorshfit.setFixSeed(true); }
 
-uint64_t randNum() { return g_xorshfit(); }
+uint64_t rand_num() { return g_xorshfit(); }
 
-uint64_t randScope(uint64_t min_v, uint64_t max_v) {
+uint64_t rand_scope(uint64_t min_v, uint64_t max_v) {
   uint64_t diff = std::max(min_v, max_v) - std::min(min_v, max_v);
   if (diff == 0) {
     return max_v;
   }
-  return randNum() % diff + std::min(min_v, max_v);
+  return rand_num() % diff + std::min(min_v, max_v);
 }

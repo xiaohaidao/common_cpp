@@ -32,19 +32,6 @@ public: //! socket op
 
   void close(std::error_code &ec);
 
-public: //! multicast
-  void joint_multicast(const SocketAddr &multicast, std::error_code &ec);
-  void leave_multicast(const SocketAddr &multicast, std::error_code &ec);
-  void set_multicast_loop(bool enable, std::error_code &ec);
-  bool multicast_loop(std::error_code &ec);
-  void set_multicast_ttl(int ttl, std::error_code &ec);
-  int multicast_ttl(std::error_code &ec);
-
-  void joint_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
-  void leave_multicast_v6(const SocketAddr &multicast, std::error_code &ec);
-  void set_multicast_loop_v6(bool enable, std::error_code &ec);
-  bool multicast_loop_v6(std::error_code &ec);
-
 public:
   void async_read(char *buff, size_t buff_size, func_recv_type f,
                   std::error_code &ec);
