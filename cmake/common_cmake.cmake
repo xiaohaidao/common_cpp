@@ -9,6 +9,10 @@ else()
 endif()
 message("GITHUB_URL_PREFIX: ${GITHUB_URL_PREFIX}, ENABLE_URL_PREFIX: ${ENABLE_URL_PREFIX}")
 
+# set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/.third_party/)
+# set(FETCHCONTENT_SOURCE_DIR_COMMON_CMAKE ${CMAKE_SOURCE_DIR}/.third_party/common_cmake-src)
+set(FETCHCONTENT_QUIET OFF)
+
 include(FetchContent)
 FetchContent_Declare(
     common_cmake
@@ -17,7 +21,6 @@ FetchContent_Declare(
     GIT_SHALLOW ON
     GIT_PROGRESS ON
 )
-set(FETCHCONTENT_QUIET OFF)
 FetchContent_MakeAvailable(common_cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")

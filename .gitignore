@@ -2,3 +2,4 @@ build*
 *.swp
 .vs*
 StringVersion.h
+*third_party
