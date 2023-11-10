@@ -1,17 +1,19 @@
 
-option(ENABLE_URL_PREFIX "enable url prefix" OFF)
-if(ENABLE_URL_PREFIX)
-    if(NOT GITHUB_URL_PREFIX)
-        set(GITHUB_URL_PREFIX https://gh.api.99988866.xyz/) # https://gh.api.99988866.xyz  https://ghproxy.com/ https://toolwa.com/github/
+if(PROJECT_IS_TOP_LEVEL)
+    option(ENABLE_URL_PREFIX "enable url prefix" OFF)
+    if(ENABLE_URL_PREFIX)
+        if(NOT GITHUB_URL_PREFIX)
+            set(GITHUB_URL_PREFIX https://gh.api.99988866.xyz/) # https://gh.api.99988866.xyz  https://ghproxy.com/ https://toolwa.com/github/
+        endif()
+    else()
+        set(GITHUB_URL_PREFIX "")
     endif()
-else()
-    set(GITHUB_URL_PREFIX "")
-endif()
-message("GITHUB_URL_PREFIX: ${GITHUB_URL_PREFIX}, ENABLE_URL_PREFIX: ${ENABLE_URL_PREFIX}")
+    message("GITHUB_URL_PREFIX: ${GITHUB_URL_PREFIX}, ENABLE_URL_PREFIX: ${ENABLE_URL_PREFIX}")
 
-# set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/.third_party/)
-# set(FETCHCONTENT_SOURCE_DIR_COMMON_CMAKE ${CMAKE_SOURCE_DIR}/.third_party/common_cmake-src)
-set(FETCHCONTENT_QUIET OFF)
+    # set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/.third_party/)
+    # set(FETCHCONTENT_SOURCE_DIR_COMMON_CMAKE ${CMAKE_SOURCE_DIR}/.third_party/common_cmake-src)
+    set(FETCHCONTENT_QUIET OFF)
+endif()
 
 include(FetchContent)
 FetchContent_Declare(
