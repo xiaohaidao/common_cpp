@@ -1,4 +1,12 @@
 
+if(CMAKE_VERSION VERSION_LESS 3.21)
+    get_directory_property(hasParent PARENT_DIRECTORY)
+    if(NOT hasParent)
+        set(PROJECT_IS_TOP_LEVEL true)
+    else()
+        set(PROJECT_IS_TOP_LEVEL)
+    endif()
+endif()
 if(PROJECT_IS_TOP_LEVEL)
     option(ENABLE_URL_PREFIX "enable url prefix" OFF)
     if(ENABLE_URL_PREFIX)
@@ -25,9 +33,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(common_cmake)
 
+configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake.in cmake/dependencies_${PROJECT_NAME}.cmake)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies_dev.cmake.in cmake/dependencies_dev_${PROJECT_NAME}.cmake)
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cmake/")
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${common_cmake_SOURCE_DIR}/cmake")
 # list(APPEND CMAKE_MODULE_PATH "${FETCHCONTENT_BASE_DIR}/common_cmake-src/cmake")
 
 #import tool
 include(common)
+include(msvc_static_runtime)

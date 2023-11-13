@@ -7,7 +7,12 @@
 
 TEST(SocketsTest, UdpSocketTest) {
   std::error_code ec;
-  UdpSocket server = UdpSocket::create(kIpV4, ec);
+  // #ifdef WIN32
+  // // set_multicast_interface err when not bind port
+  UdpSocket server = UdpSocket::bind("9985", ec);
+  // #else
+  //   UdpSocket server = UdpSocket::create(kIpV4, ec);
+  // #endif
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("server udp default value: loop %d ttl %d ",
