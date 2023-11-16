@@ -119,8 +119,11 @@ std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
 int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
                        std::error_code &ec) {
 
+#ifdef _WIN32
+#define MSG_NOSIGNAL 0
+#endif
   int rev =
-      ::sendto(socket_, buf, (int)buf_size, 0,
+      ::sendto(socket_, buf, (int)buf_size, MSG_NOSIGNAL,
                (const sockaddr *)to.native_addr(), (int)to.native_addr_size());
   if (rev < 0) {
     ec = getNetErrorCode();

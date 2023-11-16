@@ -79,7 +79,11 @@ int TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
 }
 
 int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
-  int re_size = ::send(socket_, buff, static_cast<int>(buff_size), 0);
+#ifdef _WIN32
+#define MSG_NOSIGNAL 0
+#endif
+  int re_size =
+      ::send(socket_, buff, static_cast<int>(buff_size), MSG_NOSIGNAL);
   if (re_size < 0) {
     ec = getNetErrorCode();
   }

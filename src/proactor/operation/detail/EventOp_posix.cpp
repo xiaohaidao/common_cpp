@@ -64,7 +64,8 @@ void EventOp::complete(void *p, const std::error_code &result_ec,
   std::error_code re_ec = result_ec;
   if (func_) {
     uint64_t count = wait(re_ec);
-    func_(re_ec, count);
+    auto tmp = std::move(func_);
+    tmp(re_ec, count);
   }
 }
 

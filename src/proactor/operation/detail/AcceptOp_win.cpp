@@ -66,7 +66,8 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
     client_ = INVALID_SOCKET;
     // server_ = INVALID_SOCKET;
 
-    func_(p, result_ec, ac_addr);
+    auto tmp = std::move(func_);
+    tmp(p, result_ec, ac_addr);
   }
 }
 

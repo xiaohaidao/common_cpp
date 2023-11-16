@@ -37,7 +37,8 @@ void SendOp::complete(void *p, const std::error_code &result_ec,
       TcpStream tcp(socket_);
       re_size = tcp.write(buff_.buff, buff_.len, re_ec);
     }
-    func_(p, re_ec, re_size);
+    auto tmp = std::move(func_);
+    tmp(p, re_ec, re_size);
   }
 }
 

@@ -41,7 +41,8 @@ void WriteOp::complete(void *p, const std::error_code &result_ec,
         re_size = 0;
       }
     }
-    func_(p, re_ec, re_size);
+    auto tmp = std::move(func_);
+    tmp(p, re_ec, re_size);
   }
 }
 

@@ -37,7 +37,8 @@ void RecvFromOp::complete(void *p, const std::error_code &result_ec,
       UdpSocket udp(socket_);
       re = udp.recv_from(buff_.buff, buff_.len, re_ec);
     }
-    func_(p, re_ec, re.first, re.second);
+    auto tmp = std::move(func_);
+    tmp(p, re_ec, re.first, re.second);
   }
 }
 

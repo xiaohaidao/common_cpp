@@ -51,38 +51,41 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
   return s;
 }
 
-void setKeepLive(socket_type s, int enable, int time_s, int intvl, int times,
-                 std::error_code &ec) {
+void setKeepLive(socket_type s, std::error_code &ec, int enable, int time_s,
+                 int intvl, int times) {
 
-  // #ifdef _WIN32
-  //   struct tcp_keepalive {
-  //     u_long onoff;
-  //     u_long keepalivetime;
-  //     u_long keepaliveinterval;
-  //   } keepalive;
+  /*
+  #ifdef _WIN32
+    struct tcp_keepalive {
+      u_long onoff;
+      u_long keepalivetime;
+      u_long keepaliveinterval;
+    } keepalive;
 
-  //   // times is 10, can't be changed
-  // #define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)
+    // times is 10, can't be changed
+    // #define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR, 4)
 
-  //   keepalive.onoff = enable;
-  //   keepalive.keepalivetime = time_s * 1000;
-  //   keepalive.keepaliveinterval = intvl * 1000;
-  //   if (::WSAIoctl(s,                        // descriptor identifying a
-  //   socket
-  //                  SIO_KEEPALIVE_VALS,       // dwIoControlCode
-  //                  (LPVOID)&keepalive,       // pointer to tcp_keepalive
-  //                  struct (DWORD)sizeof(keepalive), // length of input buffer
-  //                  NULL,                     // output buffer
-  //                  0,                        // size of output buffer
-  //                  nullptr,                  // number of bytes returned
-  //                  nullptr,                  // OVERLAPPED structure
-  //                  nullptr                   // completion routine
-  //                  ) != 0) {
-  //     ec = getNetErrorCode();
-  //   }
+    keepalive.onoff = enable;
+    keepalive.keepalivetime = time_s * 1000;
+    keepalive.keepaliveinterval = intvl * 1000;
+    DWORD ret;
+    if (::WSAIoctl(s,                  // descriptor identifying a
+                   SIO_KEEPALIVE_VALS, // dwIoControlCode
+                   &keepalive,         // pointer to tcp_keepalive
+                   sizeof(keepalive),  // length of input buffer
+                   NULL,               // output buffer
+                   0,                  // size of output buffer
+                   &ret,               // number of bytes returned
+                   nullptr,            // OVERLAPPED structure
+                   nullptr             // completion routine
+                   ) == SOCKET_ERROR) {
 
-  // #else // Windows 10, version 1709. support
-  // #endif // _WIN32
+      ec = getNetErrorCode();
+    }
+
+  #else  // Windows 10, version 1709. support
+  #endif // _WIN32
+  */
 
   if (::setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (const char *)&enable,
                    sizeof(enable)) < 0) {

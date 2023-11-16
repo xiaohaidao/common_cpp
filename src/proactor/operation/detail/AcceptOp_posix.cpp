@@ -37,7 +37,8 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
       ac_addr.first = ret.first.native_handle();
       ac_addr.second = ret.second;
     }
-    func_(p, re_ec, ac_addr);
+    auto tmp = std::move(func_);
+    tmp(p, re_ec, ac_addr);
   }
 }
 

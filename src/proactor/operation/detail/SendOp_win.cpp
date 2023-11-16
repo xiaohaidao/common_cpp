@@ -31,8 +31,10 @@ void SendOp::async_send(void *proactor, socket_type s, const char *buff,
 void SendOp::complete(void *p, const std::error_code &result_ec,
                       size_t trans_size) {
 
-  if (func_)
-    func_(p, result_ec, trans_size);
+  if (func_) {
+    auto tmp = std::move(func_);
+    tmp(p, result_ec, trans_size);
+  }
 }
 
 } // namespace detail

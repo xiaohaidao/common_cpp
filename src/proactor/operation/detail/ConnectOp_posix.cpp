@@ -57,7 +57,8 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
     socket_type s = client_;
     client_ = -1;
 
-    func_(p, re_ec, trans_size, s);
+    auto tmp = std::move(func_);
+    tmp(p, re_ec, trans_size, s);
   }
 }
 

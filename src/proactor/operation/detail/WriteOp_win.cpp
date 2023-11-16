@@ -32,8 +32,10 @@ void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
 void WriteOp::complete(void *p, const std::error_code &result_ec,
                        size_t trans_size) {
 
-  if (func_)
-    func_(p, result_ec, trans_size);
+  if (func_) {
+    auto tmp = std::move(func_);
+    tmp(p, result_ec, trans_size);
+  }
 }
 
 } // namespace detail
