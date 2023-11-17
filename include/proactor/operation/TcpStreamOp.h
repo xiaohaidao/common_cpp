@@ -31,6 +31,7 @@ public:
   size_t read(char *buff, size_t buff_size, std::error_code &ec);
   size_t write(const char *buff, size_t buff_size, std::error_code &ec);
 
+  void shutdown(std::error_code &ec);
   void close(std::error_code &ec);
 
   socket_type native_handle() const;

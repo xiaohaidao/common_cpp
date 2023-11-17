@@ -15,6 +15,8 @@ public:
 
   void connected(const SocketAddr &addr, std::error_code &ec);
 
+  void shutdown(std::error_code &ec);
+
   void close(std::error_code &ec);
 
   void set_read_timeout(size_t timeout_ms, std::error_code &ec);

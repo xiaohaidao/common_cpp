@@ -105,6 +105,11 @@ void TcpStreamOp::async_write(const char *buff, size_t buff_size, func_type f,
   send_op_.async_send(ctx_, socket_, buff, buff_size, call_back, ec);
 }
 
+void TcpStreamOp::shutdown(std::error_code &ec) {
+  TcpStream tcp(socket_);
+  tcp.shutdown(ec);
+}
+
 void TcpStreamOp::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;

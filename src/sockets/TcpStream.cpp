@@ -19,6 +19,7 @@
 #else
 #define closesocket close
 #define INVALID_SOCKET (socket_type)(~0)
+#define SD_SEND (SHUT_WR)
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
@@ -90,13 +91,17 @@ int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
   return re_size;
 }
 
-void TcpStream::close(std::error_code &ec) {
-  if (::shutdown(socket_, SD_BOTH)) {
+void TcpStream::shutdown(std::error_code &ec) {
+  if (::shutdown(socket_, SD_SEND)) {
     std::error_code re_ec = getNetErrorCode();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
   }
+}
+
+void TcpStream::close(std::error_code &ec) {
+  shutdown(ec);
   if (::closesocket(socket_)) {
     ec = getNetErrorCode();
   }

@@ -27,6 +27,7 @@
 #else
 #define closesocket close
 #define INVALID_SOCKET (socket_type)(~0)
+#define SD_SEND (SHUT_WR)
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
@@ -132,7 +133,7 @@ int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
 }
 
 void UdpSocket::close(std::error_code &ec) {
-  if (::shutdown(socket_, SD_BOTH)) {
+  if (::shutdown(socket_, SD_SEND)) {
     std::error_code re_ec = getNetErrorCode();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;

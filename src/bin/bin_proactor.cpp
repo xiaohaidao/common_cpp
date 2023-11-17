@@ -101,6 +101,7 @@ public:
   ~Server() {
     std::error_code ec;
     server_.close(ec);
+    printf("close server\n");
   }
 };
 
