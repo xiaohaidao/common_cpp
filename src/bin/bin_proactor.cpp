@@ -90,14 +90,15 @@ class Server {
   }
 
 public:
-  Server(Proactor &p) : server_(p) {
+  Server(Proactor &p, const char *port) : server_(p) {
     std::error_code ec;
-    server_.bind("8088", ec);
+    server_.bind(port, ec);
     if (ec) {
       fprintf(stderr, "bind 8088 error %s\n", ec.message().c_str());
     }
     do_accept();
   }
+
   ~Server() {
     std::error_code ec;
     server_.close(ec);
@@ -106,13 +107,19 @@ public:
 };
 
 int main(int args, char **argv) {
+  if (args != 2) {
+    printf("Usage:\n"
+           "    %s <port>\n",
+           argv[0]);
+    return -1;
+  }
   std::error_code ec;
   Proactor a(ec);
   if (ec) {
     fprintf(stderr, "Proactor create error %s\n", ec.message().c_str());
   }
 
-  Server server(a);
+  Server server(a, argv[1]);
 
   a.run();
   return 0;

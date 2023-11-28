@@ -12,7 +12,7 @@ install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
     DESTINATION include
 )
 
-set(library_name proactor reactor)
+set(library_name proactor reactor process utils)
 
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
     add_executable(${PROJECT_NAME} main.cpp)
