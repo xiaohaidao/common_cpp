@@ -15,7 +15,7 @@ EventOp::EventOp() : fd_(-1) {}
 
 void EventOp::close(std::error_code &ec) {
   if (::close(fd_) < 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
@@ -25,7 +25,7 @@ EventOp EventOp::create(std::error_code &ec) {
   EventOp re;
   re.fd_ = ::eventfd(0, 0);
   if (re.fd_ < 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return re;
 }
@@ -33,14 +33,14 @@ EventOp EventOp::create(std::error_code &ec) {
 void EventOp::notify(std::error_code &ec) {
   uint64_t exp = 1;
   if (::write(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
 uint64_t EventOp::wait(std::error_code &ec) {
   uint64_t exp = 0;
   if (::read(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return exp;
 }

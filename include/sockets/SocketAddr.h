@@ -40,29 +40,29 @@ namespace sockets {
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec);
 
-void setKeepLive(socket_type s, std::error_code &ec, int enable,
-                 int time_s = 7200, int intvl = 75, int times = 9);
-void setReuseAddr(socket_type s, std::error_code &ec);
-void setReadTimeout(socket_type s, size_t timeout_ms, std::error_code &ec);
-void setWriteTimeout(socket_type s, size_t timeout_ms, std::error_code &ec);
-size_t readTimeout(socket_type s, std::error_code &ec);
-size_t writeTimeout(socket_type s, std::error_code &ec);
-int getErrorStatus(socket_type s, std::error_code &ec);
+void set_keepalive(socket_type s, std::error_code &ec, int enable,
+                   int time_s = 7200, int intvl = 75, int times = 9);
+void set_reuseaddr(socket_type s, std::error_code &ec);
+void set_read_timeout(socket_type s, size_t timeout_ms, std::error_code &ec);
+void set_write_timeout(socket_type s, size_t timeout_ms, std::error_code &ec);
+size_t read_timeout(socket_type s, std::error_code &ec);
+size_t write_timeout(socket_type s, std::error_code &ec);
+int get_error_status(socket_type s, std::error_code &ec);
 
-int enumToNative(FamilyType family);
-int enumToNative(SocketType type);
-int enumToNative(Protocal protocal);
+int enum_to_native(FamilyType family);
+int enum_to_native(SocketType type);
+int enum_to_native(Protocal protocal);
 
-FamilyType nativeToFamily(int family);
-SocketType nativeToType(int type);
-Protocal nativeToProtocal(int protocal);
+FamilyType native_to_family(int family);
+SocketType native_to_type(int type);
+Protocal native_to_protocal(int protocal);
 
-uint16_t netToHost(uint16_t v);
-uint32_t netToHost(uint32_t v);
-uint64_t netToHost(uint64_t v);
-uint16_t hostToNet(uint16_t v);
-uint32_t hostToNet(uint32_t v);
-uint64_t hostToNet(uint64_t v);
+uint16_t net_to_host(uint16_t v);
+uint32_t net_to_host(uint32_t v);
+uint64_t net_to_host(uint64_t v);
+uint16_t host_to_net(uint16_t v);
+uint32_t host_to_net(uint32_t v);
+uint64_t host_to_net(uint64_t v);
 
 } // namespace sockets
 

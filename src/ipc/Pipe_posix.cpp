@@ -27,7 +27,7 @@ Pipe Pipe::create(std::error_code &ec) {
 
   int pipefd[2];
   if (::pipe(pipefd) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return re;
   }
 
@@ -39,7 +39,7 @@ Pipe Pipe::create(std::error_code &ec) {
 
 Pipe Pipe::create(const char *name_pipe, std::error_code &ec) {
   if (::mkfifo(name_pipe, 0666) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return Pipe();
   }
 
@@ -50,7 +50,7 @@ Pipe Pipe::connect(const char *name_pipe, std::error_code &ec) {
   Pipe re;
   int server = ::open(name_pipe, O_RDWR);
   if (server == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return re;
   }
   re.read_pipe_ = server;
@@ -63,7 +63,7 @@ Pipe Pipe::connect(const char *name_pipe, std::error_code &ec) {
 size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
   int num = ::read(read_pipe_, buff, buff_size);
   if (num == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     num = 0;
   }
   return num;
@@ -72,7 +72,7 @@ size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
 size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
   int num = ::write(write_pipe_, buff, buff_size);
   if (num == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     num = 0;
   }
   return num;
@@ -80,15 +80,15 @@ size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
 
 void Pipe::close(std::error_code &ec) {
   if (::close(read_pipe_) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   if (read_pipe_ != write_pipe_) {
     if (::close(write_pipe_) == -1) {
-      ec = getErrorCode();
+      ec = get_error_code();
     }
   }
   if (!name_.empty() && ::unlink(name_.c_str()) == -1) {
-    std::error_code re_ec = getErrorCode();
+    std::error_code re_ec = get_error_code();
     if (re_ec.value() != ENOENT) {
       ec = re_ec;
     }

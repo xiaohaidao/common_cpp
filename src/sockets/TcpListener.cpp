@@ -41,7 +41,7 @@ TcpListener TcpListener::bind(const char *port_or_service, FamilyType family,
   }
   if (::listen(listen, SOMAXCONN)) {
     ::closesocket(listen);
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return re;
   }
   return re;
@@ -62,7 +62,7 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
     return re;
   }
   re.socket_ = listen;
-  sockets::setReuseAddr(listen, ec);
+  sockets::set_reuseaddr(listen, ec);
   if (ec) {
     return re;
   }
@@ -76,7 +76,7 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
   if (::bind(listen, (sockaddr *)addr.native_addr(),
              static_cast<int>(addr.native_addr_size()))) {
     ::closesocket(listen);
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return re;
   }
   return re;
@@ -89,7 +89,7 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
   socket_type client = ::accept(socket_, NULL, NULL);
   if (client == INVALID_SOCKET) {
     ::closesocket(client);
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return re;
   }
   re.first.socket_ = client;
@@ -98,16 +98,16 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
 }
 
 void TcpListener::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::setReadTimeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, timeout_ms, ec);
 }
 
 size_t TcpListener::read_timeout(std::error_code &ec) const {
-  return sockets::readTimeout(socket_, ec);
+  return sockets::read_timeout(socket_, ec);
 }
 
 void TcpListener::close(std::error_code &ec) {
   if (::closesocket(socket_)) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 

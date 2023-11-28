@@ -35,7 +35,7 @@ SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
                                     false, // do not inherit the name
                                     key_g.c_str());
   if (map_file == nullptr) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.shmid_ = map_file;
@@ -57,7 +57,7 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
       key_g.c_str());               // name of mapping object
 
   SharedMemory result;
-  std::error_code er = getErrorCode();
+  std::error_code er = get_error_code();
   if (map_file == nullptr || er.value() == ERROR_ALREADY_EXISTS) {
     ec = er;
     return result;
@@ -75,7 +75,7 @@ void SharedMemory::deatch(std::error_code &ec) {
     return;
   }
   if (UnmapViewOfFile(memory_) == 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
 
@@ -87,7 +87,7 @@ void SharedMemory::attach(std::error_code &ec) {
   if ((memory_ = MapViewOfFile(shmid_,              // handle to map object
                                FILE_MAP_ALL_ACCESS, // read/write permission
                                0, 0, size_)) == nullptr) {
-    ec = getErrorCode();
+    ec = get_error_code();
     memory_ = nullptr;
     size_ = 0;
     return;
@@ -95,7 +95,7 @@ void SharedMemory::attach(std::error_code &ec) {
   if (size_ == 0) {
     MEMORY_BASIC_INFORMATION mbi = {0};
     if (VirtualQueryEx(GetCurrentProcess(), shmid_, &mbi, sizeof(mbi)) == 0) {
-      ec = getErrorCode();
+      ec = get_error_code();
       return;
     }
     size_ = mbi.RegionSize;
@@ -108,7 +108,7 @@ void SharedMemory::close(std::error_code &ec) {
     return;
   }
   if (CloseHandle(shmid_) == 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
   shmid_ = nullptr;

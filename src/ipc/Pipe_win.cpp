@@ -29,7 +29,7 @@ Pipe Pipe::create(std::error_code &ec) {
   inherit.lpSecurityDescriptor = NULL;
   int default_size = 0;
   if (!::CreatePipe(&re.read_pipe_, &re.write_pipe_, &inherit, default_size)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return re;
 }
@@ -51,7 +51,7 @@ Pipe Pipe::create(const char *name_pipe, std::error_code &ec) {
       0,                                         // client time-out
       NULL);
   if (server == INVALID_HANDLE_VALUE) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return re;
   }
 
@@ -69,7 +69,7 @@ Pipe Pipe::connect(const char *name_pipe, std::error_code &ec) {
   HANDLE client = ::CreateFile(buff_name, GENERIC_WRITE | GENERIC_READ, 0, NULL,
                                OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
   if (client == INVALID_HANDLE_VALUE) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return re;
   }
   re.read_pipe_ = client;
@@ -81,7 +81,7 @@ Pipe Pipe::connect(const char *name_pipe, std::error_code &ec) {
 size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
   if (is_server_) {
     if (!::ConnectNamedPipe(read_pipe_, NULL)) {
-      std::error_code re_ec = getErrorCode();
+      std::error_code re_ec = get_error_code();
       if (re_ec.value() != ERROR_IO_PENDING &&
           re_ec.value() != ERROR_PIPE_CONNECTED) {
         ec = re_ec;
@@ -91,7 +91,7 @@ size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
   DWORD num = 0;
   if (!::ReadFile(read_pipe_, buff, static_cast<DWORD>(buff_size), &num,
                   NULL)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return num;
 }
@@ -99,7 +99,7 @@ size_t Pipe::read(char *buff, size_t buff_size, std::error_code &ec) {
 size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
   if (is_server_) {
     if (!::ConnectNamedPipe(write_pipe_, NULL)) {
-      std::error_code re_ec = getErrorCode();
+      std::error_code re_ec = get_error_code();
       if (re_ec.value() != ERROR_IO_PENDING &&
           re_ec.value() != ERROR_PIPE_CONNECTED) {
         ec = re_ec;
@@ -109,7 +109,7 @@ size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
   DWORD num = 0;
   if (!::WriteFile(write_pipe_, buff, static_cast<DWORD>(buff_size), &num,
                    NULL)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return num;
 }
@@ -117,15 +117,15 @@ size_t Pipe::write(const char *buff, size_t buff_size, std::error_code &ec) {
 void Pipe::close(std::error_code &ec) {
   if (read_pipe_ == write_pipe_) {
     if (is_server_ && !::DisconnectNamedPipe(read_pipe_)) {
-      ec = getErrorCode();
+      ec = get_error_code();
     }
   }
   if (!::CloseHandle(read_pipe_)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   if (read_pipe_ != write_pipe_) {
     if (!::CloseHandle(write_pipe_)) {
-      ec = getErrorCode();
+      ec = get_error_code();
     }
   }
 }

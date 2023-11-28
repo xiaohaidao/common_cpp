@@ -15,7 +15,7 @@ Epoll::Epoll(int fd) : fd_(fd), proactor_(nullptr) {}
 Epoll::Epoll(std::error_code &ec)
     : fd_(epoll_create1(EPOLL_CLOEXEC)), proactor_(nullptr) {
   if (fd_ == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
@@ -24,13 +24,13 @@ void Epoll::post(int fd, ReactorOp *op, std::error_code &ec) {
   event.events = op->get_event_data();
   event.data.ptr = op;
   if (epoll_ctl(fd_, EPOLL_CTL_ADD, fd, &event)) {
-    std::error_code re_ec = getErrorCode();
+    std::error_code re_ec = get_error_code();
     if (re_ec.value() != EEXIST) {
       ec = re_ec;
       return;
     }
     if (epoll_ctl(fd_, EPOLL_CTL_MOD, fd, &event)) {
-      ec = getErrorCode();
+      ec = get_error_code();
     }
   }
 }
@@ -48,7 +48,7 @@ void Epoll::post_write(int fd, ReactorOp *op, std::error_code &ec) {
 void Epoll::cancel(int fd, std::error_code &ec) {
   struct epoll_event event = {};
   if (epoll_ctl(fd_, EPOLL_CTL_DEL, fd, &event)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
@@ -79,7 +79,7 @@ size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
   struct epoll_event events[128];
   int number = epoll_wait(fd_, events, sizeof(events), timeout_ms);
   if (number < 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return 0;
   }
   for (size_t i = 0; i < number; ++i) {
@@ -92,7 +92,7 @@ size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
 
 void Epoll::close(std::error_code &ec) {
   if (::close(fd_)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 

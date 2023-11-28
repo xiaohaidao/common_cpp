@@ -17,7 +17,7 @@ Proactor::Proactor() : fd_(nullptr), shutdown_(false) {}
 Proactor::Proactor(std::error_code &ec) : fd_(nullptr), shutdown_(false) {
   HANDLE han = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
   if (han == nullptr) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   fd_ = han;
 }
@@ -56,7 +56,7 @@ size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
 
 void Proactor::notify_op(Operation *op, std::error_code &ec) {
   if (!PostQueuedCompletionStatus(fd_, 0, 0, op)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
@@ -64,7 +64,7 @@ void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
                     std::error_code &ec) {
   HANDLE han = CreateIoCompletionPort(file_descriptor, fd_, 0, 0);
   if (han == nullptr) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
   // assert(han == fd_);
@@ -73,7 +73,7 @@ void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
 void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
   if (!::CancelIoEx(file_descriptor, nullptr)) {
-    std::error_code re_ec = getErrorCode();
+    std::error_code re_ec = get_error_code();
     // if (re_ec.value() != ERROR_NOT_FOUND) {
     ec = re_ec;
     // }
@@ -82,7 +82,7 @@ void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
 void Proactor::close(std::error_code &ec) {
   if (!::CloseHandle(fd_)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 
@@ -112,7 +112,7 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
         GetQueuedCompletionStatus(fd_, &bytes_transferred, &completion_key,
                                   &overlapped, (DWORD)timeout_ms);
 
-    std::error_code result_ec = getErrorCode();
+    std::error_code result_ec = get_error_code();
     if (result_ec.value() == ERROR_IO_PENDING ||
         result_ec.value() == WAIT_TIMEOUT) {
       result_ec = {0, result_ec.category()};

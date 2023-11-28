@@ -38,7 +38,7 @@ std::string transferName(const std::string &name) {
 MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
   MsgQueue result;
   if ((result.msgid_ = mq_open(transferName(key).c_str(), O_RDWR)) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.key_ = transferName(key);
@@ -51,7 +51,7 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
   if ((result.msgid_ =
            mq_open(transferName(key).c_str(), O_RDWR | O_CREAT | O_EXCL,
                    DEFFILEMODE, nullptr)) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.key_ = transferName(key);
@@ -61,7 +61,7 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
 void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
   constexpr int priority = 0; // the priority in [0-31], highest priority first
   if (mq_send(msgid_, data, size, priority) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
 }
@@ -71,7 +71,7 @@ bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return false;
   }
   timeout.tv_sec += timeout_ms / 1000;
@@ -93,7 +93,7 @@ bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
 size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
   size_t size;
   if ((size = mq_receive(msgid_, data, data_size, nullptr)) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return 0;
   }
   return size;
@@ -104,7 +104,7 @@ size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return 0;
   }
   timeout.tv_sec += timeout_ms / 1000;
@@ -129,7 +129,7 @@ void MsgQueue::close(std::error_code &ec) {
     return;
   }
   if (mq_close(msgid_) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
   msgid_ = 0;
@@ -139,7 +139,7 @@ void MsgQueue::remove(std::error_code &ec) {
   close(ec);
 
   if (mq_unlink(key_.c_str()) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
 }

@@ -148,21 +148,21 @@ void IcmpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   read_timeout_ = timeout_ms;
 #endif // _WIN32
-  sockets::setReadTimeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, timeout_ms, ec);
 }
 
 void IcmpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   send_timeout_ = timeout_ms;
 #endif // _WIN32
-  sockets::setWriteTimeout(socket_, timeout_ms, ec);
+  sockets::set_write_timeout(socket_, timeout_ms, ec);
 }
 
 size_t IcmpSocket::read_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   return read_timeout_;
 #else
-  return sockets::readTimeout(socket_, ec);
+  return sockets::read_timeout(socket_, ec);
 #endif // _WIN32
 }
 
@@ -170,7 +170,7 @@ size_t IcmpSocket::write_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   return send_timeout_;
 #else
-  return sockets::writeTimeout(socket_, ec);
+  return sockets::write_timeout(socket_, ec);
 #endif // _WIN32
 }
 
@@ -182,7 +182,7 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
   int ret = ::recvfrom(socket_, buf, static_cast<int>(buf_size), 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return re;
   }
 
@@ -219,7 +219,7 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
                (const sockaddr *)to.native_addr(),
                static_cast<int>(to.native_addr_size()));
   if (rev < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return 0;
   }
   return rev;
@@ -227,13 +227,13 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
 
 void IcmpSocket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_BOTH)) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
   }
   if (::closesocket(socket_)) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 

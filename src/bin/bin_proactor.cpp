@@ -14,7 +14,7 @@ class Client : public std::enable_shared_from_this<Client> {
 public:
   Client(const TcpStreamOp &op) : tcp_op_(op) {
     std::error_code ec;
-    sockets::setKeepLive(tcp_op_.native_handle(), ec, 1, 10, 1, 3);
+    sockets::set_keepalive(tcp_op_.native_handle(), ec, 1, 10, 1, 3);
     if (ec) {
       fprintf(stderr, "set keep live error %d:%s\n", ec.value(),
               ec.message().c_str());

@@ -42,7 +42,7 @@ Process Process::call(const char *command,
                      &si,  // Pointer to STARTUPINFO structure
                      &pi)  // Pointer to PROCESS_INFORMATION structure
   ) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return sys;
   }
   sys.child_handle_ = pi.hProcess;
@@ -61,7 +61,7 @@ Process Process::open(uint64_t pid, std::error_code &ec) {
   Process p;
   HANDLE han = OpenProcess(PROCESS_ALL_ACCESS, false, static_cast<DWORD>(pid));
   if (han == nullptr) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return p;
   }
   p.child_handle_ = han;
@@ -71,7 +71,7 @@ Process Process::open(uint64_t pid, std::error_code &ec) {
 bool Process::running(std::error_code &ec) {
   DWORD re = WaitForSingleObject(child_handle_, 0);
   if (re == WAIT_FAILED) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   if (re != WAIT_TIMEOUT) {
     return false;
@@ -82,10 +82,10 @@ bool Process::running(std::error_code &ec) {
 int Process::wait(std::error_code &ec) {
   int status = -1;
   if (WaitForSingleObject(child_handle_, INFINITE) == WAIT_FAILED) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   if (GetExitCodeProcess(child_handle_, (DWORD *)&status) == 0) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   // STILL_ACTIVE == exit_code // Still running
   return status;
@@ -93,7 +93,7 @@ int Process::wait(std::error_code &ec) {
 
 void Process::terminate(std::error_code &ec) {
   if (!TerminateProcess(child_handle_, -1)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 

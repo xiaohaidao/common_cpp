@@ -43,16 +43,16 @@ namespace {
 
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec) {
-  socket_type s = ::socket(enumToNative(family), enumToNative(type),
-                           enumToNative(protocal));
+  socket_type s = ::socket(enum_to_native(family), enum_to_native(type),
+                           enum_to_native(protocal));
   if (s == INVALID_SOCKET) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return s;
 }
 
-void setKeepLive(socket_type s, std::error_code &ec, int enable, int time_s,
-                 int intvl, int times) {
+void set_keepalive(socket_type s, std::error_code &ec, int enable, int time_s,
+                   int intvl, int times) {
 
   /*
   #ifdef _WIN32
@@ -80,7 +80,7 @@ void setKeepLive(socket_type s, std::error_code &ec, int enable, int time_s,
                    nullptr             // completion routine
                    ) == SOCKET_ERROR) {
 
-      ec = getNetErrorCode();
+      ec = get_net_error_code();
     }
 
   #else  // Windows 10, version 1709. support
@@ -89,27 +89,27 @@ void setKeepLive(socket_type s, std::error_code &ec, int enable, int time_s,
 
   if (::setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (const char *)&enable,
                    sizeof(enable)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return;
   }
   if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPIDLE, (const char *)&time_s,
                    sizeof(time_s)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return;
   }
   if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPINTVL, (const char *)&intvl,
                    sizeof(intvl)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return;
   }
   if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPCNT, (const char *)&times,
                    sizeof(times)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return;
   }
 }
 
-void setReuseAddr(socket_type s, std::error_code &ec) {
+void set_reuseaddr(socket_type s, std::error_code &ec) {
   constexpr int set = 1;
 #ifdef SO_REUSEPORT
   int optname = SO_REUSEPORT;
@@ -118,11 +118,11 @@ void setReuseAddr(socket_type s, std::error_code &ec) {
 #endif // SO_REUSEPORT
   if (::setsockopt(s, SOL_SOCKET, optname, (const char *)&set, sizeof(set)) <
       0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
-void setReadTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
+void set_read_timeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
 #else
@@ -132,12 +132,12 @@ void setReadTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #endif // _WIN32
   if (::setsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (const char *)&time_out,
                    sizeof(time_out)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return;
   }
 }
 
-void setWriteTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
+void set_write_timeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
 #else
@@ -147,57 +147,60 @@ void setWriteTimeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
 #endif // _WIN32
   if (::setsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (const char *)&time_out,
                    sizeof(time_out)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
-size_t readTimeout(socket_type s, std::error_code &ec) {
+size_t read_timeout(socket_type s, std::error_code &ec) {
 #ifdef _WIN32
   size_t v = 0;
   socklen_t size = sizeof(v);
   if (::getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (char *)&v, &size) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return v;
 #else
   struct timeval v = {};
   socklen_t size = sizeof(v);
   if (::getsockopt(s, SOL_SOCKET, SO_RCVTIMEO, (void *)&v, &size) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return v.tv_sec * 1000 + v.tv_usec / 1000;
 #endif // _WIN32
 }
 
-size_t writeTimeout(socket_type s, std::error_code &ec) {
+size_t write_timeout(socket_type s, std::error_code &ec) {
 #ifdef _WIN32
   size_t v = 0;
   socklen_t size = sizeof(v);
   if (::getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (char *)&v, &size) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return v;
 #else
   struct timeval v = {};
   socklen_t size = sizeof(v);
   if (::getsockopt(s, SOL_SOCKET, SO_SNDTIMEO, (void *)&v, &size) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return v.tv_sec * 1000 + v.tv_usec / 1000;
 #endif // _WIN32
 }
 
-int getErrorStatus(socket_type s, std::error_code &ec) {
+int get_error_status(socket_type s, std::error_code &ec) {
   int set = 0;
   socklen_t ret = sizeof(set);
   if (::getsockopt(s, SOL_SOCKET, SO_ERROR, (char *)&set, &ret) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return -1;
+  }
+  if (set != 0) {
+    ec = {set, std::system_category()};
   }
   return set;
 }
 
-int enumToNative(FamilyType family) {
+int enum_to_native(FamilyType family) {
   switch (family) {
   case kIpV4:
     return AF_INET;
@@ -209,7 +212,7 @@ int enumToNative(FamilyType family) {
   }
 }
 
-int enumToNative(SocketType type) {
+int enum_to_native(SocketType type) {
   switch (type) {
   case kDgram:
     return SOCK_DGRAM;
@@ -221,7 +224,7 @@ int enumToNative(SocketType type) {
   }
 }
 
-int enumToNative(Protocal protocal) {
+int enum_to_native(Protocal protocal) {
   switch (protocal) {
   case kIp:
     return IPPROTO_IP;
@@ -237,7 +240,7 @@ int enumToNative(Protocal protocal) {
   }
 }
 
-FamilyType nativeToFamily(int family) {
+FamilyType native_to_family(int family) {
   switch (family) {
   case AF_INET:
     return kIpV4;
@@ -249,7 +252,7 @@ FamilyType nativeToFamily(int family) {
   }
 }
 
-SocketType nativeToType(int type) {
+SocketType native_to_type(int type) {
   switch (type) {
   case SOCK_DGRAM:
     return kDgram;
@@ -261,7 +264,7 @@ SocketType nativeToType(int type) {
   }
 }
 
-Protocal nativeToProtocal(int protocal) {
+Protocal native_to_protocal(int protocal) {
   switch (protocal) {
   case IPPROTO_UDP:
     return kUDP;
@@ -275,11 +278,11 @@ Protocal nativeToProtocal(int protocal) {
   }
 }
 
-uint16_t netToHost(uint16_t v) { return ntohs(v); }
+uint16_t net_to_host(uint16_t v) { return ntohs(v); }
 
-uint32_t netToHost(uint32_t v) { return ntohl(v); }
+uint32_t net_to_host(uint32_t v) { return ntohl(v); }
 
-uint64_t netToHost(uint64_t v) {
+uint64_t net_to_host(uint64_t v) {
   return
 #ifdef _WIN32
       ntohll(v);
@@ -288,11 +291,11 @@ uint64_t netToHost(uint64_t v) {
 #endif // _WIN32
 }
 
-uint16_t hostToNet(uint16_t v) { return htons(v); }
+uint16_t host_to_net(uint16_t v) { return htons(v); }
 
-uint32_t hostToNet(uint32_t v) { return htonl(v); }
+uint32_t host_to_net(uint32_t v) { return htonl(v); }
 
-uint64_t hostToNet(uint64_t v) {
+uint64_t host_to_net(uint64_t v) {
   return
 #ifdef _WIN32
       htonll(v);

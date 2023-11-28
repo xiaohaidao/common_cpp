@@ -30,7 +30,7 @@ SharedMemory::~SharedMemory() {}
 SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   SharedMemory result;
   if ((result.shmid_ = shm_open(key, O_RDWR, 0)) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.key_ = key;
@@ -53,14 +53,14 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
   if ((result.shmid_ = shm_open(key, O_CREAT | O_EXCL | O_RDWR, DEFFILEMODE)) ==
       -1) {
 
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.key_ = key;
 
   size_t size = mem_size;
   if (ftruncate(result.shmid_, size)) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return result;
   }
   result.size_ = size;
@@ -74,7 +74,7 @@ void SharedMemory::deatch(std::error_code &ec) {
     return;
   }
   if (munmap(memory_, size_) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
 
@@ -85,7 +85,7 @@ void SharedMemory::deatch(std::error_code &ec) {
 void SharedMemory::attach(std::error_code &ec) {
   if ((memory_ = mmap(nullptr, size_, PROT_READ | PROT_WRITE, MAP_SHARED,
                       shmid_, 0)) == MAP_FAILED) {
-    ec = getErrorCode();
+    ec = get_error_code();
     memory_ = nullptr;
     size_ = 0;
   }
@@ -97,7 +97,7 @@ void SharedMemory::close(std::error_code &ec) {
     return;
   }
   if (::close(shmid_) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
   shmid_ = 0;
@@ -106,7 +106,7 @@ void SharedMemory::close(std::error_code &ec) {
 void SharedMemory::remove(std::error_code &ec) {
   close(ec);
   if (shm_unlink(key_.c_str()) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     return;
   }
 }

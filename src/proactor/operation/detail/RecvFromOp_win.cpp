@@ -22,7 +22,7 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
   if (::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, &recv_flags,
                     (sockaddr *)from_.native_addr(), &from_size_,
                     (LPWSAOVERLAPPED)this, nullptr)) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);

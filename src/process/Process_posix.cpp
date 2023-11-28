@@ -44,7 +44,7 @@ Process Process::call(const char *command,
   if (posix_spawn_file_actions_adddup2(&file_actions, STDIN_FILENO,
                                        pipe.read_native())) {
 
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   posix_spawn_file_actions_adddup2(&file_actions, STDOUT_FILENO,
                                    pipe.write_native());
@@ -59,7 +59,7 @@ Process Process::call(const char *command,
   if (posix_spawnp(&pid, command, &file_actions, &attr,
                    const_cast<char *const *>(arg.data()), environ) != 0) {
 
-    ec = getErrorCode();
+    ec = get_error_code();
     return sys;
   }
   posix_spawnattr_destroy(&attr);
@@ -108,7 +108,7 @@ int Process::wait(std::error_code &ec) {
 
 void Process::terminate(std::error_code &ec) {
   if (::kill(child_handle_, SIGKILL) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 }
 

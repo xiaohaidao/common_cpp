@@ -120,7 +120,7 @@ size_t Select::run_once_timeout(QueueOp &queue, size_t timeout_ms,
       static_cast<int>(fd_), &readability, &writability, &check_except,
       timeout_ms == (std::numeric_limits<size_t>::max)() ? nullptr : &time);
   if (re < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return 0;
   }
   if (re == 0) { // timeout

@@ -37,7 +37,7 @@ void ReadOp::complete(void *p, const std::error_code &result_ec,
     if (!re_ec) {
       re_size = ::read(fd_, buff_.buff, buff_.len);
       if (re_size < 0) {
-        re_ec = getErrorCode();
+        re_ec = get_error_code();
         re_size = 0;
       }
     }

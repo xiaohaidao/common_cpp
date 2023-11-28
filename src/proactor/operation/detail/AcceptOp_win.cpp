@@ -30,7 +30,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
     if (::WSAIoctl(client_, SIO_GET_EXTENSION_FUNCTION_POINTER, (void *)&guid,
                    sizeof(guid), (void *)&AcceptExPtr, sizeof(AcceptExPtr),
                    &numBytes, NULL, NULL)) {
-      ec = getNetErrorCode();
+      ec = get_net_error_code();
       complete(proactor, ec, 0);
       // assert(ec);
       return;
@@ -39,7 +39,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
 
   DWORD p = 0;
   if (!AcceptExPtr(s, client_, addresses_, 0, 0, 32, &p, (OVERLAPPED *)this)) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
@@ -54,7 +54,7 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
 
   if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
                  (char *)&server_, sizeof(server_))) {
-    // std::error_code ec = getNetErrorCode();
+    // std::error_code ec = get_net_error_code();
   }
   if (func_) {
     std::pair<socket_type, SocketAddr> ac_addr;

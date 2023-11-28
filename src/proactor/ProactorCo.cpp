@@ -31,7 +31,7 @@ socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec) {
   do {
     co_yield();
     std::error_code status_ec;
-    if (sockets::getErrorStatus(s, status_ec) != 0 || status_ec) {
+    if (sockets::get_error_status(s, status_ec) != 0 || status_ec) {
       ec = status_ec;
       return new_socket;
     }
@@ -59,7 +59,7 @@ socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
   do {
     co_yield();
     std::error_code status_ec;
-    if (sockets::getErrorStatus(s, status_ec) != 0 || status_ec) {
+    if (sockets::get_error_status(s, status_ec) != 0 || status_ec) {
       ec = status_ec;
       return s;
     }
@@ -88,7 +88,7 @@ int co_tcp_read(socket_type s, char *data, size_t data_size,
   do {
     co_yield();
     std::error_code status_ec;
-    if (sockets::getErrorStatus(s, status_ec) != 0 || status_ec) {
+    if (sockets::get_error_status(s, status_ec) != 0 || status_ec) {
       ec = status_ec;
       return -1;
     }
@@ -134,7 +134,7 @@ int co_udp_readfrom(socket_type s, SocketAddr &from, char *data,
   do {
     co_yield();
     std::error_code status_ec;
-    if (sockets::getErrorStatus(s, status_ec) != 0 || status_ec) {
+    if (sockets::get_error_status(s, status_ec) != 0 || status_ec) {
       ec = status_ec;
       return -1;
     }

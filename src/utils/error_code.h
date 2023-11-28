@@ -8,7 +8,7 @@
 #include <windows.h>
 #endif // _WIN32
 
-static inline std::error_code getNetErrorCode() {
+static inline std::error_code get_net_error_code() {
 #ifdef _WIN32
   return {WSAGetLastError(), std::system_category()};
 #else
@@ -16,7 +16,7 @@ static inline std::error_code getNetErrorCode() {
 #endif
 }
 
-static inline std::error_code getErrorCode() {
+static inline std::error_code get_error_code() {
 #ifdef _WIN32
   return {(int)GetLastError(), std::system_category()};
 #else

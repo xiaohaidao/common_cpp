@@ -65,7 +65,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
     return re;
   }
   re.socket_ = s;
-  sockets::setReuseAddr(s, ec);
+  sockets::set_reuseaddr(s, ec);
   if (ec) {
     ::closesocket(s);
     return re;
@@ -73,7 +73,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
 
   if (::bind(s, (sockaddr *)addr.native_addr(), (int)addr.native_addr_size())) {
     ::closesocket(s);
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     return re;
   }
   return re;
@@ -82,25 +82,25 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
 void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
   if (::connect(socket_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size())) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     ::closesocket(socket_);
   }
 }
 
 void UdpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::setReadTimeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, timeout_ms, ec);
 }
 
 void UdpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::setWriteTimeout(socket_, timeout_ms, ec);
+  sockets::set_write_timeout(socket_, timeout_ms, ec);
 }
 
 size_t UdpSocket::read_timeout(std::error_code &ec) const {
-  return sockets::readTimeout(socket_, ec);
+  return sockets::read_timeout(socket_, ec);
 }
 
 size_t UdpSocket::write_timeout(std::error_code &ec) const {
-  return sockets::writeTimeout(socket_, ec);
+  return sockets::write_timeout(socket_, ec);
 }
 
 std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
@@ -111,7 +111,7 @@ std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
   int ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   re.first = ret;
   return re;
@@ -127,20 +127,20 @@ int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
       ::sendto(socket_, buf, (int)buf_size, MSG_NOSIGNAL,
                (const sockaddr *)to.native_addr(), (int)to.native_addr_size());
   if (rev < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return rev;
 }
 
 void UdpSocket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_SEND)) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
   }
   if (::closesocket(socket_)) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -148,7 +148,7 @@ void UdpSocket::set_broadcast(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, sizeof(en)) <
       0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -156,7 +156,7 @@ bool UdpSocket::broadcast(std::error_code &ec) {
   int en = 0;
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, &len) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return en;
 }
@@ -170,7 +170,7 @@ void UdpSocket::joint_multicast(const SocketAddr &multicast,
   mreq.imr_interface = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
   if (::setsockopt(socket_, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -182,7 +182,7 @@ void UdpSocket::leave_multicast(const SocketAddr &multicast,
   mreq.imr_interface = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
   if (::setsockopt(socket_, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -193,7 +193,7 @@ void UdpSocket::set_multicast_interface(const SocketAddr &iface,
   in_addr mreq = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
   if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_IF, (char *)&mreq,
                    sizeof(mreq)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -201,7 +201,7 @@ void UdpSocket::set_multicast_loop(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&en,
                    sizeof(en)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -210,7 +210,7 @@ bool UdpSocket::multicast_loop(std::error_code &ec) {
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&en, &len) <
       0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return en;
 }
@@ -218,7 +218,7 @@ bool UdpSocket::multicast_loop(std::error_code &ec) {
 void UdpSocket::set_multicast_ttl(int ttl, std::error_code &ec) {
   if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl,
                    sizeof(ttl)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -227,7 +227,7 @@ int UdpSocket::multicast_ttl(std::error_code &ec) {
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&en, &len) <
       0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return en;
 }
@@ -242,7 +242,7 @@ void UdpSocket::joint_multicast_v6(const SocketAddr &multicast,
   mreq.ipv6mr_interface = interface_index;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -255,7 +255,7 @@ void UdpSocket::leave_multicast_v6(const SocketAddr &multicast,
   mreq.ipv6mr_interface = interface_index;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP, (char *)&mreq,
                    sizeof(mreq)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -264,7 +264,7 @@ void UdpSocket::set_multicast_interface_v6(unsigned int interface_index,
 
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_IF,
                    (char *)&interface_index, sizeof(interface_index)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -272,7 +272,7 @@ void UdpSocket::set_multicast_loop_v6(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&en,
                    sizeof(en)) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
 }
 
@@ -281,7 +281,7 @@ bool UdpSocket::multicast_loop_v6(std::error_code &ec) {
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&en,
                    &len) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
   }
   return en;
 }

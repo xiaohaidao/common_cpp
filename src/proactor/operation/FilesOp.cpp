@@ -50,7 +50,7 @@ void FilesOp::open(const char *file_path, bool create, std::error_code &ec) {
                      create ? OPEN_ALWAYS : OPEN_EXISTING, FILE_FLAG_OVERLAPPED,
                      nullptr);
   if (fd_ == INVALID_HANDLE_VALUE) {
-    std::error_code re_ec = getErrorCode();
+    std::error_code re_ec = get_error_code();
     if (re_ec.value() != ERROR_ALREADY_EXISTS) {
       ec = re_ec;
       fd_ = 0;
@@ -60,7 +60,7 @@ void FilesOp::open(const char *file_path, bool create, std::error_code &ec) {
   fd_ = ::open(file_path, O_RDWR | (create ? O_CREAT : 0),
                S_IRWXU | S_IRWXG | S_IRWXO);
   if (fd_ == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     fd_ = 0;
   }
 #endif
@@ -71,13 +71,13 @@ size_t FilesOp::read(char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
   if (!::ReadFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return num;
 #else
   int num = ::read(fd_, buff, buff_size);
   if (num == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     num = 0;
   }
   return num;
@@ -88,13 +88,13 @@ size_t FilesOp::write(const char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
   if (!::WriteFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   return num;
 #else
   int num = ::write(fd_, buff, buff_size);
   if (num == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
     num = 0;
   }
   return num;
@@ -126,11 +126,11 @@ void FilesOp::close(std::error_code &ec) {
   }
 #ifdef _WIN32
   if (!::CloseHandle(fd_)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 #else
   if (::close(fd_) == -1) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
 #endif
   fd_ = 0;

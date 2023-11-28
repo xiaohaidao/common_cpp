@@ -16,7 +16,7 @@ if(PROJECT_IS_TOP_LEVEL)
     else()
         set(GITHUB_URL_PREFIX "")
     endif()
-    message("GITHUB_URL_PREFIX: ${GITHUB_URL_PREFIX}, ENABLE_URL_PREFIX: ${ENABLE_URL_PREFIX}")
+    message("ENABLE_URL_PREFIX: ${ENABLE_URL_PREFIX}, GITHUB_URL_PREFIX: ${GITHUB_URL_PREFIX}")
 
     # set(FETCHCONTENT_BASE_DIR ${CMAKE_SOURCE_DIR}/.third_party/)
     # set(FETCHCONTENT_SOURCE_DIR_COMMON_CMAKE ${CMAKE_SOURCE_DIR}/.third_party/common_cmake-src)
@@ -33,8 +33,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(common_cmake)
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake.in cmake/dependencies_${PROJECT_NAME}.cmake)
-configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies_dev.cmake.in cmake/dependencies_dev_${PROJECT_NAME}.cmake)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies.cmake cmake/dependencies_${PROJECT_NAME}.cmake)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/dependencies_dev.cmake cmake/dependencies_dev_${PROJECT_NAME}.cmake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}/cmake/")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")

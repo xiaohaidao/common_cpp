@@ -22,13 +22,13 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
 
   int flags = fcntl(client_, F_GETFL, 0);
   if (fcntl(client_, F_SETFL, flags | O_NONBLOCK)) {
-    ec = getErrorCode();
+    ec = get_error_code();
     complete(proactor, ec, 0);
     return;
   }
   if (::connect(client_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size()) < 0) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (re_ec.value() != EINPROGRESS) {
       ec = re_ec;
       complete(proactor, ec, 0);
@@ -50,7 +50,7 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
   std::error_code ec;
   int flags = fcntl(client_, F_GETFL, 0);
   if (fcntl(client_, F_SETFL, flags & ~O_NONBLOCK)) {
-    ec = getErrorCode();
+    ec = get_error_code();
   }
   std::error_code re_ec = result_ec;
   if (func_) {

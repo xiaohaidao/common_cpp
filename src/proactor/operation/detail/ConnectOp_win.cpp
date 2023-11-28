@@ -31,7 +31,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
     if (::WSAIoctl(client_, SIO_GET_EXTENSION_FUNCTION_POINTER, (void *)&guid,
                    sizeof(guid), (void *)&ConnectExPtr, sizeof(ConnectExPtr),
                    &numBytes, NULL, NULL)) {
-      ec = getNetErrorCode();
+      ec = get_net_error_code();
       complete(proactor, ec, 0);
       // assert(ec);
       return;
@@ -47,7 +47,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
   a.base.sa_family = addr.native_family();
 
   if (::bind(client_, &a.base, static_cast<int>(addr.native_addr_size())) < 0) {
-    ec = getNetErrorCode();
+    ec = get_net_error_code();
     complete(proactor, ec, 0);
     // assert(ec);
     return;
@@ -56,7 +56,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
   if (ConnectExPtr(client_, (sockaddr *)addr.native_addr(),
                    static_cast<int>(addr.native_addr_size()), nullptr, 0,
                    nullptr, (OVERLAPPED *)this)) {
-    std::error_code re_ec = getNetErrorCode();
+    std::error_code re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
@@ -70,7 +70,7 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
                          size_t trans_size) {
 
   if (::setsockopt(client_, SOL_SOCKET, SO_UPDATE_CONNECT_CONTEXT, NULL, 0)) {
-    // std::error_code ec = getNetErrorCode();
+    // std::error_code ec = get_net_error_code();
   }
   if (func_) {
     socket_type s = client_;
