@@ -76,7 +76,8 @@ private:
     }
     std::function<void()> &c = *reinterpret_cast<std::function<void()> *>(f);
     if (c) {
-      c();
+      auto tmp = std::move(c);
+      tmp();
     }
   }
 };

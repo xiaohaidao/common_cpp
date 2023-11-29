@@ -45,12 +45,15 @@ void TimerOp::close(std::error_code &ec) {
   if (ctx_) {
     ctx_->cancel_timeout(&op_, ec);
   }
+  op_.timeout_num = -1;
+  op_.complete(nullptr, ec, 0);
 }
 
 void TimerOp::TimerOpPrivate::complete(void *proactor,
                                        const std::error_code &result_ec,
                                        size_t trans_size) {
-  func(result_ec, timeout_num);
+  auto tmp = std::move(func);
+  tmp(result_ec, timeout_num);
   auto now = time_clock::now();
   if (expire < now) {
     if (!(interval > time_clock::duration::zero())) {

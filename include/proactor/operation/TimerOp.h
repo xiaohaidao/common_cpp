@@ -8,7 +8,7 @@
 
 class TimerOp {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  typedef std::function<void(const std::error_code &, int)> func_type;
 
   typedef typename Proactor::time_clock time_clock;
 
