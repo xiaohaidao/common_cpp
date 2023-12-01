@@ -69,7 +69,8 @@ uint64_t host_to_net(uint64_t v);
 class SocketAddr {
 public:
   SocketAddr();
-  SocketAddr(const char *host_or_ip, const char *port_or_service);
+  SocketAddr(const char *host_or_ip, const char *port_or_service,
+             FamilyType family = kIpV4);
 
   static SocketAddr get_local_socket(socket_type handle, std::error_code &ec);
   static SocketAddr get_remote_socket(socket_type handle, std::error_code &ec);

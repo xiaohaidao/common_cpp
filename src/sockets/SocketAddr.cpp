@@ -82,10 +82,12 @@ using namespace sockets;
 // inet_addr(ip); // str ip to sin_ipaddr
 SocketAddr::SocketAddr() : ip_addr_{}, sock_addr_{} {}
 
-SocketAddr::SocketAddr(const char *host_or_ip, const char *port_or_service)
+SocketAddr::SocketAddr(const char *host_or_ip, const char *port_or_service,
+                       FamilyType family)
     : ip_addr_{}, sock_addr_{} {
+
   std::error_code ec;
-  *this = resolve_host(host_or_ip, port_or_service, ec);
+  *this = resolve_host(host_or_ip, port_or_service, ec, family);
 }
 
 const char *SocketAddr::get_ip() const {
