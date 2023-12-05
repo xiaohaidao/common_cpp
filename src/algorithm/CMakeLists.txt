@@ -2,6 +2,7 @@
 set(library_name "algorithm")
 add_library(${library_name} INTERFACE
 )
+add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} INTERFACE
 )

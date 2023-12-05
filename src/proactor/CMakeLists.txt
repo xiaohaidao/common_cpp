@@ -28,6 +28,7 @@ add_library(${library_name}
     operation/detail/WriteOp_posix.cpp
     operation/detail/WriteOp_win.cpp
 )
+add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC
     sockets

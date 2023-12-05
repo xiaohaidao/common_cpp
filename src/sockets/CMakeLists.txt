@@ -8,6 +8,7 @@ add_library(${library_name}
     TcpStream.cpp
     UdpSocket.cpp
 )
+add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC
 )

@@ -4,6 +4,7 @@ add_library(${library_name}
     Process_posix.cpp
     Process_win.cpp
 )
+add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC
     ipc

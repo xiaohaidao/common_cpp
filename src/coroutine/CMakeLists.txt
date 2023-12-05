@@ -3,6 +3,7 @@ set(library_name "coroutine")
 add_library(${library_name}
     coroutine.cpp
 )
+add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC
 )
