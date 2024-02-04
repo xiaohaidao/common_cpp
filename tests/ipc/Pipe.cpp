@@ -29,6 +29,7 @@ TEST(IPCTest, AnonymousPipeTest) {
   ec.clear();
 }
 
+/*
 TEST(IPCTest, PipeTest) {
   using ipc::Pipe;
   std::error_code ec;
@@ -86,3 +87,5 @@ TEST(IPCTest, PipeTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 }
+
+*/

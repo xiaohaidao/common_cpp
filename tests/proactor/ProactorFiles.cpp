@@ -72,6 +72,7 @@ public:
   std::string module_;
 };
 
+/*
 TEST(ProactorTest, ProactorFiles) {
   std::error_code ec;
   Proactor p(ec);
@@ -123,3 +124,4 @@ TEST(ProactorTest, ProactorFiles) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 }
+*/

@@ -7,6 +7,10 @@ add_library(${library_name}
     MsgQueue.cpp
     Pipe_posix.cpp
     Pipe_win.cpp
+    PipeListener_posix.cpp
+    PipeListener_win.cpp
+    PipeStream_posix.cpp
+    PipeStream_win.cpp
     Semaphores_posix.cpp
     Semaphores_win.cpp
     SharedMemory_posix.cpp
