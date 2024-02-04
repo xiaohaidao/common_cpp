@@ -16,6 +16,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <sys/un.h>
 #include <unistd.h>
 #endif // _WIN32
 
@@ -90,7 +91,20 @@ SocketAddr::SocketAddr(const char *host_or_ip, const char *port_or_service,
   *this = resolve_host(host_or_ip, port_or_service, ec, family);
 }
 
+#ifdef __linux__
+SocketAddr::SocketAddr(const char *path) {
+  struct sockaddr_un *addr = (struct sockaddr_un *)native_addr();
+  addr->sun_family = enum_to_native(kUnix);
+  strcpy(addr->sun_path, path);
+}
+#endif // __linux__
+
 const char *SocketAddr::get_ip() const {
+#ifdef __linux__
+  if (get_family() == kUnix) {
+    return ((struct sockaddr_un *)native_addr())->sun_path;
+  }
+#endif // __linux__
   if (ip_addr_[0] == 0) {
     std::error_code ec;
     get_ip((char *)ip_addr_, sizeof(ip_addr_), ec);
@@ -100,6 +114,11 @@ const char *SocketAddr::get_ip() const {
 
 void SocketAddr::get_ip(char *ip, size_t size, std::error_code &ec) const {
   FamilyType family = get_family();
+#ifdef __linux__
+  if (family == kUnix) {
+    return;
+  }
+#endif // __linux__
   void *sin_addr = nullptr;
   if (family == kIpV4) {
     sin_addr = &((struct sockaddr_in *)native_addr())->sin_addr;
@@ -135,14 +154,24 @@ int SocketAddr::native_family() const {
 void *SocketAddr::native_addr() const { return (void *)sock_addr_; }
 
 size_t SocketAddr::native_addr_size() const {
-  return get_family() == kIpV4 ? sizeof(struct sockaddr_in)
-                               : sizeof(struct sockaddr_in6);
+  return
+#ifdef __linux__
+      get_family() == kUnix ? sizeof(sockaddr_un) :
+#endif // __linux__
+                            get_family() == kIpV4 ? sizeof(struct sockaddr_in)
+                                                  : sizeof(struct sockaddr_in6);
 }
 
 void *SocketAddr::native_ip_addr() const {
-  return get_family() == kIpV4
-             ? (void *)&(((struct sockaddr_in *)sock_addr_)->sin_addr)
-             : (void *)&(((struct sockaddr_in6 *)sock_addr_)->sin6_addr);
+  return
+#ifdef __linux__
+      get_family() == kUnix
+          ? (void *)&(((struct sockaddr_un *)sock_addr_)->sun_path)
+          :
+#endif // __linux__
+          get_family() == kIpV6
+              ? (void *)&(((struct sockaddr_in6 *)sock_addr_)->sin6_addr)
+              : (void *)&(((struct sockaddr_in *)sock_addr_)->sin_addr);
 }
 
 SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {

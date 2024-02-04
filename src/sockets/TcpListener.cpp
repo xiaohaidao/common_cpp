@@ -57,7 +57,12 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
                                  std::error_code &ec) {
 
   TcpStream re;
-  socket_type listen = sockets::socket(family, kStream, kTCP, ec);
+  socket_type listen = sockets::socket(family, kStream,
+#ifdef __linux__
+                                       family == kUnix ? kIp :
+#endif // __linux__
+                                                       kTCP,
+                                       ec);
   if (listen == INVALID_SOCKET || ec) {
     return re;
   }
@@ -68,11 +73,22 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
   }
   // Setup the TCP listening socket
   SocketAddr addr =
-      SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+#ifdef __linux__
+      family == kUnix
+          ? SocketAddr(port_or_service)
+          :
+#endif // __linux__
+          SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+
   if (ec) {
     ::closesocket(listen);
     return re;
   }
+#ifdef __linux__
+  if (family == kUnix) {
+    ::unlink(addr.get_ip());
+  }
+#endif // __linux__
   if (::bind(listen, (sockaddr *)addr.native_addr(),
              static_cast<int>(addr.native_addr_size()))) {
     ::closesocket(listen);
@@ -106,6 +122,12 @@ size_t TcpListener::read_timeout(std::error_code &ec) const {
 }
 
 void TcpListener::close(std::error_code &ec) {
+#ifdef __linux__
+  auto addr = SocketAddr::get_local_socket(socket_, ec);
+  if (addr.get_family() == kUnix) {
+    ::unlink(addr.get_ip());
+  }
+#endif // __linux__
   if (::closesocket(socket_)) {
     ec = get_net_error_code();
   }

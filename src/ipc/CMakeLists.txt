@@ -20,6 +20,7 @@ add_library(${library_name}
 add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC
+    utils
 )
 
 if(WIN32)

@@ -13,6 +13,9 @@ enum FamilyType {
   kUnspecified,
   kIpV4,
   kIpV6,
+#ifdef __linux__
+  kUnix
+#endif // __linux__
 };
 
 enum SocketType {
@@ -71,6 +74,9 @@ public:
   SocketAddr();
   SocketAddr(const char *host_or_ip, const char *port_or_service,
              FamilyType family = kIpV4);
+#ifdef __linux__
+  SocketAddr(const char *path);
+#endif // __linux__
 
   static SocketAddr get_local_socket(socket_type handle, std::error_code &ec);
   static SocketAddr get_remote_socket(socket_type handle, std::error_code &ec);

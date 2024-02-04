@@ -206,6 +206,10 @@ int enum_to_native(FamilyType family) {
     return AF_INET;
   case kIpV6:
     return AF_INET6;
+#ifdef __linux__
+  case kUnix:
+    return AF_UNIX;
+#endif // __linux__
   case kUnspecified:
   default:
     return AF_UNSPEC;
@@ -246,6 +250,10 @@ FamilyType native_to_family(int family) {
     return kIpV4;
   case AF_INET6:
     return kIpV6;
+#ifdef __linux__
+  case AF_UNIX:
+    return kUnix;
+#endif // __linux__
   case AF_UNSPEC:
   default:
     return kUnspecified;

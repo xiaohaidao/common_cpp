@@ -29,7 +29,13 @@ TcpStream::TcpStream(const socket_type &s) : socket_(s) {}
 
 TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
   TcpStream re;
-  socket_type connect = sockets::socket(addr.get_family(), kStream, kTCP, ec);
+  socket_type connect = sockets::socket(addr.get_family(), kStream,
+#ifdef __linux__
+                                        addr.get_family() == kUnix ? kIp :
+#endif // __linux__
+                                                                   kTCP,
+                                        ec);
+
   if (ec) {
     return re;
   }
