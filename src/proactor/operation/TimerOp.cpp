@@ -5,7 +5,7 @@
 
 using namespace std::chrono;
 
-TimerOp::TimerOp(Proactor &context) : ctx_(&context) {}
+TimerOp::TimerOp(Proactor &context) : ctx_(&context), op_({}) {}
 
 void TimerOp::set_timeout(size_t expire_ms) { set_timeout(expire_ms, 0); }
 
@@ -37,22 +37,25 @@ void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
     return;
   }
   op_.func = async_func;
+  op_.stop = 0;
   ctx_->post_timeout(&op_, op_.expire, ec);
 }
 
 void TimerOp::close(std::error_code &ec) {
-  set_timeout(0);
   if (ctx_) {
     ctx_->cancel_timeout(&op_, ec);
   }
-  op_.timeout_num = -1;
-  op_.complete(nullptr, ec, 0);
+  set_timeout(0);
+  op_.stop = 1;
 }
 
 void TimerOp::TimerOpPrivate::complete(void *proactor,
                                        const std::error_code &result_ec,
                                        size_t trans_size) {
   auto tmp = std::move(func);
+  if (stop == 1) {
+    return;
+  }
   tmp(result_ec, timeout_num);
   auto now = time_clock::now();
   if (expire < now) {
@@ -63,6 +66,10 @@ void TimerOp::TimerOpPrivate::complete(void *proactor,
     expire += (interval * p);
     timeout_num = p;
   }
+  if (stop == 1) {
+    return;
+  }
+  func = std::move(tmp);
   if (proactor) {
     std::error_code ec;
     ((Proactor *)proactor)->post_timeout(this, expire, ec);

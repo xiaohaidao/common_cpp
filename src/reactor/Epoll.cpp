@@ -76,8 +76,9 @@ size_t Epoll::run_once(QueueOp &queue, std::error_code &ec) {
 size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
                                std::error_code &ec) {
 
-  struct epoll_event events[128];
-  int number = epoll_wait(fd_, events, sizeof(events), timeout_ms);
+  struct epoll_event events[1];
+  int number =
+      epoll_wait(fd_, events, sizeof(events) / sizeof(events[0]), timeout_ms);
   if (number < 0) {
     ec = get_error_code();
     return 0;
