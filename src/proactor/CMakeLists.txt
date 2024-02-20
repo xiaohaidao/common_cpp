@@ -6,6 +6,8 @@ add_library(${library_name}
     Proactor.cpp
     ProactorCo.cpp
     operation/FilesOp.cpp
+    operation/IpcListenerOp.cpp
+    operation/IpcStreamOp.cpp
     operation/TcpListenerOp.cpp
     operation/TcpStreamOp.cpp
     operation/TimerOp.cpp
@@ -15,6 +17,7 @@ add_library(${library_name}
     operation/detail/ConnectOp_posix.cpp
     operation/detail/ConnectOp_win.cpp
     operation/detail/EventOp_posix.cpp
+    operation/detail/PipeConnectOp_win.cpp
     operation/detail/ReadOp_posix.cpp
     operation/detail/ReadOp_win.cpp
     operation/detail/RecvFromOp_posix.cpp

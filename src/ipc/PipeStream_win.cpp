@@ -9,7 +9,10 @@
 
 namespace ipc {
 
-PipeStream::PipeStream() : named_pipe_(0) {}
+PipeStream::PipeStream() : named_pipe_(0), is_server_(false) {}
+
+PipeStream::PipeStream(native_handle native_handle, bool is_server)
+    : named_pipe_(native_handle), is_server_(is_server) {}
 
 PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
   PipeStream re;
@@ -45,6 +48,11 @@ size_t PipeStream::write(const char *buff, size_t buff_size,
 }
 
 void PipeStream::close(std::error_code &ec) {
+  if (is_server_) {
+    if (!::DisconnectNamedPipe(named_pipe_)) {
+      ec = get_error_code();
+    }
+  }
   if (!::CloseHandle(named_pipe_)) {
     ec = get_error_code();
   }

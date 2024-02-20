@@ -95,7 +95,7 @@ SocketAddr::SocketAddr(const char *host_or_ip, const char *port_or_service,
 SocketAddr::SocketAddr(const char *path) {
   struct sockaddr_un *addr = (struct sockaddr_un *)native_addr();
   addr->sun_family = enum_to_native(kUnix);
-  strcpy(addr->sun_path, path);
+  snprintf(addr->sun_path, sizeof(addr->sun_path), "%s", path);
 }
 #endif // __linux__
 

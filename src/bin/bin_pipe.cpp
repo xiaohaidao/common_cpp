@@ -40,12 +40,12 @@ int main(int args, char **argv, char *env[]) {
   std::error_code ec;
   char buff[4096];
   if (strcmp(argv[1], "-s") == 0) {
-    auto pip = ipc::PipeListener::create(kPipeName, ec);
+    auto pip_s = ipc::PipeListener::create(kPipeName, ec);
     if (ec) {
       printf("create pipe error %s\n", ec.message().c_str());
       ec.clear();
     }
-    pip.accept(ec);
+    auto pip = pip_s.accept(ec);
     if (ec) {
       printf("accpet pipe error %s\n", ec.message().c_str());
       return -1;
@@ -53,7 +53,7 @@ int main(int args, char **argv, char *env[]) {
       printf("accpet pipe success\n");
     }
     MACOR_FUN()
-    pip.remove(ec);
+    pip_s.remove(ec);
     if (ec) {
       printf("pipe remove error %s\n", ec.message().c_str());
     }

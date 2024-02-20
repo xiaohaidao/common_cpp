@@ -19,6 +19,8 @@ public:
   const TcpListenerOp &operator=(const TcpListenerOp &);
 
   void bind(const char *port_or_service, std::error_code &ec);
+  void bind(const char *port_or_service, FamilyType family,
+            std::error_code &ec);
 
   std::pair<TcpStreamOp, SocketAddr> accept(std::error_code &ec);
   void async_accept(func_type f, std::error_code &ec);

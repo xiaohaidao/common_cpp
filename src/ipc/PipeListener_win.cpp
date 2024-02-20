@@ -3,13 +3,14 @@
 
 #include "ipc/PipeListener.h"
 
+#include <cstring>
 #include <windows.h>
 
 #include "utils/error_code.h"
 
 namespace ipc {
 
-PipeListener::PipeListener() : named_pipe_(nullptr) {}
+PipeListener::PipeListener() : name_{}, named_pipe_(nullptr) {}
 
 PipeListener PipeListener::create(const char *name_pipe, std::error_code &ec) {
   PipeListener re;
@@ -33,46 +34,32 @@ PipeListener PipeListener::create(const char *name_pipe, std::error_code &ec) {
   }
 
   re.named_pipe_ = server;
+  snprintf(re.name_, sizeof(re.name_), "%s", name_pipe);
   return re;
 }
+void PipeListener::create(std::error_code &ec) {
+  *this = PipeListener::create(name_, ec);
+}
 
-void PipeListener::accept(std::error_code &ec) {
+PipeStream PipeListener::accept(std::error_code &ec) {
+  if (named_pipe_ == NULL) {
+    (*this) = create(name_, ec);
+  }
+  PipeStream re(named_pipe_, true);
   if (!::ConnectNamedPipe(named_pipe_, NULL)) {
     std::error_code re_ec = get_error_code();
     if (re_ec.value() != ERROR_IO_PENDING &&
         re_ec.value() != ERROR_PIPE_CONNECTED) {
       ec = re_ec;
+      return PipeStream();
     }
   }
-}
-
-size_t PipeListener::read(char *buff, size_t buff_size, std::error_code &ec) {
-  DWORD num = 0;
-  if (!::ReadFile(named_pipe_, buff, static_cast<DWORD>(buff_size), &num,
-                  NULL)) {
-    ec = get_error_code();
-  }
-  return num;
-}
-
-size_t PipeListener::write(const char *buff, size_t buff_size,
-                           std::error_code &ec) {
-  DWORD num = 0;
-  if (!::WriteFile(named_pipe_, buff, static_cast<DWORD>(buff_size), &num,
-                   NULL)) {
-    ec = get_error_code();
-  }
-  return num;
-}
-
-void PipeListener::close(std::error_code &ec) {
-  if (!::DisconnectNamedPipe(named_pipe_)) {
-    ec = get_error_code();
-  }
+  named_pipe_ = NULL;
+  return re;
 }
 
 void PipeListener::remove(std::error_code &ec) {
-  if (!::CloseHandle(named_pipe_)) {
+  if (named_pipe_ != NULL && !::CloseHandle(named_pipe_)) {
     ec = get_error_code();
   }
 }

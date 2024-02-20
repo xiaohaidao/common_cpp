@@ -16,6 +16,9 @@ namespace ipc {
 
 PipeStream::PipeStream() : named_pipe_(0) {}
 
+PipeStream::PipeStream(native_handle native_handle)
+    : named_pipe_(native_handle) {}
+
 PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
   PipeStream re;
   int server = ::open(name_pipe, O_RDWR);
@@ -24,7 +27,6 @@ PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
     return re;
   }
   re.named_pipe_ = server;
-  re.name_ = name_pipe;
   return re;
 }
 

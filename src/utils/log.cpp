@@ -76,17 +76,17 @@ bool isSkipLog(const LogData &data) { return data.level < SKIP_LOG_LEVEL; }
 void formatLog(const LogData &data, std::string &log) {
   // log head
   std::time_t now_time = std::chrono::system_clock::to_time_t(data.now);
-  auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+  auto us = std::chrono::duration_cast<std::chrono::microseconds>(
                 data.now.time_since_epoch())
                 .count() %
-            1000;
+            1000000;
 
   std::stringstream ss_h;
   // ISO 8601 data format
   struct tm buff;
   ss_h << "["
        << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "(%z)%Y-%m-%d %H:%M:%S.")
-       << std::setfill('0') << std::setw(3) << ms << "]"
+       << std::setfill('0') << std::setw(6) << us << "]"
        << "[" << data.thread_id << "]"
        << "[" << getEnumStr(data.level) << "]"
        << "[" << data.filename << ":" << data.line << "]"

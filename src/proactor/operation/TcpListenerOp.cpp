@@ -41,10 +41,15 @@ std::pair<TcpStreamOp, SocketAddr> TcpListenerOp::accept(std::error_code &ec) {
 }
 
 void TcpListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
+  return bind(port_or_servicer, kIpV4, ec);
+}
+
+void TcpListenerOp::bind(const char *port_or_servicer, FamilyType family,
+                         std::error_code &ec) {
   if (-1 != socket_ && socket_ != 0) {
     return;
   }
-  TcpListener listener = TcpListener::bind(port_or_servicer, ec);
+  TcpListener listener = TcpListener::bind(port_or_servicer, family, ec);
   socket_ = listener.native_handle();
 #ifdef _WIN32
   if (!ec && ctx_ != nullptr) {

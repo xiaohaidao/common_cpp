@@ -16,7 +16,7 @@ TEST(ProactorTest, ProactorTimer) {
   ec.clear();
 
   TimerOp timer(p);
-  auto call_back = [](const char *b, const std::error_code & ec, size_t n) {
+  auto call_back = [](const char *b, const std::error_code &ec, size_t n) {
     LOG_TRACE("%s timer async call n %u!", b, n);
     if (ec) {
       LOG_TRACE("error %s", ec.message().c_str());

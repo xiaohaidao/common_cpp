@@ -84,11 +84,6 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
     ::closesocket(listen);
     return re;
   }
-#ifdef __linux__
-  if (family == kUnix) {
-    ::unlink(addr.get_ip());
-  }
-#endif // __linux__
   if (::bind(listen, (sockaddr *)addr.native_addr(),
              static_cast<int>(addr.native_addr_size()))) {
     ::closesocket(listen);

@@ -3,6 +3,7 @@
 
 #include "ipc/PipeListener.h"
 
+#include <cstring>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -12,53 +13,36 @@
 
 namespace ipc {
 
-PipeListener::PipeListener() : named_pipe_(0) {}
+PipeListener::PipeListener() : name_{} {}
 
 PipeListener PipeListener::create(const char *name_pipe, std::error_code &ec) {
   PipeListener re;
   if (::mkfifo(name_pipe, 0666) == -1) {
     ec = get_error_code();
   }
-  re.name_ = name_pipe;
+  snprintf(re.name_, sizeof(re.name_), "%s", name_pipe);
   return re;
 }
 
-void PipeListener::accept(std::error_code &ec) {
-  int server = ::open(name_.c_str(), O_RDWR);
+void PipeListener::create(std::error_code &ec) {
+  if (::mkfifo(name_, 0666) == -1) {
+    ec = get_error_code();
+  }
+}
+
+PipeStream PipeListener::accept(std::error_code &ec) {
+  PipeStream re;
+  int server = ::open(name_, O_RDWR);
   if (server == -1) {
     ec = get_error_code();
   } else {
-    named_pipe_ = server;
+    return PipeStream(server);
   }
-}
-
-size_t PipeListener::read(char *buff, size_t buff_size, std::error_code &ec) {
-  int num = ::read(named_pipe_, buff, buff_size);
-  if (num == -1) {
-    ec = get_error_code();
-    num = 0;
-  }
-  return num;
-}
-
-size_t PipeListener::write(const char *buff, size_t buff_size,
-                           std::error_code &ec) {
-  int num = ::write(named_pipe_, buff, buff_size);
-  if (num == -1) {
-    ec = get_error_code();
-    num = 0;
-  }
-  return num;
-}
-
-void PipeListener::close(std::error_code &ec) {
-  if (::close(named_pipe_) == -1) {
-    ec = get_error_code();
-  }
+  return re;
 }
 
 void PipeListener::remove(std::error_code &ec) {
-  if (!name_.empty() && named_pipe_ > 0 && ::unlink(name_.c_str()) == -1) {
+  if (strlen(name_) != 0 && ::unlink(name_) == -1) {
     std::error_code re_ec = get_error_code();
     if (re_ec.value() != ENOENT) {
       ec = re_ec;
@@ -66,7 +50,7 @@ void PipeListener::remove(std::error_code &ec) {
   }
 }
 
-native_handle PipeListener::native() const { return named_pipe_; }
+native_handle PipeListener::native() const { return 0; }
 
 } // namespace ipc
 

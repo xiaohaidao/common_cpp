@@ -57,11 +57,11 @@ private:
   TimerQueueSet<time_clock> timer_queue_;
   std::mutex timer_mutex_;
 
-#ifndef _WIN32
+#ifdef __linux__
   ::detail::EventOp event_;
   QueueOp event_queue_;
   std::mutex event_mutex_;
-#endif // _WIN32
+#endif // __linux__
 };
 
 #endif // PROACTOR_PROACTOR_H

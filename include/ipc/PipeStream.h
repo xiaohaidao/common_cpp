@@ -15,6 +15,11 @@ typedef int native_handle;
 class PipeStream {
 public:
   PipeStream();
+#if defined(__linux__)
+  PipeStream(native_handle native_handle);
+#elif defined(_WIN32)
+  PipeStream(native_handle native_handle, bool is_server);
+#endif
 
   static PipeStream connect(const char *name_pipe, std::error_code &ec);
 
@@ -30,8 +35,8 @@ private:
   native_handle named_pipe_;
 
 #ifdef _WIN32
+  bool is_server_;
 #else //__linux__
-  std::string name_;
 #endif
 };
 
