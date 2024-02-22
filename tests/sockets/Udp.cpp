@@ -41,11 +41,10 @@ TEST(SocketsTest, UdpSocketTest) {
   server.connected({"www.baidu.com", "80"}, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  SocketAddr local_addr =
-      SocketAddr::get_local_socket(server.native_handle(), ec);
+  SocketAddr local_addr = SocketAddr::get_local_socket(server.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("server socket value %d  %s:%d", server.native_handle(),
+  LOG_TRACE("server socket value %d  %s:%d", server.native(),
             local_addr.get_ip(), local_addr.get_port());
 
   const char port[] = "8981";
@@ -57,10 +56,10 @@ TEST(SocketsTest, UdpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  local_addr = SocketAddr::get_local_socket(client.native_handle(), ec);
+  local_addr = SocketAddr::get_local_socket(client.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", client.native_handle(),
+  LOG_TRACE("clinet socket value %d  %s:%d", client.native(),
             local_addr.get_ip(), local_addr.get_port());
 
   // set loop

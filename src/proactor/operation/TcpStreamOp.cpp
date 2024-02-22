@@ -14,6 +14,7 @@ TcpStreamOp::TcpStreamOp(Proactor *context, socket_type s)
 #ifdef _WIN32
   if (ctx_ != nullptr) {
     std::error_code ec;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((HANDLE)socket_, nullptr, ec); // register to io proactor
     // if (ec) {
     //   LOG_WARN("overlapped post error %d %s", ec.value(), ec.message());
@@ -25,12 +26,15 @@ TcpStreamOp::TcpStreamOp(Proactor *context, socket_type s)
 TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
     : ctx_(other.ctx_), socket_(other.socket_) {}
 
-const TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
+TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
+  if (&other == this) {
+    return *this;
+  }
   this->ctx_ = other.ctx_;
   this->socket_ = other.socket_;
-  this->connect_op_ = detail::ConnectOp();
-  this->recv_op_ = detail::RecvOp();
-  this->send_op_ = detail::SendOp();
+  // this->connect_op_ = detail::ConnectOp();
+  // this->recv_op_ = detail::RecvOp();
+  // this->send_op_ = detail::SendOp();
   return *this;
 }
 
@@ -50,16 +54,17 @@ void TcpStreamOp::connect(const SocketAddr &addr, std::error_code &ec) {
   if (socket_ != -1 && socket_ != 0) {
     close(ec);
   }
-  TcpStream tcp = TcpStream::connect(addr, ec);
-  socket_ = tcp.native_handle();
+  TcpStream const tcp = TcpStream::connect(addr, ec);
+  socket_ = tcp.native();
 #ifdef _WIN32
   if (!ec && ctx_ != nullptr) {
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((HANDLE)socket_, nullptr, ec); // register to io proactor
   }
 #endif
 }
 
-void TcpStreamOp::async_connect(const SocketAddr &addr, func_type f,
+void TcpStreamOp::async_connect(const SocketAddr &addr, const func_type &f,
                                 std::error_code &ec) {
 
   if (socket_ != -1 && socket_ != 0) {
@@ -75,31 +80,32 @@ void TcpStreamOp::async_connect(const SocketAddr &addr, func_type f,
 
 #ifdef _WIN32
   if (ctx_ != nullptr) {
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((HANDLE)socket_, nullptr, ec); // register to io proactor
   }
 #endif
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec, size_t size,
-                       socket_type s) {
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
+                       size_t size, socket_type /*s*/) {
     // assert(this->socket_ == s)
     f(re_ec, size);
   };
   connect_op_.async_connect(ctx_, socket_, addr, call_back, ec);
 }
 
-void TcpStreamOp::async_read(char *buff, size_t buff_size, func_type f,
+void TcpStreamOp::async_read(char *buff, size_t buff_size, const func_type &f,
                              std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t recv_size) { f(re_ec, recv_size); };
 
   recv_op_.async_recv(ctx_, socket_, buff, buff_size, call_back, ec);
 }
 
-void TcpStreamOp::async_write(const char *buff, size_t buff_size, func_type f,
-                              std::error_code &ec) {
+void TcpStreamOp::async_write(const char *buff, size_t buff_size,
+                              const func_type &f, std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t send_size) { f(re_ec, send_size); };
 
   send_op_.async_send(ctx_, socket_, buff, buff_size, call_back, ec);
@@ -113,6 +119,7 @@ void TcpStreamOp::shutdown(std::error_code &ec) {
 void TcpStreamOp::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->cancel((::native_handle)socket_, t_ec);
   }
   TcpStream tcp(socket_);
@@ -120,4 +127,4 @@ void TcpStreamOp::close(std::error_code &ec) {
   socket_ = -1;
 }
 
-socket_type TcpStreamOp::native_handle() const { return socket_; }
+socket_type TcpStreamOp::native() const { return socket_; }

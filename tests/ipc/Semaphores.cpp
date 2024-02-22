@@ -30,14 +30,14 @@ TEST(IPCTest, SemaphoresTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  sem1.notifyOne(ec);
+  sem1.notify_one(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  sem1.tryWait(ec);
+  sem1.try_wait(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  sem1.tryWaitFor(5, ec);
+  sem1.try_wait_for(5, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

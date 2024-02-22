@@ -27,7 +27,7 @@ void local_unix() {
     // read and write
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
-    for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+    for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
       // LOG_TRACE("read write index %d", i);
       char buff[256] = {};
       size_t ret = s_client.read(buff, sizeof(buff) - 1, ec);
@@ -70,12 +70,12 @@ void local_unix() {
   // read and write
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
-  for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+  for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
     // LOG_TRACE("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
-    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100d", message, i);
+    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     size_t ret = client.write(msg_buff, strlen(msg_buff) + 1, ec);
     // EXPECT_TRUE(ret == strlen(msg_buff) + 1);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -109,10 +109,10 @@ void local_unix() {
 }
 
 void tcp() {
-  SocketAddr a("127.0.0.1", "8980");
+  SocketAddr const a("127.0.0.1", "8980");
   std::error_code ec;
   auto client = TcpStream::connect(a, ec);
-  bool is_server = ec ? true : false;
+  bool const is_server = ec ? true : false;
   if (is_server) {
     ec.clear();
     TcpListener server = TcpListener::bind("8980", ec);
@@ -120,7 +120,7 @@ void tcp() {
     ec.clear();
 
     auto s_c = server.accept(ec);
-    bool ok = ec ? false : true;
+    bool const ok = ec ? false : true;
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 
@@ -130,7 +130,7 @@ void tcp() {
     // read and write
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
-    for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+    for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
       // LOG_TRACE("read write index %d", i);
       char buff[256] = {};
       size_t ret = s_client.read(buff, sizeof(buff) - 1, ec);
@@ -169,16 +169,16 @@ void tcp() {
     ec.clear();
     return;
   }
-  bool ok = true;
+  bool const ok = true;
   // read and write
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
-  for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+  for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
     // LOG_TRACE("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
-    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100d", message, i);
+    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     size_t ret = client.write(msg_buff, strlen(msg_buff) + 1, ec);
     // EXPECT_TRUE(ret == strlen(msg_buff) + 1);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -216,7 +216,7 @@ void c() {
   mm_socket s;
   int ret = s.bind(server);
   LOG_TRACE("server bind %d", ret);
-  bool is_server = !(ret < 0);
+  bool const is_server = !(ret < 0);
 
   if (is_server) {
     mm_client s_client;
@@ -229,13 +229,13 @@ void c() {
       // EXPECT_TRUE(ret > 0);
     } while (ret != 0);
 
-    bool ok = s_client.send(nullptr, 0) == 0;
+    bool const ok = s_client.send(nullptr, 0) == 0;
     LOG_ERROR("ok %d", ok);
 
     // read and write
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
-    for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+    for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
       // LOG_TRACE("read write index %d", i);
       char buff[256] = {};
       do {
@@ -280,18 +280,18 @@ void c() {
     // EXPECT_TRUE(ret > 0);
   } while (ret != 0);
 
-  bool ok = client.send(nullptr, 0) == 0;
+  bool const ok = client.send(nullptr, 0) == 0;
   LOG_ERROR("ok %d", ok);
 
   // read and write
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
-  for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+  for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
     // LOG_TRACE("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
-    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100d", message, i);
+    snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     ret = client.send(msg_buff, strlen(msg_buff) + 1);
     // LOG_TRACE("client send msg size %d:%d", ret, strlen(msg_buff) + 1);
     // EXPECT_TRUE(ret == strlen(msg_buff) + 1);

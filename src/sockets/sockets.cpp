@@ -29,8 +29,8 @@ namespace {
 #define htonll(x) (x)
 #define ntohll(x) (x)
 #else
-#define htonll(x) ((((uint64_t)htonl(x & 0xFFFFFFFF)) << 32) + htonl(x >> 32))
-#define ntohll(x) ((((uint64_t)ntohl(x & 0xFFFFFFFF)) << 32) + ntohl(x >> 32))
+#define HTONLL(x) ((((uint64_t)htonl((x)&0xFFFFFFFF)) << 32) + htonl((x) >> 32))
+#define NTOHLL(x) ((((uint64_t)ntohl((x)&0xFFFFFFFF)) << 32) + ntohl((x) >> 32))
 #endif
 
 #endif // _WIN32
@@ -38,13 +38,13 @@ namespace {
 } // namespace
 
 #ifndef _WIN32
-#define INVALID_SOCKET -1
+#define INVALID_SOCKET (-1)
 #endif // _WIN32
 
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec) {
-  socket_type s = ::socket(enum_to_native(family), enum_to_native(type),
-                           enum_to_native(protocal));
+  socket_type const s = ::socket(enum_to_native(family), enum_to_native(type),
+                                 enum_to_native(protocal));
   if (s == INVALID_SOCKET) {
     ec = get_net_error_code();
   }
@@ -110,13 +110,13 @@ void set_keepalive(socket_type s, std::error_code &ec, int enable, int time_s,
 }
 
 void set_reuseaddr(socket_type s, std::error_code &ec) {
-  constexpr int set = 1;
+  constexpr int kSet = 1;
 #ifdef SO_REUSEPORT
   int optname = SO_REUSEPORT;
 #else
-  int optname = SO_REUSEADDR;
+  int const optname = SO_REUSEADDR;
 #endif // SO_REUSEPORT
-  if (::setsockopt(s, SOL_SOCKET, optname, (const char *)&set, sizeof(set)) <
+  if (::setsockopt(s, SOL_SOCKET, optname, (const char *)&kSet, sizeof(kSet)) <
       0) {
     ec = get_net_error_code();
   }
@@ -293,7 +293,7 @@ uint32_t net_to_host(uint32_t v) { return ntohl(v); }
 uint64_t net_to_host(uint64_t v) {
   return
 #ifdef _WIN32
-      ntohll(v);
+      NTOHLL(v);
 #else
       be64toh(v);
 #endif // _WIN32
@@ -306,7 +306,7 @@ uint32_t host_to_net(uint32_t v) { return htonl(v); }
 uint64_t host_to_net(uint64_t v) {
   return
 #ifdef _WIN32
-      htonll(v);
+      HTONLL(v);
 #else
       htobe64(v);
 #endif // _WIN32

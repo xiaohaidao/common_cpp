@@ -16,10 +16,10 @@ public:
       : buff_{}, file_op_(&p, s), module_(module) {}
   ~Files() {}
 
-  ::native_handle native_handle() const { return file_op_.native_handle(); }
+  ::native_handle native() const { return file_op_.native(); }
 
   void close() {
-    LOG_TRACE("module: %s, close fd %d", module_.c_str(), native_handle());
+    LOG_TRACE("module: %s, close fd %d", module_.c_str(), native());
     std::error_code ec;
     file_op_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -29,8 +29,8 @@ public:
   void read(const std::error_code &re_ec, size_t size, Files *f) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module_.c_str(),
-              native_handle(), size, strlen(buff_), buff_);
+    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
+              size, strlen(buff_), buff_);
     if (!re_ec) {
       f->async_write(buff_, size, this);
     }
@@ -40,7 +40,7 @@ public:
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_TRACE("%s: %d async write buff complete %d %d \"%s\"", module_.c_str(),
-              native_handle(), size, strlen(buff_), buff_);
+              native(), size, strlen(buff_), buff_);
     if (!re_ec) {
       f->async_read(this);
     }
@@ -56,10 +56,10 @@ public:
   }
 
   void async_write(const char *buff, size_t size, Files *f) {
-    size = (std::min)(size, sizeof(buff_));
+    size = (std::min)(size, sizeof(buff));
     memcpy(buff_, buff, size);
     buff_[size] = 0;
-    LOG_TRACE("%s: write message \"%s\"", module_.c_str(), buff_);
+    LOG_TRACE("%s: write message \"%s\"", module_.c_str(), buff);
     std::error_code ec;
     file_op_.async_write((char *)buff_, size,
                          std::bind(&Files::write, this, _1, _2, f), ec);
@@ -67,6 +67,7 @@ public:
                      << ec.message();
   }
 
+private:
   char buff_[1024];
   FilesOp file_op_;
   std::string module_;

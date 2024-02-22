@@ -60,7 +60,7 @@ void Semaphores::wait(std::error_code &ec) {
   }
 }
 
-bool Semaphores::tryWait(std::error_code &ec) {
+bool Semaphores::try_wait(std::error_code &ec) {
   if (::sem_trywait((sem_t *)sem_) == -1) {
     int e = errno;
     if (e != EAGAIN) {
@@ -71,7 +71,7 @@ bool Semaphores::tryWait(std::error_code &ec) {
   return true;
 }
 
-bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
+bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
     ec = get_error_code();
@@ -92,7 +92,7 @@ bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
   return true;
 }
 
-void Semaphores::notifyOne(std::error_code &ec) {
+void Semaphores::notify_one(std::error_code &ec) {
   if (::sem_post((sem_t *)sem_) == -1) {
     ec = get_error_code();
     return;

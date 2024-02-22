@@ -53,7 +53,7 @@ Process Process::call(const char *command,
                       const std::vector<const char *> &argv,
                       std::error_code &ec) {
 
-  ipc::Pipe pipe = ipc::Pipe::std_in_out();
+  ipc::Pipe const pipe = ipc::Pipe::std_in_out();
   return call(command, argv, pipe, ec);
 }
 
@@ -69,7 +69,7 @@ Process Process::open(uint64_t pid, std::error_code &ec) {
 }
 
 bool Process::running(std::error_code &ec) {
-  DWORD re = WaitForSingleObject(child_handle_, 0);
+  DWORD const re = WaitForSingleObject(child_handle_, 0);
   if (re == WAIT_FAILED) {
     ec = get_error_code();
   }

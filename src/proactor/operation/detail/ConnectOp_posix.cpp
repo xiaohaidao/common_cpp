@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 
+#include <utility>
+
 #include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
@@ -18,7 +20,7 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
                               std::error_code &ec) {
 
   client_ = s;
-  func_ = async_func;
+  func_ = std::move(async_func);
 
   int flags = fcntl(client_, F_GETFL, 0);
   if (fcntl(client_, F_SETFL, flags | O_NONBLOCK)) {

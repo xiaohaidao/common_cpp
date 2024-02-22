@@ -39,16 +39,16 @@ public:
   // when queue is full, it will be blocked
   void send(const char *data, size_t size, std::error_code &ec);
 
-  bool sendTimeout(const char *data, size_t size, size_t timeout_ms,
-                   std::error_code &ec);
+  bool send_timeout(const char *data, size_t size, size_t timeout_ms,
+                    std::error_code &ec);
 
   // when queue is full, it will be blocked. data_size recommendation is not
   // less than 8192
   size_t recv(char *data, size_t data_size, std::error_code &ec);
 
   // data_size recommendation is not less than 8192
-  size_t recvTimeout(char *data, size_t data_size, size_t timeout_ms,
-                     std::error_code &ec);
+  size_t recv_timeout(char *data, size_t data_size, size_t timeout_ms,
+                      std::error_code &ec);
 
   void close(std::error_code &ec);
   void remove(std::error_code &ec);

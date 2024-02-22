@@ -15,8 +15,8 @@ public:
 
   PipeConnectOp();
 
-  void async_connect(void *proactor, native_handle h, func_type async_func,
-                     std::error_code &ec);
+  void async_connect(void *proactor, func_type async_func,
+                     const native_handle &h, std::error_code &ec);
 
   // protected:
   // Proactor call this function

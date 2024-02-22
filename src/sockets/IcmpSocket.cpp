@@ -18,8 +18,9 @@
 #include "utils/error_code.h"
 
 #ifdef _WIN32
-#define closesocket closesocket
+#define CLOSESOCKET closesocket
 
+// NOLINTBEGIN(readability-identifier-naming)
 struct icmphdr {
   uint8_t type; /* message type */
   uint8_t code; /* type sub-code */
@@ -74,8 +75,10 @@ struct iphdr {
 #define ICMP_ADDRESSREPLY 18   /* Address Mask Reply		*/
 #define NR_ICMP_TYPES 18
 
+// NOLINTEND(readability-identifier-naming)
+
 #else
-#define closesocket close
+#define CLOSESOCKET close
 #define INVALID_SOCKET (socket_type)(~0)
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
@@ -134,7 +137,7 @@ IcmpSocket::IcmpSocket(const socket_type &s)
 IcmpSocket IcmpSocket::create(FamilyType family, std::error_code &ec) {
 
   IcmpSocket re;
-  socket_type s =
+  socket_type const s =
       sockets::socket(family, kRaw, family == kIpV4 ? kIcmp : kIcmpV6, ec);
   // sockets::socket(family, kDgram, family == kIpV4 ? kIcmp : kIcmpV6, ec);
   if (ec) {
@@ -187,13 +190,13 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
   }
 
   struct icmphdr icmp_hdr = {};
-  constexpr size_t icmp_head_size = sizeof(icmphdr);
-  size_t ip_head_size = reinterpret_cast<iphdr *>(buf)->ihl * 4;
-  ret -= static_cast<int>(icmp_head_size);
+  constexpr size_t kIcmpHeadSize = sizeof(icmphdr);
+  size_t const ip_head_size = reinterpret_cast<iphdr *>(buf)->ihl * 4;
+  ret -= static_cast<int>(kIcmpHeadSize);
   ret -= static_cast<int>(ip_head_size); // ip protocal struct size
-  memcpy(&icmp_hdr, buf + ip_head_size, icmp_head_size);
-  memcpy(buf, buf + icmp_head_size + ip_head_size, ret);
-  memset(buf + icmp_head_size + ip_head_size, 0, icmp_head_size + ip_head_size);
+  memcpy(&icmp_hdr, buf + ip_head_size, kIcmpHeadSize);
+  memcpy(buf, buf + kIcmpHeadSize + ip_head_size, ret);
+  memset(buf + kIcmpHeadSize + ip_head_size, 0, kIcmpHeadSize + ip_head_size);
   if (icmp_hdr.type == ICMP_ECHOREPLY) {
     //
   }
@@ -214,7 +217,7 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
       in_cksum(buf, static_cast<int>(data_size + sizeof(icmp_hdr)), 0);
   memcpy(buf, &icmp_hdr, sizeof(icmp_hdr));
 
-  int rev =
+  int const rev =
       ::sendto(socket_, buf, static_cast<int>(data_size + sizeof(icmp_hdr)), 0,
                (const sockaddr *)to.native_addr(),
                static_cast<int>(to.native_addr_size()));
@@ -227,14 +230,14 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
 
 void IcmpSocket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_BOTH)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
   }
-  if (::closesocket(socket_)) {
+  if (::CLOSESOCKET(socket_)) {
     ec = get_net_error_code();
   }
 }
 
-socket_type IcmpSocket::native_handle() const { return socket_; }
+socket_type IcmpSocket::native() const { return socket_; }

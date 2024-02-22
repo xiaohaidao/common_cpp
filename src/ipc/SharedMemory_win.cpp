@@ -30,7 +30,7 @@ SharedMemory::~SharedMemory() {
 SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   SharedMemory result;
 
-  std::string key_g = std::string("Global\\") + key;
+  std::string const key_g = std::string("Global\\") + key;
   HANDLE map_file = OpenFileMapping(FILE_MAP_ALL_ACCESS, // read/write access
                                     false, // do not inherit the name
                                     key_g.c_str());
@@ -47,7 +47,7 @@ SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
 SharedMemory SharedMemory::create(const char *key, size_t mem_size,
                                   std::error_code &ec) {
 
-  std::string key_g = std::string("Global\\") + key;
+  std::string const key_g = std::string("Global\\") + key;
   HANDLE map_file = CreateFileMapping(
       INVALID_HANDLE_VALUE,         // use paging file
       NULL,                         // default security
@@ -57,7 +57,7 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
       key_g.c_str());               // name of mapping object
 
   SharedMemory result;
-  std::error_code er = get_error_code();
+  std::error_code const er = get_error_code();
   if (map_file == nullptr || er.value() == ERROR_ALREADY_EXISTS) {
     ec = er;
     return result;
@@ -84,9 +84,10 @@ void SharedMemory::deatch(std::error_code &ec) {
 }
 
 void SharedMemory::attach(std::error_code &ec) {
-  if ((memory_ = MapViewOfFile(shmid_,              // handle to map object
-                               FILE_MAP_ALL_ACCESS, // read/write permission
-                               0, 0, size_)) == nullptr) {
+  memory_ = MapViewOfFile(shmid_,              // handle to map object
+                          FILE_MAP_ALL_ACCESS, // read/write permission
+                          0, 0, size_);
+  if (memory_ == nullptr) {
     ec = get_error_code();
     memory_ = nullptr;
     size_ = 0;

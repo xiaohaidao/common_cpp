@@ -71,7 +71,7 @@ Process Process::call(const char *command,
   return sys;
 }
 
-Process Process::open(uint64_t pid, std::error_code &ec) {
+Process Process::open(uint64_t pid, std::error_code & /*ec*/) {
   Process p;
   p.child_handle_ = pid;
   return p;

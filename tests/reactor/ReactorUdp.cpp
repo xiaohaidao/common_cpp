@@ -14,7 +14,7 @@ public:
   explicit Udp(const char *module) : module_(module) {}
 
   void close() {
-    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native_handle());
+    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native());
     std::error_code ec;
     client_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -22,7 +22,7 @@ public:
     ec.clear();
   }
 
-  socket_type native_handle() const { return client_.native_handle(); }
+  socket_type native() const { return client_.native(); }
 
   void bind(const char *port) {
     std::error_code ec;
@@ -50,9 +50,8 @@ public:
     ec.clear();
   }
 
-  void read(void *reactor) {
-    LOG_TRACE("module: %s, socket %d begin read", module_.c_str(),
-              native_handle());
+  void read(void * /*reactor*/) {
+    LOG_TRACE("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
     std::pair<size_t, SocketAddr> recv =
         client_.recv_from(buff_, sizeof(buff_), ec);
@@ -67,7 +66,7 @@ public:
 
     if (n == 0) {
       LOG_TRACE("module: %s, close socket %d", module_.c_str(),
-                client_.native_handle());
+                client_.native());
       client_.close(ec);
       EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                        << ec.message();
@@ -85,7 +84,8 @@ public:
     ec.clear();
   }
 
-  void complete(void *owner, const std::error_code &re_ec, size_t v) override {
+  void complete(void *owner, const std::error_code & /*re_ec*/,
+                size_t /*v*/) override {
     read(owner);
   }
 
@@ -97,7 +97,7 @@ private:
 
 }; // class Udp
 
-template <typename T> void ReactorUdpFunc() {
+template <typename T> void reactor_udp_func() {
   std::error_code ec;
   SocketAddr addr(nullptr, "8989");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
@@ -106,12 +106,12 @@ template <typename T> void ReactorUdpFunc() {
   snprintf(port, sizeof(port), "%d", addr.get_port());
   Udp<T> server("server");
   server.bind(port);
-  EXPECT_TRUE(server.native_handle() > 0);
+  EXPECT_TRUE(server.native() > 0);
 
   T reactor(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  reactor.post_read(server.native_handle(), &server, ec);
+  reactor.post_read(server.native(), &server, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -119,7 +119,7 @@ template <typename T> void ReactorUdpFunc() {
             addr.get_port());
   Udp<T> client("client");
   client.connect(addr);
-  reactor.post_read(client.native_handle(), &client, ec);
+  reactor.post_read(client.native(), &client, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -146,6 +146,6 @@ template <typename T> void ReactorUdpFunc() {
   ec.clear();
 }
 
-TEST(ReactorTest, ReactorUdp) { ReactorUdpFunc<Reactor>(); }
+TEST(ReactorTest, ReactorUdp) { reactor_udp_func<Reactor>(); }
 
-TEST(ReactorTest, SelectUdp) { ReactorUdpFunc<ReactorSelect>(); }
+TEST(ReactorTest, SelectUdp) { reactor_udp_func<ReactorSelect>(); }

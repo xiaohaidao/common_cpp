@@ -18,14 +18,15 @@ public:
   TcpStreamOp(Proactor *context, socket_type s);
 
   TcpStreamOp(const TcpStreamOp &);
-  const TcpStreamOp &operator=(const TcpStreamOp &);
+  TcpStreamOp &operator=(const TcpStreamOp &);
 
   void connect(const SocketAddr &addr, std::error_code &ec);
-  void async_connect(const SocketAddr &addr, func_type f, std::error_code &ec);
+  void async_connect(const SocketAddr &addr, const func_type &f,
+                     std::error_code &ec);
 
-  void async_read(char *buff, size_t buff_size, func_type f,
+  void async_read(char *buff, size_t buff_size, const func_type &f,
                   std::error_code &ec);
-  void async_write(const char *buff, size_t buff_size, func_type f,
+  void async_write(const char *buff, size_t buff_size, const func_type &f,
                    std::error_code &ec);
 
   size_t read(char *buff, size_t buff_size, std::error_code &ec);
@@ -34,7 +35,7 @@ public:
   void shutdown(std::error_code &ec);
   void close(std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   Proactor *ctx_;

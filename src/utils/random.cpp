@@ -7,15 +7,15 @@
 
 namespace {
 
-typedef std::chrono::time_point<std::chrono::steady_clock> time_type;
+typedef std::chrono::time_point<std::chrono::steady_clock> TimeType;
 
-class xorshift32 {
+class Xorshift32 {
   uint32_t seed_;
 
 public:
-  xorshift32()
+  Xorshift32()
       : seed_(static_cast<uint32_t>(
-            time_type::clock::now().time_since_epoch().count())) {}
+            TimeType::clock::now().time_since_epoch().count())) {}
 
   uint32_t operator()() {
     uint64_t x = seed_;
@@ -26,11 +26,11 @@ public:
   }
 };
 
-class xorshift64 {
+class Xorshift64 {
   uint64_t seed_;
 
 public:
-  xorshift64() : seed_(time_type::clock::now().time_since_epoch().count()) {}
+  Xorshift64() : seed_(TimeType::clock::now().time_since_epoch().count()) {}
 
   uint64_t operator()() {
     uint64_t x = seed_;
@@ -43,39 +43,39 @@ public:
 
 class Seed {
   bool fix_seed_;
-  static constexpr uint64_t FIX_SEED = 15011051792192176828u;
+  static constexpr uint64_t kFixSeed = 15011051792192176828u;
 
 public:
   Seed() : fix_seed_(false) {}
 
   void gen32(uint32_t *dst, size_t size) {
-    xorshift32 xor32;
+    Xorshift32 xor32;
     for (size_t i = 0; i < size; ++i) {
-      dst[i] = static_cast<uint32_t>(fix_seed_ ? (FIX_SEED | i) : xor32());
+      dst[i] = static_cast<uint32_t>(fix_seed_ ? (kFixSeed | i) : xor32());
     }
   }
 
   void gen64(uint64_t *dst, size_t size) {
-    xorshift64 xor64;
+    Xorshift64 xor64;
     for (size_t i = 0; i < size; ++i) {
-      dst[i] = fix_seed_ ? (FIX_SEED | i) : xor64();
+      dst[i] = fix_seed_ ? (kFixSeed | i) : xor64();
     }
   }
 
-  void setFix(bool fix) { fix_seed_ = fix; }
+  void set_fix(bool fix) { fix_seed_ = fix; }
 };
 
-class xorshift128 {
+class Xorshift128 {
   uint32_t seed_[4];
   Seed gen_seed_;
 
 public:
-  xorshift128() { setFixSeed(false); }
+  Xorshift128() { set_fix_seed(false); }
 
   uint32_t operator()() {
     uint32_t t = seed_[3];
 
-    uint32_t s = seed_[0]; /* Perform a contrived 32-bit shift. */
+    uint32_t const s = seed_[0]; /* Perform a contrived 32-bit shift. */
     seed_[3] = seed_[2];
     seed_[2] = seed_[1];
     seed_[1] = s;
@@ -85,20 +85,20 @@ public:
     return seed_[0] = t ^ s ^ (s >> 19);
   }
 
-  void setFixSeed(bool fix) {
-    gen_seed_.setFix(fix);
+  void set_fix_seed(bool fix) {
+    gen_seed_.set_fix(fix);
     gen_seed_.gen32(seed_, 4);
   }
 };
 
-class xoshiro256ss {
+class Xoshiro256ss {
   uint64_t seed_[4];
   Seed gen_seed_;
 
   uint64_t rol64(uint64_t x, uint64_t k) { return (x << k) | (x >> (64 - k)); }
 
 public:
-  xoshiro256ss() { setFixSeed(false); }
+  Xoshiro256ss() { set_fix_seed(false); }
 
   uint64_t operator()() {
     uint64_t *s = seed_;
@@ -114,12 +114,12 @@ public:
     return result;
   }
 
-  void setFixSeed(bool fix) {
-    gen_seed_.setFix(fix);
+  void set_fix_seed(bool fix) {
+    gen_seed_.set_fix(fix);
     gen_seed_.gen64(seed_, 4);
   }
 
-  float genFloat() {
+  float gen_float() {
     uint64_t s = (*this)();
     s = ((s >> 41) + (0x7fUL << 23));
     float r = {};
@@ -127,7 +127,7 @@ public:
     return r;
   }
 
-  double genDouble() {
+  double gen_double() {
     uint64_t s = (*this)();
     s = ((s >> 12) + (0x3ffULL << 52));
     double r = {};
@@ -136,16 +136,16 @@ public:
   }
 };
 
-xoshiro256ss g_xorshfit;
+Xoshiro256ss g_xorshfit;
 
 } // namespace
 
-void fix_seed() { g_xorshfit.setFixSeed(true); }
+void fix_seed() { g_xorshfit.set_fix_seed(true); }
 
 uint64_t rand_num() { return g_xorshfit(); }
 
 uint64_t rand_scope(uint64_t min_v, uint64_t max_v) {
-  uint64_t diff = std::max(min_v, max_v) - std::min(min_v, max_v);
+  uint64_t const diff = std::max(min_v, max_v) - std::min(min_v, max_v);
   if (diff == 0) {
     return max_v;
   }

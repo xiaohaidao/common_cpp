@@ -57,7 +57,7 @@ public:
   void set_multicast_loop_v6(bool enable, std::error_code &ec);
   bool multicast_loop_v6(std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   socket_type socket_;

@@ -9,12 +9,12 @@
 #include "sockets/TcpStream.h"
 #include "sockets/UdpSocket.h"
 
-Proactor *PROACTOR = nullptr;
+Proactor *proactor = nullptr;
 
-void set_proactor(void *proactor) { PROACTOR = (Proactor *)proactor; }
+void set_proactor(void *p) { proactor = (Proactor *)p; }
 
 socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec) {
-  TcpListenerOp op(*PROACTOR, s);
+  TcpListenerOp op(*proactor, s);
   std::error_code r_ec;
   bool ready = false;
   socket_type new_socket = {};
@@ -22,7 +22,7 @@ socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec) {
       [&new_socket, &from, &ec,
        &ready](const std::error_code &re_ec,
                const std::pair<TcpStreamOp, SocketAddr> &recv) {
-        new_socket = recv.first.native_handle();
+        new_socket = recv.first.native();
         from = recv.second;
         ec = re_ec;
         ready = true;
@@ -35,7 +35,7 @@ socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec) {
       ec = status_ec;
       return new_socket;
     }
-  } while (!ready && !r_ec && PROACTOR);
+  } while (!ready && !r_ec && proactor);
   if (r_ec) {
     ec = r_ec;
   }
@@ -43,7 +43,7 @@ socket_type co_accept(socket_type s, SocketAddr &from, std::error_code &ec) {
 }
 
 socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
-  TcpStreamOp op(PROACTOR);
+  TcpStreamOp op(proactor);
   std::error_code r_ec;
   bool ready = false;
   size_t recv_size = 0;
@@ -55,7 +55,7 @@ socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
         ready = true;
       },
       r_ec);
-  socket_type s = op.native_handle();
+  socket_type const s = op.native();
   do {
     co_yield();
     std::error_code status_ec;
@@ -63,7 +63,7 @@ socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
       ec = status_ec;
       return s;
     }
-  } while (!ready && !r_ec && PROACTOR);
+  } while (!ready && !r_ec && proactor);
   if (r_ec) {
     ec = r_ec;
   }
@@ -73,7 +73,7 @@ socket_type co_connect(const SocketAddr &addr, std::error_code &ec) {
 int co_tcp_read(socket_type s, char *data, size_t data_size,
                 std::error_code &ec) {
 
-  TcpStreamOp op(PROACTOR, s);
+  TcpStreamOp op(proactor, s);
   std::error_code r_ec;
   bool ready = false;
   size_t recv_size = 0;
@@ -92,7 +92,7 @@ int co_tcp_read(socket_type s, char *data, size_t data_size,
       ec = status_ec;
       return -1;
     }
-  } while (!ready && !r_ec && PROACTOR);
+  } while (!ready && !r_ec && proactor);
   if (r_ec) {
     ec = r_ec;
     return -1;
@@ -117,7 +117,7 @@ int co_udp_sendto(socket_type s, const SocketAddr &to, const char *data,
 int co_udp_readfrom(socket_type s, SocketAddr &from, char *data,
                     size_t data_size, std::error_code &ec) {
 
-  UdpSocketOp op(*PROACTOR, s);
+  UdpSocketOp op(*proactor, s);
   std::error_code r_ec;
   bool ready = false;
   size_t recv_size = 0;
@@ -138,7 +138,7 @@ int co_udp_readfrom(socket_type s, SocketAddr &from, char *data,
       ec = status_ec;
       return -1;
     }
-  } while (!ready && !r_ec && PROACTOR);
+  } while (!ready && !r_ec && proactor);
   if (r_ec) {
     ec = r_ec;
     return -1;

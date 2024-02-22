@@ -9,45 +9,45 @@
 
 #define POST_SOCKET(s, op_size, ops, set, op, ec)                              \
   do {                                                                         \
-    if (op_size >= ops.size()) {                                               \
-      ec = {EINVAL, std::system_category()};                                   \
+    if ((op_size) >= (ops).size()) {                                           \
+      (ec) = {EINVAL, std::system_category()};                                 \
       return;                                                                  \
     }                                                                          \
-    size_t index = ops.size();                                                 \
-    for (size_t i = 0; i < op_size; ++i) {                                     \
-      if (ops[i].first == s) {                                                 \
+    size_t index = (ops).size();                                               \
+    for (size_t i = 0; i < (op_size); ++i) {                                   \
+      if ((ops)[i].first == (s)) {                                             \
         index = i;                                                             \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
-    if (index == ops.size()) {                                                 \
+    if (index == (ops).size()) {                                               \
       index = op_size;                                                         \
-      ++op_size;                                                               \
+      ++(op_size);                                                             \
     }                                                                          \
-    FD_SET(s, &set);                                                           \
-    ops[index] = {s, op};                                                      \
+    FD_SET(s, &(set));                                                         \
+    (ops)[index] = {s, op};                                                    \
   } while (false)
 
 #define REMOVE_SOCKET(s, op_size, ops, set)                                    \
   do {                                                                         \
-    for (size_t i = 0; i < op_size; ++i) {                                     \
-      if (ops[i].first == s) {                                                 \
-        std::swap(ops[i], ops[op_size - 1]);                                   \
-        --op_size;                                                             \
+    for (size_t i = 0; i < (op_size); ++i) {                                   \
+      if ((ops)[i].first == (s)) {                                             \
+        std::swap((ops)[i], (ops)[(op_size)-1]);                               \
+        --(op_size);                                                           \
         break;                                                                 \
       }                                                                        \
     }                                                                          \
-    FD_CLR(s, &set);                                                           \
+    FD_CLR(s, &(set));                                                         \
   } while (false)
 
 #define FIND_SOCKET(queue, op_size, ops, set, re_size)                         \
   do {                                                                         \
-    for (size_t i = 0; i < op_size; ++i) {                                     \
-      if (FD_ISSET(ops[i].first, &set)) {                                      \
-        ReactorOp *ptr = ops[i].second;                                        \
-        if (!queue.exist(ptr)) {                                               \
-          queue.push(ptr);                                                     \
-          ++re_size;                                                           \
+    for (size_t i = 0; i < (op_size); ++i) {                                   \
+      if (FD_ISSET((ops)[i].first, &(set))) {                                  \
+        ReactorOp *ptr = (ops)[i].second;                                      \
+        if (!(queue).exist(ptr)) {                                             \
+          (queue).push(ptr);                                                   \
+          ++(re_size);                                                         \
         }                                                                      \
       }                                                                        \
     }                                                                          \
@@ -82,7 +82,7 @@ void Select::post_except(socket_type s, ReactorOp *op, std::error_code &ec) {
   fd_ = (std::max)(fd_, s + 1);
 }
 
-void Select::cancel(socket_type s, std::error_code &ec) {
+void Select::cancel(socket_type s, std::error_code & /*ec*/) {
   REMOVE_SOCKET(s, map_read_op_size_, map_read_op_, read_);
   REMOVE_SOCKET(s, map_write_op_size_, map_write_op_, write_);
   REMOVE_SOCKET(s, map_except_op_size_, map_except_op_, except_);
@@ -111,12 +111,12 @@ size_t Select::run_once(QueueOp &queue, std::error_code &ec) {
 size_t Select::run_once_timeout(QueueOp &queue, size_t timeout_ms,
                                 std::error_code &ec) {
   struct timeval time = {};
-  time.tv_usec = timeout_ms % 1000 * 1000;
-  time.tv_sec = static_cast<long>(timeout_ms / 1000);
+  time.tv_usec = timeout_ms % 1000u * 1000u;
+  time.tv_sec = static_cast<long>(timeout_ms / 1000u);
   fd_type readability = read_;
   fd_type writability = write_;
   fd_type check_except = except_;
-  int re = ::select(
+  int const re = ::select(
       static_cast<int>(fd_), &readability, &writability, &check_except,
       timeout_ms == (std::numeric_limits<size_t>::max)() ? nullptr : &time);
   if (re < 0) {

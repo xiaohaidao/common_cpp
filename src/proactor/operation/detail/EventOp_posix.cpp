@@ -6,6 +6,8 @@
 #include <sys/eventfd.h>
 #include <unistd.h>
 
+#include <utility>
+
 #include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
@@ -19,7 +21,7 @@ void EventOp::close(std::error_code &ec) {
   }
 }
 
-native_handle EventOp::native_handle() const { return fd_; }
+native_handle EventOp::native() const { return fd_; }
 
 EventOp EventOp::create(std::error_code &ec) {
   EventOp re;
@@ -48,7 +50,7 @@ uint64_t EventOp::wait(std::error_code &ec) {
 void EventOp::async_wait(void *proactor, func_type async_func,
                          std::error_code &ec) {
 
-  func_ = async_func;
+  func_ = std::move(async_func);
   if (proactor == nullptr) {
     std::error_code re_ec = {ENXIO, std::system_category()};
     complete(proactor, re_ec, 0);
@@ -58,8 +60,8 @@ void EventOp::async_wait(void *proactor, func_type async_func,
   static_cast<Proactor *>(proactor)->post(fd_, this, ec);
 }
 
-void EventOp::complete(void *p, const std::error_code &result_ec,
-                       size_t trans_size) {
+void EventOp::complete(void * /*p*/, const std::error_code &result_ec,
+                       size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

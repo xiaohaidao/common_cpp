@@ -7,6 +7,8 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
@@ -22,15 +24,15 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
   //   return;
   // }
   client_ = s;
-  func_ = async_func;
+  func_ = std::move(async_func);
 
-  DWORD numBytes = 0;
+  DWORD num_bytes = 0;
   GUID guid = WSAID_CONNECTEX;
-  static LPFN_CONNECTEX ConnectExPtr = NULL;
-  if (!ConnectExPtr) {
+  static LPFN_CONNECTEX connect_ex_ptr = NULL;
+  if (!connect_ex_ptr) {
     if (::WSAIoctl(client_, SIO_GET_EXTENSION_FUNCTION_POINTER, (void *)&guid,
-                   sizeof(guid), (void *)&ConnectExPtr, sizeof(ConnectExPtr),
-                   &numBytes, NULL, NULL)) {
+                   sizeof(guid), (void *)&connect_ex_ptr,
+                   sizeof(connect_ex_ptr), &num_bytes, NULL, NULL)) {
       ec = get_net_error_code();
       complete(proactor, ec, 0);
       // assert(ec);
@@ -53,10 +55,10 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
     return;
   }
 
-  if (ConnectExPtr(client_, (sockaddr *)addr.native_addr(),
-                   static_cast<int>(addr.native_addr_size()), nullptr, 0,
-                   nullptr, (OVERLAPPED *)this)) {
-    std::error_code re_ec = get_net_error_code();
+  if (connect_ex_ptr(client_, (sockaddr *)addr.native_addr(),
+                     static_cast<int>(addr.native_addr_size()), nullptr, 0,
+                     nullptr, (OVERLAPPED *)this)) {
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
@@ -73,7 +75,7 @@ void ConnectOp::complete(void *p, const std::error_code &result_ec,
     // std::error_code ec = get_net_error_code();
   }
   if (func_) {
-    socket_type s = client_;
+    socket_type const s = client_;
     client_ = INVALID_SOCKET;
 
     auto tmp = std::move(func_);

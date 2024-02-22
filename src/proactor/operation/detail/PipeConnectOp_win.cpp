@@ -5,18 +5,20 @@
 
 #include <namedpipeapi.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
 
 PipeConnectOp::PipeConnectOp() {}
 
-void PipeConnectOp::async_connect(void *proactor, native_handle h,
-                                  func_type async_func, std::error_code &ec) {
+void PipeConnectOp::async_connect(void *proactor, func_type async_func,
+                                  const native_handle &h, std::error_code &ec) {
 
-  func_ = async_func;
+  func_ = std::move(async_func);
   if (!::ConnectNamedPipe(h, (LPOVERLAPPED)this)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() == ERROR_PIPE_CONNECTED) {
       complete(proactor, ec, 0);
     } else if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {

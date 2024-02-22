@@ -1,6 +1,8 @@
 
 #ifdef __linux__
 
+#include <utility>
+
 #include "proactor/operation/detail/SendToOp.h"
 
 #include "proactor/Proactor.h"
@@ -16,7 +18,7 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
                              func_type async_func, std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
-  func_ = async_func;
+  func_ = std::move(async_func);
   to_ = to;
   socket_ = s;
   if (proactor == nullptr) {
@@ -29,7 +31,7 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
 }
 
 void SendToOp::complete(void *p, const std::error_code &result_ec,
-                        size_t trans_size) {
+                        size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

@@ -16,8 +16,8 @@ public:
   coroutine(coroutine &) = delete;
   coroutine &operator=(coroutine &) = delete;
 
-  void append_task(std::function<void()> f, uint32_t block_size = 256);
-  void append_task(std::function<void(coroutine &)> f,
+  void append_task(const std::function<void()> &f, uint32_t block_size = 256);
+  void append_task(const std::function<void(coroutine &)> &f,
                    uint32_t block_size = 256);
 
   void yield();

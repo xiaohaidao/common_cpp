@@ -32,7 +32,7 @@ public:
   }
 
   void write(const char *str) {
-    int r = snprintf(buff_, sizeof(buff_), "%s", str);
+    int const r = snprintf(buff_, sizeof(buff_), "%s", str);
     LOG_INFO("r %d:%zu\n", r, strlen(str));
     write(r);
   }
@@ -69,7 +69,7 @@ public:
                                     size, (int)size, buff_);
                            write(size);
                          } else {
-                           std::error_code ec;
+                           std::error_code const ec;
                            LOG_INFO("remote client close %d re %s\n",
                                     tcp_op_.native(), re.message().c_str());
                          }
@@ -129,29 +129,34 @@ int main(int args, char **argv) {
            argv[0]);
     return -1;
   }
-  if (strcmp(argv[1], "-c") == 0) {
-    std::error_code ec;
-    Proactor a(ec);
-    if (ec) {
-      LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
+  try {
+    if (strcmp(argv[1], "-c") == 0) {
+      std::error_code ec;
+      Proactor a(ec);
+      if (ec) {
+        LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
+      }
+
+      IpcStreamOp const op(&a);
+      auto client = std::make_shared<Client>(op);
+      client->connect(argv[2]);
+      client->write("client send message!");
+      a.run();
+
+    } else if (strcmp(argv[1], "-s") == 0) {
+      std::error_code ec;
+      Proactor a(ec);
+      if (ec) {
+        LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
+      }
+
+      Server const server(a, argv[2]);
+
+      a.run();
     }
 
-    IpcStreamOp op(&a);
-    auto client = std::make_shared<Client>(op);
-    client->connect(argv[2]);
-    client->write("client send message!");
-    a.run();
-
-  } else if (strcmp(argv[1], "-s") == 0) {
-    std::error_code ec;
-    Proactor a(ec);
-    if (ec) {
-      LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
-    }
-
-    Server server(a, argv[2]);
-
-    a.run();
+  } catch (const std::exception &e) {
+    LOG_ERROR("throw error %s", e.what());
   }
 
   return 0;

@@ -14,7 +14,7 @@ public:
   Udp(Proactor &p, const char *module) : buff_{}, udp_op_(p), module_(module) {}
   ~Udp() {}
 
-  socket_type native_handle() const { return udp_op_.native_handle(); }
+  socket_type native() const { return udp_op_.native(); }
 
   void bind(char *port_service) {
     std::error_code ec;
@@ -31,7 +31,7 @@ public:
   }
 
   void close() {
-    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native_handle());
+    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native());
     std::error_code ec;
     udp_op_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -42,8 +42,8 @@ public:
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_TRACE("%s: %d async read from %s:%d size %d %d \"%s\"", module_.c_str(),
-              native_handle(), from.get_ip(), from.get_port(), size,
-              strlen(buff_), buff_);
+              native(), from.get_ip(), from.get_port(), size, strlen(buff_),
+              buff_);
     if (!re_ec)
       async_write(buff_, size, from);
   }
@@ -52,7 +52,7 @@ public:
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_TRACE("%s: %d async send buff complete %d %d \"%s\"", module_.c_str(),
-              native_handle(), size, strlen(buff_), buff_);
+              native(), size, strlen(buff_), buff_);
     if (!re_ec)
       async_read();
   }
@@ -67,7 +67,7 @@ public:
   }
 
   void async_write(const char *buff, size_t size, const SocketAddr &to) {
-    size = (std::min)(size, sizeof(buff_));
+    size = (std::min)(size, sizeof(buff));
     memcpy(buff_, buff, size);
     buff_[size] = 0;
     LOG_TRACE("%s: write to %s:%d message \"%s\"", module_.c_str(), to.get_ip(),
@@ -79,6 +79,7 @@ public:
                      << ec.message();
   }
 
+private:
   char buff_[1024];
   UdpSocketOp udp_op_;
   std::string module_;

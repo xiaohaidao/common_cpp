@@ -31,22 +31,22 @@ class SocketStart {
 public:
   SocketStart() {
     std::error_code ec;
-    initSocket(ec);
+    init_socket(ec);
   }
 
   ~SocketStart() {
     std::error_code ec;
-    uninitSocket(ec);
+    uninit_socket(ec);
   }
 
 private:
-  void initSocket(std::error_code &ec) {
+  void init_socket(std::error_code &ec) {
     WSADATA wsa_data;
     if (WSAStartup(MAKEWORD(2, 2), &wsa_data)) {
       ec = get_net_error_code();
     }
   }
-  void uninitSocket(std::error_code &ec) {
+  void uninit_socket(std::error_code &ec) {
     if (WSACleanup()) {
       ec = get_net_error_code();
     }
@@ -66,9 +66,9 @@ public:
 } // namespace
 
 #ifdef _WIN32
-typedef int size_type;
+typedef int SizeType;
 #else
-typedef socklen_t size_type;
+typedef socklen_t SizeType;
 #endif // _WIN32
 
 } // namespace sockets
@@ -113,7 +113,7 @@ const char *SocketAddr::get_ip() const {
 }
 
 void SocketAddr::get_ip(char *ip, size_t size, std::error_code &ec) const {
-  FamilyType family = get_family();
+  FamilyType const family = get_family();
 #ifdef __linux__
   if (family == kUnix) {
     return;
@@ -177,7 +177,7 @@ void *SocketAddr::native_ip_addr() const {
 SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
   sockaddr *addr = (sockaddr *)re.sock_addr_;
-  size_type size = static_cast<size_type>(re.native_addr_size());
+  SizeType size = static_cast<SizeType>(re.native_addr_size());
   if (::getsockname(s, addr, &size)) {
     ec = get_net_error_code();
     return re;
@@ -189,7 +189,7 @@ SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
 SocketAddr SocketAddr::get_remote_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
   sockaddr *addr = (sockaddr *)re.sock_addr_;
-  size_type size = static_cast<size_type>(re.native_addr_size());
+  SizeType size = static_cast<SizeType>(re.native_addr_size());
   if (::getpeername(s, addr, &size)) {
     ec = get_net_error_code();
     return re;
@@ -202,9 +202,9 @@ void SocketAddr::get_nameinfo(char *host, size_t host_size, char *service,
                               size_t service_size, std::error_code &ec) const {
 
   if (::getnameinfo((const sockaddr *)native_addr(),
-                    static_cast<size_type>(native_addr_size()), host,
-                    static_cast<size_type>(host_size), service,
-                    static_cast<size_type>(service_size), NI_NUMERICSERV)) {
+                    static_cast<SizeType>(native_addr_size()), host,
+                    static_cast<SizeType>(host_size), service,
+                    static_cast<SizeType>(service_size), NI_NUMERICSERV)) {
 
     ec = get_net_error_code();
   }
@@ -219,6 +219,7 @@ const char *SocketAddr::get_localhost(std::error_code &ec) {
   return buff;
 }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 SocketAddr SocketAddr::resolve_host(const char *host,
                                     const char *port_or_service,
                                     std::error_code &ec, FamilyType family,
@@ -243,7 +244,7 @@ SocketAddr SocketAddr::resolve_host(const char *host,
     return re;
   }
 
-  for (auto ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+  for (auto *ptr = result; ptr != NULL; ptr = ptr->ai_next) {
     memcpy(re.sock_addr_, ptr->ai_addr, re.native_addr_size());
     // sockaddr_ipv4->ai_canonname
     re.get_ip(re.ip_addr_, sizeof(re.ip_addr_), ec);
@@ -254,6 +255,7 @@ SocketAddr SocketAddr::resolve_host(const char *host,
 }
 
 std::vector<SocketAddr>
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
                              std::error_code &ec, FamilyType family) {
 
@@ -270,7 +272,7 @@ SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
     return re;
   }
 
-  for (auto ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+  for (auto *ptr = result; ptr != NULL; ptr = ptr->ai_next) {
     SocketAddr address = {};
     memcpy(address.sock_addr_, ptr->ai_addr,
            ptr->ai_family == AF_INET ? sizeof(sockaddr_in)
@@ -280,7 +282,7 @@ SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
       continue;
     }
     address.get_ip(address.ip_addr_, sizeof(address.ip_addr_), ec);
-    re.push_back(std::move(address));
+    re.push_back(address);
   }
 
   ::freeaddrinfo(result);
@@ -302,9 +304,9 @@ SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
     return re;
   }
 
-  size_t address_size = enum_to_native(family) == AF_INET
-                            ? sizeof(sockaddr_in)
-                            : sizeof(sockaddr_in6);
+  size_t const address_size = enum_to_native(family) == AF_INET
+                                  ? sizeof(sockaddr_in)
+                                  : sizeof(sockaddr_in6);
 
   for (PIP_ADAPTER_ADDRESSES addr = addresses; addr; addr = addr->Next) {
     for (PIP_ADAPTER_UNICAST_ADDRESS pu = addr->FirstUnicastAddress; pu;
@@ -319,20 +321,20 @@ SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
 
       SocketAddr mask = {};
       ((struct sockaddr_in *)mask.native_addr())->sin_family =
-          enum_to_native(family);
-      size_t mask_len = pu->OnLinkPrefixLength;
+          (short)enum_to_native(family);
+      size_t const mask_len = pu->OnLinkPrefixLength;
       uint8_t *m = (uint8_t *)mask.native_ip_addr();
-      static const uint8_t CONST_NUMBER[] = {128, 192, 224, 240,
+      static const uint8_t kConstNumber[] = {128, 192, 224, 240,
                                              248, 252, 254, 255};
       for (size_t i = 0; i * 8 < mask_len; ++i) {
-        size_t index = (mask_len - i * 8) >= 8 ? 8 : (mask_len - i * 8);
-        m[i] |= CONST_NUMBER[index - 1];
+        size_t const index = (mask_len - i * 8) >= 8 ? 8 : (mask_len - i * 8);
+        m[i] |= kConstNumber[index - 1];
       }
       mask.get_ip(mask.ip_addr_, sizeof(mask.ip_addr_), ec);
 
       SocketAddr broadaddr = {};
       ((struct sockaddr_in *)broadaddr.native_addr())->sin_family =
-          enum_to_native(family);
+          (short)enum_to_native(family);
       if (family != kIpV6) {
         uint8_t *ip = (uint8_t *)address.native_ip_addr();
         uint8_t *m_ip = (uint8_t *)mask.native_ip_addr();
@@ -343,8 +345,7 @@ SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
         broadaddr.get_ip(broadaddr.ip_addr_, sizeof(broadaddr.ip_addr_), ec);
       }
 
-      re.push_back(std::make_tuple(std::move(address), std::move(mask),
-                                   std::move(broadaddr)));
+      re.push_back(std::make_tuple(address, mask, broadaddr));
       break;
     }
   }
@@ -378,8 +379,7 @@ SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
         broadaddr.get_ip(broadaddr.ip_addr_, sizeof(broadaddr.ip_addr_), ec);
       }
 
-      re.push_back(std::make_tuple(std::move(address), std::move(mask),
-                                   std::move(broadaddr)));
+      re.push_back(std::make_tuple(address, mask, broadaddr));
     }
   }
 

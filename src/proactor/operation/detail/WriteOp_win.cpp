@@ -5,22 +5,24 @@
 
 #include <windows.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
 
 WriteOp::WriteOp() {}
 
-void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
-                          size_t size, func_type async_func,
+void WriteOp::async_write(void *proactor, func_type async_func,
+                          native_handle fd, const char *buff, size_t size,
                           std::error_code &ec) {
 
-  func_ = async_func;
+  func_ = std::move(async_func);
   // if (!::WriteFileEx(fd, buff, size, (LPWSAOVERLAPPED)this, nullptr)) {
   DWORD flag = 0;
   if (!::WriteFile(fd, buff, static_cast<DWORD>(size), &flag,
                    (LPWSAOVERLAPPED)this)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);

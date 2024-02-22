@@ -53,7 +53,7 @@ TEST(IPCTest, MMSocket) {
   // read and write
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
-  for (i = 0; i < 1024 * 1024 * 8 && ok; ++i) {
+  for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
     // LOG_TRACE("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";

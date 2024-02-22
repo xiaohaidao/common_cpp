@@ -9,13 +9,13 @@
 
 namespace proactor_co {
 
-bool STOP_TASK = false;
+bool stop_task = false;
 
 void co_close(socket_type s, const char *module) {
   LOG_TRACE("module: %s, close socket %d", module, s);
   std::error_code ec;
   TcpStream(s).close(ec);
-  if (!STOP_TASK)
+  if (!stop_task)
     EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
 }
@@ -24,7 +24,8 @@ void async_read(socket_type s, const char *module);
 void connected(const char *module, const SocketAddr &addr) {
   std::error_code ec;
   socket_type s = co_connect(addr, ec);
-  EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
+  EXPECT_FALSE(ec) << "module: " << module << ", " << addr.get_ip() << ":"
+                   << addr.get_port() << ", " << ec.value() << " : "
                    << ec.message();
   ec.clear();
   LOG_TRACE("%s: connect %s:%d complete", module, addr.get_ip(),
@@ -79,16 +80,16 @@ public:
   Service() : exit_task_(false) {}
   ~Service() {}
 
-  socket_type native_handle() const { return listener_.native_handle(); }
+  socket_type native() const { return listener_.native(); }
 
   void close() {
     for (auto &i : tcps_) {
       std::error_code ec;
       TcpStream(i).close(ec);
-      if (!STOP_TASK)
+      if (!stop_task)
         EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     }
-    LOG_TRACE("server close socket %d", native_handle());
+    LOG_TRACE("server close socket %d", native());
     std::error_code ec;
     listener_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -104,19 +105,19 @@ public:
   }
 
   void accept() {
-    while (!STOP_TASK) {
+    while (!stop_task) {
       if (exit_task_) {
         break;
       }
       std::error_code ec;
       SocketAddr from = {};
       socket_type new_socket = {};
-      if ((new_socket = co_accept(listener_.native_handle(), from, ec)) == 0) {
+      if ((new_socket = co_accept(listener_.native(), from, ec)) == 0) {
         break;
       }
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-      LOG_TRACE("socket %d client ip %d and port %s:%d", native_handle(),
-                new_socket, from.get_ip(), from.get_port());
+      LOG_TRACE("socket %d client ip %d and port %s:%d", native(), new_socket,
+                from.get_ip(), from.get_port());
       if (ec) {
         continue;
       }
@@ -130,6 +131,7 @@ public:
     co_await([this]() { accept(); });
   }
 
+private:
   TcpListener listener_;
   std::vector<socket_type> tcps_;
   bool exit_task_;
@@ -167,7 +169,7 @@ TEST(ProactorTest, ProactorCo) {
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     if (++i > 10) {
-      STOP_TASK = true;
+      stop_task = true;
       set_proactor(nullptr);
       p.shutdown();
     }

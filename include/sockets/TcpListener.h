@@ -28,7 +28,7 @@ public:
   void set_read_timeout(size_t timeout_ms, std::error_code &ec);
   size_t read_timeout(std::error_code &ec) const;
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   socket_type socket_;

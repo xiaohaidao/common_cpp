@@ -20,7 +20,7 @@ public:
 
   void close(std::error_code &ec);
 
-  ::native_handle native_handle() const;
+  ::native_handle native() const;
 
   void async_wait(void *proactor, func_type async_func, std::error_code &ec);
 

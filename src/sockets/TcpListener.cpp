@@ -14,9 +14,9 @@
 #include "utils/error_code.h"
 
 #ifdef _WIN32
-#define closesocket closesocket
+#define CLOSESOCKET closesocket
 #else
-#define closesocket close
+#define CLOSESOCKET close
 #define INVALID_SOCKET (socket_type)(~0)
 #endif // _WIN32
 
@@ -34,13 +34,13 @@ TcpListener TcpListener::bind(const char *port_or_service, FamilyType family,
                               std::error_code &ec) {
 
   TcpListener re;
-  socket_type listen = bind_port(port_or_service, family, ec).native_handle();
+  socket_type const listen = bind_port(port_or_service, family, ec).native();
   re.socket_ = listen;
   if (ec) {
     return re;
   }
   if (::listen(listen, SOMAXCONN)) {
-    ::closesocket(listen);
+    ::CLOSESOCKET(listen);
     ec = get_net_error_code();
     return re;
   }
@@ -57,12 +57,12 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
                                  std::error_code &ec) {
 
   TcpStream re;
-  socket_type listen = sockets::socket(family, kStream,
+  socket_type const listen = sockets::socket(family, kStream,
 #ifdef __linux__
-                                       family == kUnix ? kIp :
+                                             family == kUnix ? kIp :
 #endif // __linux__
-                                                       kTCP,
-                                       ec);
+                                                             kTCP,
+                                             ec);
   if (listen == INVALID_SOCKET || ec) {
     return re;
   }
@@ -72,7 +72,7 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
     return re;
   }
   // Setup the TCP listening socket
-  SocketAddr addr =
+  SocketAddr const addr =
 #ifdef __linux__
       family == kUnix
           ? SocketAddr(port_or_service)
@@ -81,12 +81,12 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
           SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
-    ::closesocket(listen);
+    ::CLOSESOCKET(listen);
     return re;
   }
   if (::bind(listen, (sockaddr *)addr.native_addr(),
              static_cast<int>(addr.native_addr_size()))) {
-    ::closesocket(listen);
+    ::CLOSESOCKET(listen);
     ec = get_net_error_code();
     return re;
   }
@@ -97,9 +97,9 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
   std::pair<TcpStream, SocketAddr> re;
 
   // Accept a client socket
-  socket_type client = ::accept(socket_, NULL, NULL);
+  socket_type const client = ::accept(socket_, NULL, NULL);
   if (client == INVALID_SOCKET) {
-    ::closesocket(client);
+    ::CLOSESOCKET(client);
     ec = get_net_error_code();
     return re;
   }
@@ -123,9 +123,9 @@ void TcpListener::close(std::error_code &ec) {
     ::unlink(addr.get_ip());
   }
 #endif // __linux__
-  if (::closesocket(socket_)) {
+  if (::CLOSESOCKET(socket_)) {
     ec = get_net_error_code();
   }
 }
 
-socket_type TcpListener::native_handle() const { return socket_; }
+socket_type TcpListener::native() const { return socket_; }

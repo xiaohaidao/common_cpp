@@ -16,16 +16,16 @@ public:
   TcpListenerOp(Proactor &context, socket_type s);
 
   TcpListenerOp(const TcpListenerOp &);
-  const TcpListenerOp &operator=(const TcpListenerOp &);
+  TcpListenerOp &operator=(const TcpListenerOp &);
 
   void bind(const char *port_or_service, std::error_code &ec);
   void bind(const char *port_or_service, FamilyType family,
             std::error_code &ec);
 
   std::pair<TcpStreamOp, SocketAddr> accept(std::error_code &ec);
-  void async_accept(func_type f, std::error_code &ec);
+  void async_accept(const func_type &f, std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
   void close(std::error_code &ec);
 

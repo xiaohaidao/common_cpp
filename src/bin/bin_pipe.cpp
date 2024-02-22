@@ -4,7 +4,7 @@
 #include "ipc/PipeStream.h"
 #include "utils/log.h"
 
-int main(int args, char **argv, char *env[]) {
+int main(int args, char **argv, char * /*env*/[]) {
   if (args < 2) {
     printf("Usage:\n"
            "    %s <cmd> [-s|-c]\n",
@@ -49,9 +49,9 @@ int main(int args, char **argv, char *env[]) {
     if (ec) {
       printf("accpet pipe error %s\n", ec.message().c_str());
       return -1;
-    } else {
-      printf("accpet pipe success\n");
     }
+    printf("accpet pipe success\n");
+
     MACOR_FUN()
     pip_s.remove(ec);
     if (ec) {
@@ -70,7 +70,7 @@ int main(int args, char **argv, char *env[]) {
       if (ec) {
         printf("read pipe error %s\n", ec.message().c_str());
       }
-      int s = strlen(buff);
+      int const s = (int)strlen(buff);
       printf("recv %d %s\n", s, buff);
       char b[1024];
       snprintf(b, sizeof(b), "%.*s%s", s, buff, " from client\n");

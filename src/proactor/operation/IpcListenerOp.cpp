@@ -20,6 +20,36 @@ IpcListenerOp::IpcListenerOp(Proactor &context)
 {
 }
 
+#if defined(_WIN32)
+
+IpcListenerOp::IpcListenerOp(const IpcListenerOp &other)
+    : ctx_(other.ctx_), pipe_(other.pipe_) {}
+
+IpcListenerOp &IpcListenerOp::operator=(const IpcListenerOp &other) {
+  if (&other == this) {
+    return *this;
+  }
+  this->ctx_ = other.ctx_;
+  this->pipe_ = other.pipe_;
+  // this->connect_op_ = detail::PipeConnectOp();
+  return *this;
+}
+
+#elif defined(__linux__)
+
+IpcListenerOp::IpcListenerOp(const IpcListenerOp &other)
+    : unix_op_(other.unix_op_) {}
+
+IpcListenerOp &IpcListenerOp::operator=(const IpcListenerOp &other) {
+  if (&other == this) {
+    return *this;
+  }
+  this->unix_op_ = other.unix_op_;
+  return *this;
+}
+
+#endif
+
 void IpcListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
 #if defined(_WIN32)
   pipe_ = ipc::PipeListener::create(port_or_servicer, ec);
@@ -42,12 +72,12 @@ IpcStreamOp IpcListenerOp::accept(std::error_code &ec) {
 #endif
 }
 
-void IpcListenerOp::async_accept(func_type f, std::error_code &ec) {
+void IpcListenerOp::async_accept(const func_type &f, std::error_code &ec) {
 #if defined(_WIN32)
   connect_op_.async_connect(
-      ctx_, pipe_.native(),
+      ctx_,
       [f, &pipe = pipe_](void *ctx, const std::error_code &re_ec, size_t) {
-        auto h = pipe.native();
+        auto *h = pipe.native();
         std::error_code ec;
         pipe.create(ec);
         if (ctx != nullptr) {
@@ -58,7 +88,7 @@ void IpcListenerOp::async_accept(func_type f, std::error_code &ec) {
         f(re_ec,
           IpcStreamOp(static_cast<Proactor *>(ctx), ipc::PipeStream(h, true)));
       },
-      ec);
+      pipe_.native(), ec);
 #elif defined(__linux__)
   unix_op_.async_accept(
       [f](const std::error_code &re_ec,
@@ -85,6 +115,6 @@ native_handle IpcListenerOp::native() const {
 #if defined(_WIN32)
   return pipe_.native();
 #elif defined(__linux__)
-  return unix_op_.native_handle();
+  return unix_op_.native();
 #endif
 }

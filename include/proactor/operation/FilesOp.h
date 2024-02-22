@@ -17,16 +17,16 @@ public:
   FilesOp(Proactor *context, native_handle s);
 
   FilesOp(const FilesOp &);
-  const FilesOp &operator=(const FilesOp &);
+  FilesOp &operator=(const FilesOp &);
 
   /** don't support file
   void open(const char *file_path, std::error_code &ec);
   void open(const char *file_path, bool create, std::error_code &ec);
    */
 
-  void async_read(char *buff, size_t buff_size, func_type f,
+  void async_read(char *buff, size_t buff_size, const func_type &f,
                   std::error_code &ec);
-  void async_write(const char *buff, size_t buff_size, func_type f,
+  void async_write(const char *buff, size_t buff_size, const func_type &f,
                    std::error_code &ec);
 
   size_t read(char *buff, size_t buff_size, std::error_code &ec);
@@ -34,7 +34,7 @@ public:
 
   void close(std::error_code &ec);
 
-  ::native_handle native_handle() const;
+  ::native_handle native() const;
 
 private:
   Proactor *ctx_;

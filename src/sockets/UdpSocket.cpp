@@ -23,9 +23,9 @@
 #include "utils/error_code.h"
 
 #ifdef _WIN32
-#define closesocket closesocket
+#define CLOSESOCKET closesocket
 #else
-#define closesocket close
+#define CLOSESOCKET close
 #define INVALID_SOCKET (socket_type)(~0)
 #define SD_SEND (SHUT_WR)
 #define SD_BOTH (SHUT_RDWR)
@@ -38,7 +38,7 @@ UdpSocket::UdpSocket(const socket_type &s) : socket_(s) {}
 UdpSocket UdpSocket::create(FamilyType family, std::error_code &ec) {
 
   UdpSocket re;
-  socket_type s = sockets::socket(family, kDgram, kUDP, ec);
+  socket_type const s = sockets::socket(family, kDgram, kUDP, ec);
   if (ec) {
     return re;
   }
@@ -52,7 +52,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, std::error_code &ec) {
 
 UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
                           std::error_code &ec) {
-  SocketAddr addr =
+  SocketAddr const addr =
       SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
@@ -60,19 +60,19 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
   }
 
   UdpSocket re;
-  socket_type s = sockets::socket(family, kDgram, kUDP, ec);
+  socket_type const s = sockets::socket(family, kDgram, kUDP, ec);
   if (ec) {
     return re;
   }
   re.socket_ = s;
   sockets::set_reuseaddr(s, ec);
   if (ec) {
-    ::closesocket(s);
+    ::CLOSESOCKET(s);
     return re;
   }
 
   if (::bind(s, (sockaddr *)addr.native_addr(), (int)addr.native_addr_size())) {
-    ::closesocket(s);
+    ::CLOSESOCKET(s);
     ec = get_net_error_code();
     return re;
   }
@@ -83,7 +83,7 @@ void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
   if (::connect(socket_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size())) {
     ec = get_net_error_code();
-    ::closesocket(socket_);
+    ::CLOSESOCKET(socket_);
   }
 }
 
@@ -108,8 +108,8 @@ std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
 
   std::pair<int, SocketAddr> re;
   socklen_t len = (int)re.second.native_addr_size();
-  int ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
-                       (sockaddr *)re.second.native_addr(), &len);
+  int const ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
+                             (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {
     ec = get_net_error_code();
   }
@@ -123,7 +123,7 @@ int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
 #ifdef _WIN32
 #define MSG_NOSIGNAL 0
 #endif
-  int rev =
+  int const rev =
       ::sendto(socket_, buf, (int)buf_size, MSG_NOSIGNAL,
                (const sockaddr *)to.native_addr(), (int)to.native_addr_size());
   if (rev < 0) {
@@ -134,12 +134,12 @@ int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
 
 void UdpSocket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_SEND)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
   }
-  if (::closesocket(socket_)) {
+  if (::CLOSESOCKET(socket_)) {
     ec = get_net_error_code();
   }
 }
@@ -286,4 +286,4 @@ bool UdpSocket::multicast_loop_v6(std::error_code &ec) {
   return en;
 }
 
-socket_type UdpSocket::native_handle() const { return socket_; }
+socket_type UdpSocket::native() const { return socket_; }

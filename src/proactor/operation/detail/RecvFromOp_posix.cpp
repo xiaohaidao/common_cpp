@@ -1,6 +1,8 @@
 
 #ifdef __linux__
 
+#include <utility>
+
 #include "proactor/operation/detail/RecvFromOp.h"
 
 #include "proactor/Proactor.h"
@@ -16,7 +18,7 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
                                  std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
-  func_ = async_func;
+  func_ = std::move(async_func);
   socket_ = s;
   if (proactor == nullptr) {
     std::error_code re_ec = {ENXIO, std::system_category()};
@@ -28,7 +30,7 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
 }
 
 void RecvFromOp::complete(void *p, const std::error_code &result_ec,
-                          size_t trans_size) {
+                          size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

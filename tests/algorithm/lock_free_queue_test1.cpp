@@ -6,9 +6,9 @@
 #include "gtest/gtest.h"
 
 void thread_func(thread::lock_free_queue<int> &queue, size_t id) {
-  static const int LOOP_SIZE = 1000;
-  for (size_t i = 0; i < LOOP_SIZE; ++i) {
-    int v = (int)((id + 1) * LOOP_SIZE + i);
+  static const int kLoopSize = 1000;
+  for (size_t i = 0; i < kLoopSize; ++i) {
+    int const v = (int)((id + 1) * kLoopSize + i);
     queue.push(v);
   }
 }
@@ -16,7 +16,7 @@ void thread_func(thread::lock_free_queue<int> &queue, size_t id) {
 TEST(LockFreeQueue, LockFreeQueueFunction1) {
   thread::lock_free_queue<int> queue;
 
-  size_t thread_size = std::thread::hardware_concurrency();
+  size_t const thread_size = std::thread::hardware_concurrency();
   std::vector<thread::interruptible_thread> threads;
   for (size_t i = 0; i < thread_size; ++i) {
     threads.push_back(thread::interruptible_thread(

@@ -14,7 +14,7 @@ class Client : public std::enable_shared_from_this<Client> {
 public:
   Client(const TcpStreamOp &op) : tcp_op_(op) {
     std::error_code ec;
-    sockets::set_keepalive(tcp_op_.native_handle(), ec, 1, 10, 1, 3);
+    sockets::set_keepalive(tcp_op_.native(), ec, 1, 10, 1, 3);
     if (ec) {
       fprintf(stderr, "set keep live error %d:%s\n", ec.value(),
               ec.message().c_str());
@@ -23,7 +23,7 @@ public:
 
   ~Client() {
     std::error_code ec;
-    auto address = SocketAddr::get_remote_socket(tcp_op_.native_handle(), ec);
+    auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
     tcp_op_.close(ec);
     printf("close remote client %s:%d\n", address.get_ip(), address.get_port());
   }
@@ -33,13 +33,12 @@ public:
     std::error_code ec;
     tcp_op_.async_write(
         buff_, length,
-        [this, self](const std::error_code &re, size_t size) {
+        [this, self](const std::error_code &re, size_t /*size*/) {
           if (!re) {
             read();
           } else {
             std::error_code ec;
-            auto address =
-                SocketAddr::get_remote_socket(tcp_op_.native_handle(), ec);
+            auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
             printf("remote client close %s:%d re %s\n", address.get_ip(),
                    address.get_port(), re.message().c_str());
           }
@@ -57,8 +56,7 @@ public:
             write(size);
           } else {
             std::error_code ec;
-            auto address =
-                SocketAddr::get_remote_socket(tcp_op_.native_handle(), ec);
+            auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
             printf("remote client close %s:%d re %s\n", address.get_ip(),
                    address.get_port(), re.message().c_str());
           }
@@ -119,7 +117,7 @@ int main(int args, char **argv) {
     fprintf(stderr, "Proactor create error %s\n", ec.message().c_str());
   }
 
-  Server server(a, argv[1]);
+  Server const server(a, argv[1]);
 
   a.run();
   return 0;

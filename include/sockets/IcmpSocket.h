@@ -32,7 +32,7 @@ public:
   size_t send_to(char *buf, const char *data, size_t data_size,
                  const SocketAddr &to, std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   socket_type socket_;

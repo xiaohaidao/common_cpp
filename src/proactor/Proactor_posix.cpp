@@ -15,7 +15,7 @@ struct ThreadInfo {
 Proactor::Proactor() : fd_(0), shutdown_(false) {}
 
 Proactor::Proactor(std::error_code &ec)
-    : fd_(Reactor(ec).native_handle()), shutdown_(false),
+    : fd_(Reactor(ec).native()), shutdown_(false),
       event_(::detail::EventOp::create(ec)) {}
 
 void Proactor::shutdown() {

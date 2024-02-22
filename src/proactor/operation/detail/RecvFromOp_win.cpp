@@ -5,6 +5,8 @@
 
 #include <winsock2.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
@@ -16,13 +18,13 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
                                  std::error_code &ec) {
 
   buff_ = {(uint32_t)size, buff};
-  func_ = async_func;
+  func_ = std::move(async_func);
   from_size_ = static_cast<int>(from_.native_addr_size());
   DWORD recv_flags = 0;
   if (::WSARecvFrom(s, (WSABUF *)&buff_, 1, nullptr, &recv_flags,
                     (sockaddr *)from_.native_addr(), &from_size_,
                     (LPWSAOVERLAPPED)this, nullptr)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);

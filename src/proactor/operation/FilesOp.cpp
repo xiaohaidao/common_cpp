@@ -29,11 +29,14 @@ FilesOp::FilesOp(Proactor *context, ::native_handle s) : ctx_(context), fd_(s) {
 
 FilesOp::FilesOp(const FilesOp &other) : ctx_(other.ctx_), fd_(other.fd_) {}
 
-const FilesOp &FilesOp::operator=(const FilesOp &other) {
+FilesOp &FilesOp::operator=(const FilesOp &other) {
+  if (&other == this) {
+    return *this;
+  }
   this->ctx_ = other.ctx_;
   this->fd_ = other.fd_;
-  this->read_op_ = detail::ReadOp();
-  this->write_op_ = detail::WriteOp();
+  // this->read_op_ = detail::ReadOp();
+  // this->write_op_ = detail::WriteOp();
   return *this;
 }
 
@@ -101,22 +104,22 @@ size_t FilesOp::write(const char *buff, size_t buff_size, std::error_code &ec) {
 #endif
 }
 
-void FilesOp::async_read(char *buff, size_t buff_size, func_type f,
+void FilesOp::async_read(char *buff, size_t buff_size, const func_type &f,
                          std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t recv_size) { f(re_ec, recv_size); };
 
-  read_op_.async_read(ctx_, fd_, buff, buff_size, call_back, ec);
+  read_op_.async_read(ctx_, call_back, fd_, buff, buff_size, ec);
 }
 
-void FilesOp::async_write(const char *buff, size_t buff_size, func_type f,
-                          std::error_code &ec) {
+void FilesOp::async_write(const char *buff, size_t buff_size,
+                          const func_type &f, std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t send_size) { f(re_ec, send_size); };
 
-  write_op_.async_write(ctx_, fd_, buff, buff_size, call_back, ec);
+  write_op_.async_write(ctx_, call_back, fd_, buff, buff_size, ec);
 }
 
 void FilesOp::close(std::error_code &ec) {
@@ -136,4 +139,4 @@ void FilesOp::close(std::error_code &ec) {
   fd_ = 0;
 }
 
-native_handle FilesOp::native_handle() const { return fd_; }
+native_handle FilesOp::native() const { return fd_; }

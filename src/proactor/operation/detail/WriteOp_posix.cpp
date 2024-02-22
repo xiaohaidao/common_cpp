@@ -5,6 +5,8 @@
 
 #include <unistd.h>
 
+#include <utility>
+
 #include "proactor/Proactor.h"
 #include "utils/error_code.h"
 
@@ -12,11 +14,11 @@ namespace detail {
 
 WriteOp::WriteOp() : fd_(0), buff_({}) {}
 
-void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
-                          size_t size, func_type async_func,
+void WriteOp::async_write(void *proactor, func_type async_func,
+                          native_handle fd, const char *buff, size_t size,
                           std::error_code &ec) {
 
-  func_ = async_func;
+  func_ = std::move(async_func);
   fd_ = fd;
   buff_ = {(uint32_t)size, (char *)buff};
   if (proactor == nullptr) {
@@ -29,7 +31,7 @@ void WriteOp::async_write(void *proactor, native_handle fd, const char *buff,
 }
 
 void WriteOp::complete(void *p, const std::error_code &result_ec,
-                       size_t trans_size) {
+                       size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

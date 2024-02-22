@@ -3,8 +3,8 @@
 
 #include "utils/error_code.h"
 
-void Proactor::cancel_timeout(Operation *op, std::error_code &ec) {
-  std::lock_guard<std::mutex> lck(timer_mutex_);
+void Proactor::cancel_timeout(Operation *op, std::error_code & /*ec*/) {
+  std::lock_guard<std::mutex> const lck(timer_mutex_);
   timer_queue_.cancel(op);
 }
 
@@ -21,7 +21,7 @@ void Proactor::post_timeout(Operation *op,
                             std::error_code &ec) {
 
   {
-    std::lock_guard<std::mutex> lck(timer_mutex_);
+    std::lock_guard<std::mutex> const lck(timer_mutex_);
     timer_queue_.cancel(op);
     timer_queue_.push(expire, interval, op);
   }

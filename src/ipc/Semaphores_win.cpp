@@ -28,7 +28,7 @@ Semaphores::~Semaphores() {}
 
 Semaphores Semaphores::open(const char *key, std::error_code &ec) {
   Semaphores result;
-  std::string key_g = std::string("Global\\") + key;
+  std::string const key_g = std::string("Global\\") + key;
   HANDLE han = OpenSemaphore(SEMAPHORE_ALL_ACCESS, false, key_g.c_str());
   if (han == nullptr) {
     ec = get_error_code();
@@ -41,9 +41,9 @@ Semaphores Semaphores::open(const char *key, std::error_code &ec) {
 Semaphores Semaphores::create(const char *key, std::error_code &ec,
                               unsigned int number) {
   Semaphores result;
-  std::string key_g = std::string("Global\\") + key;
-  HANDLE han = CreateSemaphore(nullptr, number, 256, key_g.c_str());
-  std::error_code er_code = get_error_code();
+  std::string const key_g = std::string("Global\\") + key;
+  HANDLE han = CreateSemaphore(nullptr, (long)number, 256, key_g.c_str());
+  std::error_code const er_code = get_error_code();
   if (han == nullptr || er_code.value() == ERROR_ALREADY_EXISTS) {
     ec = er_code;
     return result;
@@ -58,10 +58,10 @@ void Semaphores::wait(std::error_code &ec) {
   }
 }
 
-bool Semaphores::tryWait(std::error_code &ec) { return tryWaitFor(0, ec); }
+bool Semaphores::try_wait(std::error_code &ec) { return try_wait_for(0, ec); }
 
-bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
-  DWORD re = ::WaitForSingleObject(sem_, static_cast<DWORD>(timeout_ms));
+bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
+  DWORD const re = ::WaitForSingleObject(sem_, static_cast<DWORD>(timeout_ms));
   if (re == WAIT_FAILED) {
     ec = get_error_code();
     return false;
@@ -72,7 +72,7 @@ bool Semaphores::tryWaitFor(size_t timeout_ms, std::error_code &ec) {
   return true;
 }
 
-void Semaphores::notifyOne(std::error_code &ec) {
+void Semaphores::notify_one(std::error_code &ec) {
   if (ReleaseSemaphore(sem_, 1, nullptr) == 0) {
     ec = get_error_code();
     return;

@@ -81,19 +81,19 @@ TEST(HeapTest, min_heap_time) {
   h.pop();
 }
 
-class myKey {
+class MyKey {
 public:
-  myKey() : k_(0) {}
-  myKey(uint32_t k) : k_(k) {}
-  ~myKey() {}
-  bool operator<(const myKey &r) const { return this->k_ < r.k_; }
+  MyKey() : k_(0) {}
+  MyKey(uint32_t k) : k_(k) {}
+  ~MyKey() {}
+  bool operator<(const MyKey &r) const { return this->k_ < r.k_; }
 
 private:
   uint32_t k_;
 };
 
 TEST(HeapTest, timer_task) {
-  timer_task<myKey> task;
+  timer_task<MyKey> task;
   auto p = []() {
     std::cout << "time now :"
               << std::chrono::duration_cast<std::chrono::milliseconds>(

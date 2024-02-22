@@ -11,42 +11,42 @@ using namespace std::placeholders; // for _1, _2, _3...
 
 class Tcp {
 public:
-  explicit Tcp(Proactor &p, const char *module) : tcp_op(&p), module_(module) {}
-  explicit Tcp(TcpStreamOp &&p, const char *module)
-      : tcp_op(std::move(p)), module_(module) {}
+  explicit Tcp(Proactor &p, const char *module) : tcp_op(&p), module(module) {}
+  explicit Tcp(const TcpStreamOp &p, const char *module)
+      : tcp_op(p), module(module) {}
   ~Tcp() {}
 
-  socket_type native_handle() const { return tcp_op.native_handle(); }
+  socket_type native() const { return tcp_op.native(); }
 
   void close() {
-    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native_handle());
+    LOG_TRACE("module: %s, close socket %d", module.c_str(), native());
     std::error_code ec;
     tcp_op.close(ec);
-    EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
+    EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
   }
 
   void read(const std::error_code &re_ec, size_t size) {
-    EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
+    EXPECT_FALSE(re_ec) << "module: " << module << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module_.c_str(),
-              native_handle(), size, strlen(buff_), buff_);
-    async_write(buff_, size);
+    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module.c_str(), native(),
+              size, strlen(buff), buff);
+    async_write(buff, size);
   }
 
   void write(const std::error_code &re_ec, size_t size) {
-    EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
+    EXPECT_FALSE(re_ec) << "module: " << module << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async send buff complete %d %d \"%s\"", module_.c_str(),
-              native_handle(), size, strlen(buff_), buff_);
+    LOG_TRACE("%s: %d async send buff complete %d %d \"%s\"", module.c_str(),
+              native(), size, strlen(buff), buff);
     async_read();
   }
 
   template <typename F>
   void connected(F f, const std::error_code &re_ec, size_t size) {
-    EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
+    EXPECT_FALSE(re_ec) << "module: " << module << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: async connect complete %d", module_.c_str(), size);
+    LOG_TRACE("%s: async connect complete %d", module.c_str(), size);
     f();
   }
 
@@ -54,34 +54,34 @@ public:
     std::error_code ec;
     tcp_op.async_connect(addr, std::bind(&Tcp::connected<F>, this, f, _1, _2),
                          ec);
-    EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
+    EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
   }
 
   void async_read() {
-    memset(buff_, 0, sizeof(buff_));
+    memset(buff, 0, sizeof(buff));
     std::error_code ec;
-    tcp_op.async_read((char *)buff_, sizeof(buff_),
+    tcp_op.async_read((char *)buff, sizeof(buff),
                       std::bind(&Tcp::read, this, _1, _2), ec);
-    EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
+    EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
   }
 
-  void async_write(const char *buff, size_t size) {
-    size = (std::min)(size, sizeof(buff_));
-    memcpy(buff_, buff, size);
-    buff_[size] = 0;
-    LOG_TRACE("%s: write message \"%s\"", module_.c_str(), buff_);
+  void async_write(const char *b, size_t size) {
+    size = (std::min)(size, sizeof(buff));
+    memcpy(&buff, b, size);
+    buff[size] = 0;
+    LOG_TRACE("%s: write message \"%s\"", module.c_str(), buff);
     std::error_code ec;
-    tcp_op.async_write((char *)buff_, size,
-                       std::bind(&Tcp::write, this, _1, _2), ec);
-    EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
+    tcp_op.async_write((char *)buff, size, std::bind(&Tcp::write, this, _1, _2),
+                       ec);
+    EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
   }
 
-  char buff_[1024];
+  char buff[1024];
   TcpStreamOp tcp_op;
-  std::string module_;
+  std::string module;
 };
 
 template <size_t listeners_size = 0> class Service {
@@ -89,13 +89,13 @@ public:
   Service(Proactor &p) : listener_(p) {}
   ~Service() {}
 
-  socket_type native_handle() const { return listener_.native_handle(); }
+  socket_type native() const { return listener_.native(); }
 
   void close() {
     for (auto &i : tcps_) {
       i.close();
     }
-    LOG_TRACE("server close socket %d", native_handle());
+    LOG_TRACE("server close socket %d", native());
     std::error_code ec;
     listener_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -112,15 +112,14 @@ public:
   }
 
   void accept(const std::error_code &re_ec,
-              std::pair<TcpStreamOp, SocketAddr> ac) {
+              const std::pair<TcpStreamOp, SocketAddr> &ac) {
 
-    LOG_TRACE("server socket %d begin accpet", native_handle());
+    LOG_TRACE("server socket %d begin accpet", native());
 
     EXPECT_FALSE(re_ec) << re_ec.value() << " : " << re_ec.message();
-    Tcp service_tcp(std::move(ac.first), "server");
-    LOG_TRACE("socket %d client ip and port %s:%d",
-              service_tcp.tcp_op.native_handle(), ac.second.get_ip(),
-              ac.second.get_port());
+    Tcp service_tcp(ac.first, "server");
+    LOG_TRACE("socket %d client ip and port %s:%d", service_tcp.tcp_op.native(),
+              ac.second.get_ip(), ac.second.get_port());
 
     tcps_.push_back(std::move(service_tcp));
     Tcp &alias = *tcps_.rbegin();
@@ -146,6 +145,7 @@ public:
     ec.clear();
   }
 
+private:
   TcpListenerOp listener_;
   std::array<TcpListenerOp, listeners_size> listeners_;
   std::vector<Tcp> tcps_;

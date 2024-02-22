@@ -6,6 +6,8 @@
 #include <mswsock.h>
 #include <winsock2.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
@@ -20,16 +22,16 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
       return;
     }
   }
-  func_ = async_func;
+  func_ = std::move(async_func);
   server_ = s;
 
-  DWORD numBytes = 0;
+  DWORD num_bytes = 0;
   GUID guid = WSAID_ACCEPTEX;
-  static LPFN_ACCEPTEX AcceptExPtr = NULL;
-  if (!AcceptExPtr) {
+  static LPFN_ACCEPTEX accept_ex_ptr = NULL;
+  if (!accept_ex_ptr) {
     if (::WSAIoctl(client_, SIO_GET_EXTENSION_FUNCTION_POINTER, (void *)&guid,
-                   sizeof(guid), (void *)&AcceptExPtr, sizeof(AcceptExPtr),
-                   &numBytes, NULL, NULL)) {
+                   sizeof(guid), (void *)&accept_ex_ptr, sizeof(accept_ex_ptr),
+                   &num_bytes, NULL, NULL)) {
       ec = get_net_error_code();
       complete(proactor, ec, 0);
       // assert(ec);
@@ -38,8 +40,9 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
   }
 
   DWORD p = 0;
-  if (!AcceptExPtr(s, client_, addresses_, 0, 0, 32, &p, (OVERLAPPED *)this)) {
-    std::error_code re_ec = get_net_error_code();
+  if (!accept_ex_ptr(s, client_, addresses_, 0, 0, 32, &p,
+                     (OVERLAPPED *)this)) {
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);
@@ -50,7 +53,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
 }
 
 void AcceptOp::complete(void *p, const std::error_code &result_ec,
-                        size_t trans_size) {
+                        size_t /*trans_size*/) {
 
   if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
                  (char *)&server_, sizeof(server_))) {

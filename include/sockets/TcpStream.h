@@ -30,7 +30,7 @@ public:
   // return write size
   int write(const char *buf, size_t buf_size, std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   friend class TcpListener;

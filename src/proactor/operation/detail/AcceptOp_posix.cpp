@@ -1,6 +1,8 @@
 
 #ifdef __linux__
 
+#include <utility>
+
 #include "proactor/operation/detail/AcceptOp.h"
 
 #include "proactor/Proactor.h"
@@ -13,7 +15,7 @@ AcceptOp::AcceptOp() : server_(-1) {}
 
 void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
                             std::error_code &ec) {
-  func_ = async_func;
+  func_ = std::move(async_func);
   server_ = s;
   if (proactor == nullptr) {
     std::error_code re_ec = {ENXIO, std::system_category()};
@@ -25,7 +27,7 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
 }
 
 void AcceptOp::complete(void *p, const std::error_code &result_ec,
-                        size_t trans_size) {
+                        size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {
@@ -34,7 +36,7 @@ void AcceptOp::complete(void *p, const std::error_code &result_ec,
     if (!re_ec) {
       TcpListener listen(server_);
       std::pair<TcpStream, SocketAddr> ret = listen.accept(re_ec);
-      ac_addr.first = ret.first.native_handle();
+      ac_addr.first = ret.first.native();
       ac_addr.second = ret.second;
     }
     auto tmp = std::move(func_);

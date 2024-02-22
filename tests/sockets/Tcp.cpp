@@ -16,9 +16,9 @@ TEST(SocketsTest, TcpTest) {
   auto tcp = TcpListener::bind(std::to_string(addr.get_port()).c_str(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  EXPECT_TRUE(tcp.native_handle() > 0);
-  LOG_TRACE("server socket value %d, default read timeout %d",
-            tcp.native_handle(), tcp.read_timeout(ec));
+  EXPECT_TRUE(tcp.native() > 0);
+  LOG_TRACE("server socket value %d, default read timeout %d", tcp.native(),
+            tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -33,12 +33,12 @@ TEST(SocketsTest, TcpTest) {
   auto st = TcpStream::connect(addr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  EXPECT_TRUE(st.native_handle() > 0);
-  SocketAddr local_addr = SocketAddr::get_local_socket(st.native_handle(), ec);
+  EXPECT_TRUE(st.native() > 0);
+  SocketAddr local_addr = SocketAddr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", st.native_handle(),
-            local_addr.get_ip(), local_addr.get_port());
+  LOG_TRACE("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
+            local_addr.get_port());
 
   st.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -81,15 +81,15 @@ TEST(SocketsTest, TcpTest) {
 TEST(SocketsTest, TcpUnixTest) {
   // server
   std::error_code ec;
-  const char kLocalUnix[] = "local_unix";
-  SocketAddr addr(kLocalUnix);
+  const char k_local_unix[] = "local_unix";
+  SocketAddr addr(k_local_unix);
 
-  auto tcp = TcpListener::bind(kLocalUnix, kUnix, ec);
+  auto tcp = TcpListener::bind(k_local_unix, kUnix, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  EXPECT_TRUE(tcp.native_handle() > 0);
-  LOG_TRACE("server socket value %d, default read timeout %d",
-            tcp.native_handle(), tcp.read_timeout(ec));
+  EXPECT_TRUE(tcp.native() > 0);
+  LOG_TRACE("server socket value %d, default read timeout %d", tcp.native(),
+            tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   tcp.set_read_timeout(100, ec);
@@ -103,12 +103,12 @@ TEST(SocketsTest, TcpUnixTest) {
   auto st = TcpStream::connect(addr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  EXPECT_TRUE(st.native_handle() > 0);
-  SocketAddr local_addr = SocketAddr::get_local_socket(st.native_handle(), ec);
+  EXPECT_TRUE(st.native() > 0);
+  SocketAddr local_addr = SocketAddr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", st.native_handle(),
-            local_addr.get_ip(), local_addr.get_port());
+  LOG_TRACE("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
+            local_addr.get_port());
 
   st.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

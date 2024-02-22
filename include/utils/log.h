@@ -14,6 +14,8 @@ extern "C" {
 #else
 #define __FILENAME__                                                           \
   (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+
+#define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
 enum LogLevel {
@@ -25,26 +27,26 @@ enum LogLevel {
 };
 
 #define LOG_TRACE(...)                                                         \
-  logPrint(kTrace, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  log_print(kTrace, __FILENAME__, __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
 
 #define LOG_DEBUG(...)                                                         \
-  logPrint(kDebug, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  log_print(kDebug, __FILENAME__, __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
 
 #define LOG_WARN(...)                                                          \
-  logPrint(kWarn, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  log_print(kWarn, __FILENAME__, __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
 
 #define LOG_INFO(...)                                                          \
-  logPrint(kInfo, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  log_print(kInfo, __FILENAME__, __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
 
 #define LOG_ERROR(...)                                                         \
-  logPrint(kError, __FILENAME__, __LINE__, __FUNCTION__, __VA_ARGS__)
+  log_print(kError, __FILENAME__, __LINE__, __PRETTY_FUNCTION__, __VA_ARGS__)
 
-void logPrint(LogLevel level, const char *filename, int line,
-              const char *func_name, const char *fmt, ...);
+void log_print(LogLevel level, const char *filename, int line,
+               const char *func_name, const char *fmt, ...);
 
-void setLogLevel(LogLevel level);
+void set_log_level(LogLevel level);
 
-void setExportCallback(void (*)(LogLevel, const char *, int));
+void set_export_callback(void (*)(LogLevel, const char *, int));
 
 #ifdef __cplusplus
 }

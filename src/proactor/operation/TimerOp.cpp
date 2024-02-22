@@ -2,6 +2,7 @@
 #include "proactor/operation/TimerOp.h"
 
 #include <thread>
+#include <utility>
 
 using namespace std::chrono;
 
@@ -9,6 +10,7 @@ TimerOp::TimerOp(Proactor &context) : ctx_(&context), op_({}) {}
 
 void TimerOp::set_timeout(size_t expire_ms) { set_timeout(expire_ms, 0); }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 void TimerOp::set_timeout(size_t expire_ms, size_t interval_ms) {
   op_.expire = time_clock::now() + milliseconds(expire_ms);
   op_.interval = milliseconds(interval_ms);
@@ -21,7 +23,7 @@ void TimerOp::wait() {
     if (!(op_.interval > time_clock::duration::zero())) {
       return;
     }
-    int64_t p = (now - op_.expire) / op_.interval + 1;
+    int64_t const p = (now - op_.expire) / op_.interval + 1;
     op_.expire += (op_.interval * p);
   }
   std::this_thread::sleep_until(op_.expire);
@@ -36,7 +38,7 @@ void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
     wait();
     return;
   }
-  op_.func = async_func;
+  op_.func = std::move(async_func);
   op_.stop = 0;
   ctx_->post_timeout(&op_, op_.expire, ec);
 }
@@ -51,7 +53,7 @@ void TimerOp::close(std::error_code &ec) {
 
 void TimerOp::TimerOpPrivate::complete(void *proactor,
                                        const std::error_code &result_ec,
-                                       size_t trans_size) {
+                                       size_t /*trans_size*/) {
   auto tmp = std::move(func);
   if (stop == 1) {
     return;
@@ -62,7 +64,7 @@ void TimerOp::TimerOpPrivate::complete(void *proactor,
     if (!(interval > time_clock::duration::zero())) {
       return;
     }
-    int64_t p = (now - expire) / interval + 1;
+    int64_t const p = (now - expire) / interval + 1;
     expire += (interval * p);
     timeout_num = p;
   }

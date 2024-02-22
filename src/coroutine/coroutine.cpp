@@ -4,13 +4,13 @@
 #include "coroutine_posix.h"
 #include "coroutine_win.h"
 
-thread_local std::unique_ptr<coroutine> STATIC_GLOBOAL_CO_XBREFW;
+thread_local std::unique_ptr<coroutine> static_globoal_co_xbrefw;
 
 coroutine &get_global_coroutine() {
-  if (!STATIC_GLOBOAL_CO_XBREFW) {
-    STATIC_GLOBOAL_CO_XBREFW = std::unique_ptr<coroutine>(new coroutine);
+  if (!static_globoal_co_xbrefw) {
+    static_globoal_co_xbrefw = std::unique_ptr<coroutine>(new coroutine);
   }
-  return *STATIC_GLOBOAL_CO_XBREFW;
+  return *static_globoal_co_xbrefw;
 }
 
 coroutine::coroutine() : current_index_(0), is_exit_to_main_(true) {
@@ -22,7 +22,8 @@ coroutine::~coroutine() {
   clear();
 }
 
-void coroutine::append_task(std::function<void()> f, uint32_t block_size) {
+void coroutine::append_task(const std::function<void()> &f,
+                            uint32_t block_size) {
   if (contexts_.push_back() == nullptr) {
     contexts_.push_back(std::make_shared<context>());
   }
@@ -36,7 +37,7 @@ void coroutine::append_task(std::function<void()> f, uint32_t block_size) {
                     block_size);
 }
 
-void coroutine::append_task(std::function<void(coroutine &)> f,
+void coroutine::append_task(const std::function<void(coroutine &)> &f,
                             uint32_t block_size) {
   if (contexts_.push_back() == nullptr) {
     contexts_.push_back(std::make_shared<context>());
@@ -55,6 +56,7 @@ void coroutine::yield() {
   swap(is_exit_to_main_ ? current_index_ : current_index_ + 1);
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 void coroutine::swap(size_t index) {
   if (contexts_.size() <= 1) {
     return;

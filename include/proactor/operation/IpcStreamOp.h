@@ -19,11 +19,14 @@ public:
   explicit IpcStreamOp(const TcpStreamOp &tcp);
 #endif
 
+  IpcStreamOp(const IpcStreamOp &);
+  IpcStreamOp &operator=(const IpcStreamOp &);
+
   void connect(const char *name, std::error_code &ec);
 
-  void async_read(char *buff, size_t buff_size, func_type f,
+  void async_read(char *buff, size_t buff_size, const func_type &f,
                   std::error_code &ec);
-  void async_write(const char *buff, size_t buff_size, func_type f,
+  void async_write(const char *buff, size_t buff_size, const func_type &f,
                    std::error_code &ec);
   size_t read(char *buff, size_t size, std::error_code &ec);
   size_t write(const char *buff, size_t size, std::error_code &ec);

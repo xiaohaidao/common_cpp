@@ -26,7 +26,7 @@ Pipe Pipe::create(std::error_code &ec) {
   inherit.nLength = sizeof(SECURITY_ATTRIBUTES);
   inherit.bInheritHandle = TRUE;
   inherit.lpSecurityDescriptor = NULL;
-  int default_size = 0;
+  int const default_size = 0;
   if (!::CreatePipe(&re.read_pipe_, &re.write_pipe_, &inherit, default_size)) {
     ec = get_error_code();
   }

@@ -5,6 +5,8 @@
 
 #include <winsock2.h>
 
+#include <utility>
+
 #include "utils/error_code.h"
 
 namespace detail {
@@ -16,13 +18,13 @@ void SendToOp::async_send_to(void *proactor, socket_type s, const char *buff,
                              func_type async_func, std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
-  func_ = async_func;
+  func_ = std::move(async_func);
   to_ = to;
   if (::WSASendTo(s, (WSABUF *)&buff_, 1, nullptr, 0,
                   (sockaddr *)to_.native_addr(),
                   static_cast<int>(to_.native_addr_size()),
                   (LPWSAOVERLAPPED)this, nullptr)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (re_ec.value() != ERROR_IO_PENDING && re_ec.value() != 0) {
       ec = re_ec;
       complete(proactor, ec, 0);

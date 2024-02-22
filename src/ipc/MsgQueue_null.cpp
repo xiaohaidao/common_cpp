@@ -7,28 +7,30 @@
 
 namespace ipc {
 
-MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
+MsgQueue MsgQueue::open(const std::string & /*key*/, std::error_code & /*ec*/) {
   return MsgQueue();
 }
 
-MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
+MsgQueue MsgQueue::create(const std::string & /*key*/,
+                          std::error_code & /*ec*/) {
   return MsgQueue();
 }
 
 void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {}
 
-bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
-                           std::error_code &ec) {
+bool MsgQueue::send_timeout(const char * /*data*/, size_t /*size*/,
+                            size_t /*timeout_ms*/, std::error_code &ec) {
 
   return !ec;
 }
 
-size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
+size_t MsgQueue::recv(char * /*data*/, size_t /*data_size*/,
+                      std::error_code & /*ec*/) {
   return 0;
 }
 
-size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
-                             std::error_code &ec) {
+size_t MsgQueue::recv_timeout(char * /*data*/, size_t /*data_size*/,
+                              size_t /*timeout_ms*/, std::error_code & /*ec*/) {
   return 0;
 }
 

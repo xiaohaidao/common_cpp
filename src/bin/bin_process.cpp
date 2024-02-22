@@ -3,7 +3,7 @@
 #include "process/Process.h"
 #include "utils/log.h"
 
-int main(int args, char **argv, char *env[]) {
+int main(int args, char **argv, char * /*env*/[]) {
   if (args < 2) {
     printf("Usage:\n"
            "    %s <cmd> [args]\n",

@@ -14,7 +14,7 @@ PipeListener::PipeListener() : name_{}, named_pipe_(nullptr) {}
 
 PipeListener PipeListener::create(const char *name_pipe, std::error_code &ec) {
   PipeListener re;
-  constexpr int BUF_SIZE = 4096;
+  constexpr int kBufSize = 4096;
   char buff_name[256];
   snprintf(buff_name, sizeof(buff_name), "%s%s", "\\\\.\\pipe\\", name_pipe);
   HANDLE server = ::CreateNamedPipe(
@@ -24,8 +24,8 @@ PipeListener PipeListener::create(const char *name_pipe, std::error_code &ec) {
           PIPE_READMODE_MESSAGE |                // message-read mode
           PIPE_WAIT,                             // blocking mode
       PIPE_UNLIMITED_INSTANCES,                  // max. instances
-      BUF_SIZE,                                  // output buffer size
-      BUF_SIZE,                                  // input buffer size
+      kBufSize,                                  // output buffer size
+      kBufSize,                                  // input buffer size
       0,                                         // client time-out
       NULL);
   if (server == INVALID_HANDLE_VALUE) {
@@ -47,7 +47,7 @@ PipeStream PipeListener::accept(std::error_code &ec) {
   }
   PipeStream re(named_pipe_, true);
   if (!::ConnectNamedPipe(named_pipe_, NULL)) {
-    std::error_code re_ec = get_error_code();
+    std::error_code const re_ec = get_error_code();
     if (re_ec.value() != ERROR_IO_PENDING &&
         re_ec.value() != ERROR_PIPE_CONNECTED) {
       ec = re_ec;

@@ -20,7 +20,7 @@ public: //! construct
   UdpSocketOp(Proactor &context, socket_type s);
 
   UdpSocketOp(const UdpSocketOp &);
-  const UdpSocketOp &operator=(const UdpSocketOp &);
+  UdpSocketOp &operator=(const UdpSocketOp &);
 
 public: //! socket op
   void create(FamilyType family, std::error_code &ec);
@@ -33,17 +33,17 @@ public: //! socket op
   void close(std::error_code &ec);
 
 public:
-  void async_read(char *buff, size_t buff_size, func_recv_type f,
+  void async_read(char *buff, size_t buff_size, const func_recv_type &f,
                   std::error_code &ec);
   void async_write(const char *buff, size_t buff_size, const SocketAddr &to,
-                   func_send_type f, std::error_code &ec);
+                   const func_send_type &f, std::error_code &ec);
 
   std::pair<size_t, SocketAddr> recv_from(char *buff, size_t buff_size,
                                           std::error_code &ec);
   size_t send_to(const char *buff, size_t buff_size, const SocketAddr &to,
                  std::error_code &ec);
 
-  socket_type native_handle() const;
+  socket_type native() const;
 
 private:
   Proactor *ctx_;

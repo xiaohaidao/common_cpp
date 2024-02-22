@@ -14,7 +14,8 @@ UdpSocketOp::UdpSocketOp(Proactor &context, socket_type s)
 #ifdef _WIN32
   if (ctx_ != nullptr) {
     std::error_code ec;
-    ctx_->post((HANDLE)socket_, nullptr, ec); // register to io proactor
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
+    ctx_->post((native_handle)socket_, nullptr, ec); // register to io proactor
     // if (ec) {
     //   LOG_WARN("overlapped post error %d %s", ec.value(), ec.message());
     // }
@@ -25,11 +26,14 @@ UdpSocketOp::UdpSocketOp(Proactor &context, socket_type s)
 UdpSocketOp::UdpSocketOp(const UdpSocketOp &other)
     : ctx_(other.ctx_), socket_(other.socket_) {}
 
-const UdpSocketOp &UdpSocketOp::operator=(const UdpSocketOp &other) {
+UdpSocketOp &UdpSocketOp::operator=(const UdpSocketOp &other) {
+  if (&other == this) {
+    return *this;
+  }
   this->ctx_ = other.ctx_;
   this->socket_ = other.socket_;
-  this->recvfrom_op_ = detail::RecvFromOp();
-  this->sendto_op_ = detail::SendToOp();
+  // this->recvfrom_op_ = detail::RecvFromOp();
+  // this->sendto_op_ = detail::SendToOp();
   return *this;
 }
 
@@ -47,10 +51,10 @@ size_t UdpSocketOp::send_to(const char *buff, size_t buff_size,
   return tcp.send_to(buff, buff_size, to, ec);
 }
 
-void UdpSocketOp::async_read(char *buff, size_t buff_size, func_recv_type f,
-                             std::error_code &ec) {
+void UdpSocketOp::async_read(char *buff, size_t buff_size,
+                             const func_recv_type &f, std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t recv_size,
                        const SocketAddr &from) { f(re_ec, recv_size, from); };
 
@@ -58,10 +62,10 @@ void UdpSocketOp::async_read(char *buff, size_t buff_size, func_recv_type f,
 }
 
 void UdpSocketOp::async_write(const char *buff, size_t buff_size,
-                              const SocketAddr &to, func_send_type f,
+                              const SocketAddr &to, const func_send_type &f,
                               std::error_code &ec) {
 
-  auto call_back = [f](void *ctx, const std::error_code &re_ec,
+  auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t send_size) { f(re_ec, send_size); };
 
   sendto_op_.async_send_to(ctx_, socket_, buff, buff_size, to, call_back, ec);
@@ -72,14 +76,15 @@ void UdpSocketOp::create(FamilyType family, std::error_code &ec) {
     std::error_code t_ec;
     close(t_ec);
   }
-  UdpSocket udp = UdpSocket::create(family, ec);
+  UdpSocket const udp = UdpSocket::create(family, ec);
   if (ec) {
     return;
   }
-  socket_ = udp.native_handle();
+  socket_ = udp.native();
 #ifdef _WIN32
   if (ctx_ != nullptr) {
     std::error_code ec;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((::native_handle)socket_, nullptr,
                ec); // register to io proactor
   }
@@ -96,14 +101,15 @@ void UdpSocketOp::bind(const char *port_or_service, FamilyType family,
     std::error_code t_ec;
     close(t_ec);
   }
-  UdpSocket udp = UdpSocket::bind(port_or_service, family, ec);
+  UdpSocket const udp = UdpSocket::bind(port_or_service, family, ec);
   if (ec) {
     return;
   }
-  socket_ = udp.native_handle();
+  socket_ = udp.native();
 #ifdef _WIN32
   if (ctx_ != nullptr) {
     std::error_code ec;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((::native_handle)socket_, nullptr,
                ec); // register to io proactor
   }
@@ -113,6 +119,7 @@ void UdpSocketOp::bind(const char *port_or_service, FamilyType family,
 void UdpSocketOp::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
+    // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->cancel((::native_handle)socket_, t_ec);
   }
   UdpSocket tcp(socket_);
@@ -120,4 +127,4 @@ void UdpSocketOp::close(std::error_code &ec) {
   socket_ = -1;
 }
 
-socket_type UdpSocketOp::native_handle() const { return socket_; }
+socket_type UdpSocketOp::native() const { return socket_; }

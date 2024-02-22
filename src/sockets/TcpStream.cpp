@@ -15,9 +15,9 @@
 #include "utils/macro.h"
 
 #ifdef _WIN32
-#define closesocket closesocket
+#define CLOSESOCKET closesocket
 #else
-#define closesocket close
+#define CLOSESOCKET close
 #define INVALID_SOCKET (socket_type)(~0)
 #define SD_SEND (SHUT_WR)
 #define SD_BOTH (SHUT_RDWR)
@@ -29,12 +29,12 @@ TcpStream::TcpStream(const socket_type &s) : socket_(s) {}
 
 TcpStream TcpStream::connect(const SocketAddr &addr, std::error_code &ec) {
   TcpStream re;
-  socket_type connect = sockets::socket(addr.get_family(), kStream,
+  socket_type const connect = sockets::socket(addr.get_family(), kStream,
 #ifdef __linux__
-                                        addr.get_family() == kUnix ? kIp :
+                                              addr.get_family() == kUnix ? kIp :
 #endif // __linux__
-                                                                   kTCP,
-                                        ec);
+                                                                         kTCP,
+                                              ec);
 
   if (ec) {
     return re;
@@ -57,7 +57,7 @@ void TcpStream::connected(const SocketAddr &addr, std::error_code &ec) {
   if (::connect(socket_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size())) {
     ec = get_net_error_code();
-    ::closesocket(socket_);
+    ::CLOSESOCKET(socket_);
   }
 }
 
@@ -78,7 +78,7 @@ size_t TcpStream::write_timeout(std::error_code &ec) const {
 }
 
 int TcpStream::read(char *buff, size_t buff_size, std::error_code &ec) {
-  int re_size = ::recv(socket_, buff, static_cast<int>(buff_size), 0);
+  int const re_size = ::recv(socket_, buff, static_cast<int>(buff_size), 0);
   if (re_size < 0) {
     ec = get_net_error_code();
   }
@@ -89,7 +89,7 @@ int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
 #define MSG_NOSIGNAL 0
 #endif
-  int re_size =
+  int const re_size =
       ::send(socket_, buff, static_cast<int>(buff_size), MSG_NOSIGNAL);
   if (re_size < 0) {
     ec = get_net_error_code();
@@ -99,7 +99,7 @@ int TcpStream::write(const char *buff, size_t buff_size, std::error_code &ec) {
 
 void TcpStream::shutdown(std::error_code &ec) {
   if (::shutdown(socket_, SD_SEND)) {
-    std::error_code re_ec = get_net_error_code();
+    std::error_code const re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
       ec = re_ec;
     }
@@ -108,9 +108,9 @@ void TcpStream::shutdown(std::error_code &ec) {
 
 void TcpStream::close(std::error_code &ec) {
   shutdown(ec);
-  if (::closesocket(socket_)) {
+  if (::CLOSESOCKET(socket_)) {
     ec = get_net_error_code();
   }
 }
 
-socket_type TcpStream::native_handle() const { return socket_; }
+socket_type TcpStream::native() const { return socket_; }

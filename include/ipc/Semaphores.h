@@ -40,10 +40,10 @@ public:
   }
 
   void wait(std::error_code &ec);
-  bool tryWait(std::error_code &ec);
-  bool tryWaitFor(size_t timeout_ms, std::error_code &ec);
+  bool try_wait(std::error_code &ec);
+  bool try_wait_for(size_t timeout_ms, std::error_code &ec);
 
-  void notifyOne(std::error_code &ec);
+  void notify_one(std::error_code &ec);
 
   void close(std::error_code &ec);
 

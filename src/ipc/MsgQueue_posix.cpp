@@ -28,7 +28,7 @@
 
 namespace ipc {
 
-std::string transferName(const std::string &name) {
+std::string transfer_name(const std::string &name) {
   if (name.size() > 0 && name[0] != '/') {
     return "/" + name;
   }
@@ -37,11 +37,11 @@ std::string transferName(const std::string &name) {
 
 MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
   MsgQueue result;
-  if ((result.msgid_ = mq_open(transferName(key).c_str(), O_RDWR)) == -1) {
+  if ((result.msgid_ = mq_open(transfer_name(key).c_str(), O_RDWR)) == -1) {
     ec = get_error_code();
     return result;
   }
-  result.key_ = transferName(key);
+  result.key_ = transfer_name(key);
   return result;
 }
 
@@ -49,25 +49,25 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
   MsgQueue result;
   //  delete O_EXCL will create force
   if ((result.msgid_ =
-           mq_open(transferName(key).c_str(), O_RDWR | O_CREAT | O_EXCL,
+           mq_open(transfer_name(key).c_str(), O_RDWR | O_CREAT | O_EXCL,
                    DEFFILEMODE, nullptr)) == -1) {
     ec = get_error_code();
     return result;
   }
-  result.key_ = transferName(key);
+  result.key_ = transfer_name(key);
   return result;
 }
 
 void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
-  constexpr int priority = 0; // the priority in [0-31], highest priority first
-  if (mq_send(msgid_, data, size, priority) == -1) {
+  constexpr int kPriority = 0; // the priority in [0-31], highest priority first
+  if (mq_send(msgid_, data, size, kPriority) == -1) {
     ec = get_error_code();
     return;
   }
 }
 
-bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
-                           std::error_code &ec) {
+bool MsgQueue::send_timeout(const char *data, size_t size, size_t timeout_ms,
+                            std::error_code &ec) {
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
@@ -79,8 +79,8 @@ bool MsgQueue::sendTimeout(const char *data, size_t size, size_t timeout_ms,
   timeout.tv_sec += timeout.tv_nsec / 1000000000;
   timeout.tv_nsec = timeout.tv_nsec % 1000000000;
 
-  constexpr int priority = 0; // the priority in [0-31], highest priority first
-  if (mq_timedsend(msgid_, data, size, priority, &timeout) == -1) {
+  constexpr int kPriority = 0; // the priority in [0-31], highest priority first
+  if (mq_timedsend(msgid_, data, size, kPriority, &timeout) == -1) {
     int e_code = errno;
     if (e_code != ETIMEDOUT) {
       ec = {e_code, std::system_category()};
@@ -99,8 +99,8 @@ size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
   return size;
 }
 
-size_t MsgQueue::recvTimeout(char *data, size_t data_size, size_t timeout_ms,
-                             std::error_code &ec) {
+size_t MsgQueue::recv_timeout(char *data, size_t data_size, size_t timeout_ms,
+                              std::error_code &ec) {
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {

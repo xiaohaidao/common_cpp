@@ -14,9 +14,12 @@ public:
 
   explicit IpcListenerOp(Proactor &context);
 
+  IpcListenerOp(const IpcListenerOp &);
+  IpcListenerOp &operator=(const IpcListenerOp &);
+
   void bind(const char *name, std::error_code &ec);
 
-  void async_accept(func_type f, std::error_code &ec);
+  void async_accept(const func_type &f, std::error_code &ec);
   IpcStreamOp accept(std::error_code &ec);
 
   void close(std::error_code &ec);

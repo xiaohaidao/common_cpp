@@ -39,7 +39,7 @@ TEST(IPCTest, MsgQueueTest) {
     EXPECT_TRUE(memcmp(recbuff, buff, sizeof(buff)) == 0) << recbuff;
     ec.clear();
 
-    msg1.recvTimeout(recbuff, sizeof(recbuff), 2, ec);
+    msg1.recv_timeout(recbuff, sizeof(recbuff), 2, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }

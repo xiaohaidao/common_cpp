@@ -28,7 +28,7 @@ public:
 
   void close(std::error_code &ec);
 
-  int native_handle() const { return fd_; }
+  int native() const { return fd_; }
 
   void set_proactor(void *proactor);
 

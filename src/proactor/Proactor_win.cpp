@@ -73,7 +73,7 @@ void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
 void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
   if (!::CancelIoEx(file_descriptor, nullptr)) {
-    std::error_code re_ec = get_error_code();
+    std::error_code const re_ec = get_error_code();
     // if (re_ec.value() != ERROR_NOT_FOUND) {
     ec = re_ec;
     // }
@@ -91,14 +91,14 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
   QueueOp &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.empty()) {
-      auto op = static_cast<Operation *>(queue.begin());
+      auto *op = static_cast<Operation *>(queue.begin());
       queue.pop();
       op->complete(this, std::error_code(), 0);
       return 1;
     }
     size_t timeout_ms = timer_queue_.wait_duration_ms(INT32_MAX);
     if (timeout_ms <= 0) {
-      std::lock_guard<std::mutex> lck(timer_mutex_);
+      std::lock_guard<std::mutex> const lck(timer_mutex_);
       timer_queue_.get_all_task(queue);
     }
     if (!queue.empty()) {
@@ -108,7 +108,7 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
     DWORD bytes_transferred = 0;
     ULONG_PTR completion_key = 0;
     LPOVERLAPPED overlapped = nullptr;
-    BOOL ok =
+    BOOL const ok =
         GetQueuedCompletionStatus(fd_, &bytes_transferred, &completion_key,
                                   &overlapped, (DWORD)timeout_ms);
 
@@ -118,12 +118,13 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
       result_ec = {0, result_ec.category()};
     }
     if (overlapped) {
-      auto op = static_cast<Operation *>(overlapped);
+      auto *op = static_cast<Operation *>(overlapped);
 
       op->complete(this, result_ec, bytes_transferred);
 
       return 1;
-    } else if (!ok) {
+    }
+    if (!ok) {
       if (result_ec.value() != WAIT_TIMEOUT) {
         ec = result_ec;
       }
