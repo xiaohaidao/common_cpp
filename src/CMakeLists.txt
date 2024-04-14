@@ -20,6 +20,12 @@ if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/main.cpp)
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${library_name}
     )
+    # if(NOT MSVC)
+    # target_link_libraries(${PROJECT_NAME} PRIVATE
+    #     -static-libstdc++
+    #     -static-libgcc
+    # )
+    # endif()
 endif()
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/bin)
     file(GLOB_RECURSE bin_files "bin/*.cpp")
@@ -31,4 +37,10 @@ if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/bin)
             ${library_name}
         )
     endforeach()
+    # if(NOT MSVC)
+    # target_link_libraries(${name} PRIVATE
+    #     -static-libstdc++
+    #     -static-libgcc
+    # )
+    # endif()
 endif()

@@ -52,6 +52,12 @@ if(MSVC)
         endif()
     )
 endif()
+# if(NOT MSVC)
+# target_link_libraries(${test_name} PRIVATE
+#     -static-libstdc++
+#     -static-libgcc
+# )
+# endif()
 
 target_link_libraries(${test_name} PRIVATE
     GTest::gtest_main

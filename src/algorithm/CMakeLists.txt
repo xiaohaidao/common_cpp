@@ -10,14 +10,9 @@ target_link_libraries(${library_name} INTERFACE
 if(MSVC)
 target_link_libraries(${library_name} INTERFACE
 )
-elseif(WIN32)
+else()
 target_link_libraries(${library_name} INTERFACE
-    atomic
-    pthread
-)
-elseif(UNIX)
-target_link_libraries(${library_name} INTERFACE
-    atomic
+    atomic.a
     pthread
 )
 endif()
