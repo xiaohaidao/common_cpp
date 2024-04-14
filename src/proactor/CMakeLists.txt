@@ -5,6 +5,7 @@ add_library(${library_name}
     Proactor_win.cpp
     Proactor.cpp
     ProactorCo.cpp
+    operation/EventOp.cpp
     operation/FilesOp.cpp
     operation/IpcListenerOp.cpp
     operation/IpcStreamOp.cpp

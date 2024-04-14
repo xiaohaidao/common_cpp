@@ -10,7 +10,7 @@ public:
   ~QueueOp() {
     while (Operation *op = begin_) {
       pop();
-      op->complete(0, std::error_code(), 0);
+      // op->complete(0, std::error_code(), 0); // double free
     }
   }
 
