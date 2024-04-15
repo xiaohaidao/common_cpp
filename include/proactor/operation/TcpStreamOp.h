@@ -43,6 +43,9 @@ private:
   detail::ConnectOp connect_op_;
   detail::RecvOp recv_op_;
   detail::SendOp send_op_;
+#ifdef __linux__
+  socket_type write_socket_;
+#endif
 
 }; // class TcpStreamOp
 

@@ -107,6 +107,7 @@ TEST(ProactorTest, ProactorUdp) {
 
   char buff[] = "client udp send message!";
   client.async_write(buff, sizeof(buff), addr);
+  client.async_read();
 
   LOG_TRACE("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {

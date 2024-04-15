@@ -50,6 +50,9 @@ private:
   socket_type socket_;
   detail::RecvFromOp recvfrom_op_;
   detail::SendToOp sendto_op_;
+#ifdef __linux__
+  socket_type write_socket_;
+#endif
 
 }; // class UdpSocketOp
 

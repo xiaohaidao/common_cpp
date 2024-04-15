@@ -1,15 +1,38 @@
 
 #include "proactor/operation/UdpSocketOp.h"
 
+#ifdef __linux__
+#include <unistd.h>
+#endif
+
 #include "sockets/UdpSocket.h"
 #include "utils/error_code.h"
 
-UdpSocketOp::UdpSocketOp() : ctx_(nullptr), socket_(-1) {}
+UdpSocketOp::UdpSocketOp()
+    : ctx_(nullptr), socket_(-1)
+#ifdef __linux__
+      ,
+      write_socket_(-1)
+#endif
+{
+}
 
-UdpSocketOp::UdpSocketOp(Proactor &context) : ctx_(&context), socket_(-1) {}
+UdpSocketOp::UdpSocketOp(Proactor &context)
+    : ctx_(&context), socket_(-1)
+#ifdef __linux__
+      ,
+      write_socket_(-1)
+#endif
+{
+}
 
 UdpSocketOp::UdpSocketOp(Proactor &context, socket_type s)
-    : ctx_(&context), socket_(s) {
+    : ctx_(&context), socket_(s)
+#ifdef __linux__
+      ,
+      write_socket_(-1)
+#endif
+{
 
 #ifdef _WIN32
   if (ctx_ != nullptr) {
@@ -24,7 +47,13 @@ UdpSocketOp::UdpSocketOp(Proactor &context, socket_type s)
 }
 
 UdpSocketOp::UdpSocketOp(const UdpSocketOp &other)
-    : ctx_(other.ctx_), socket_(other.socket_) {}
+    : ctx_(other.ctx_), socket_(other.socket_)
+#ifdef __linux__
+      ,
+      write_socket_(other.write_socket_)
+#endif
+{
+}
 
 UdpSocketOp &UdpSocketOp::operator=(const UdpSocketOp &other) {
   if (&other == this) {
@@ -32,6 +61,9 @@ UdpSocketOp &UdpSocketOp::operator=(const UdpSocketOp &other) {
   }
   this->ctx_ = other.ctx_;
   this->socket_ = other.socket_;
+#ifdef __linux__
+  this->write_socket_ = other.write_socket_;
+#endif
   // this->recvfrom_op_ = detail::RecvFromOp();
   // this->sendto_op_ = detail::SendToOp();
   return *this;
@@ -65,10 +97,18 @@ void UdpSocketOp::async_write(const char *buff, size_t buff_size,
                               const SocketAddr &to, const func_send_type &f,
                               std::error_code &ec) {
 
+#ifdef __linux__
+  if (write_socket_ == -1) {
+    write_socket_ = ::dup(socket_);
+  }
+  auto s = write_socket_;
+#else
+  auto s = socket_;
+#endif
   auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t send_size) { f(re_ec, send_size); };
 
-  sendto_op_.async_send_to(ctx_, socket_, buff, buff_size, to, call_back, ec);
+  sendto_op_.async_send_to(ctx_, s, buff, buff_size, to, call_back, ec);
 }
 
 void UdpSocketOp::create(FamilyType family, std::error_code &ec) {
@@ -125,6 +165,10 @@ void UdpSocketOp::close(std::error_code &ec) {
   UdpSocket tcp(socket_);
   tcp.close(ec);
   socket_ = -1;
+#ifdef __linux__
+  ::close(write_socket_);
+  write_socket_ = -1;
+#endif
 }
 
 socket_type UdpSocketOp::native() const { return socket_; }

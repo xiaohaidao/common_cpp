@@ -176,6 +176,7 @@ TEST(ProactorTest, Proactor) {
   auto client_call_back = [&client]() {
     LOG_TRACE("client async read");
     client.async_read();
+    client.async_write("client write", 13);
   };
   client.async_connect(addr, client_call_back);
 
