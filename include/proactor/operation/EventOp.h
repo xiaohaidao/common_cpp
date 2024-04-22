@@ -4,6 +4,9 @@
 
 #include <functional>
 
+#ifdef __linux__
+#include "proactor/operation/detail/EventOp_posix.h"
+#endif
 #include "proactor/Proactor.h"
 
 class EventOp {
@@ -12,6 +15,7 @@ public:
 
   EventOp();
   explicit EventOp(Proactor *context);
+  ~EventOp();
 
   EventOp(const EventOp &);
   EventOp &operator=(const EventOp &);
@@ -21,6 +25,9 @@ public:
 private:
   Proactor *ctx_;
 
+#ifdef __linux__
+  detail::EventOp op_;
+#else
   class Event : public Operation {
   public:
     void async_notify(void *proactor, const func_type &async_func,
@@ -34,6 +41,7 @@ private:
   private:
     func_type func_;
   } op_;
+#endif
 
 }; // class EventOp
 

@@ -6,7 +6,19 @@
 
 EventOp::EventOp() : ctx_(nullptr) {}
 
-EventOp::EventOp(Proactor *context) : ctx_(context) {}
+EventOp::EventOp(Proactor *context) : ctx_(context) {
+#ifdef __linux__
+  std::error_code ec;
+  op_ = detail::EventOp::create(ec);
+#endif
+}
+
+EventOp::~EventOp() {
+#ifdef __linux__
+  std::error_code ec;
+  op_.close(ec);
+#endif
+}
 
 EventOp::EventOp(const EventOp &other) : ctx_(other.ctx_) {}
 
@@ -18,6 +30,14 @@ EventOp &EventOp::operator=(const EventOp &other) {
   return *this;
 }
 
+#ifdef __linux__
+
+void EventOp::async_notify(const func_type &f, std::error_code &ec) {
+  op_.async_wait(ctx_, f, ec);
+  op_.notify(ec);
+}
+
+#else
 void EventOp::async_notify(const func_type &f, std::error_code &ec) {
   op_.async_notify(ctx_, f, ec);
 }
@@ -40,3 +60,5 @@ void EventOp::Event::complete(void *, const std::error_code &result_ec,
     tmp(result_ec, trans_size);
   }
 }
+
+#endif
