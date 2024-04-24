@@ -19,6 +19,7 @@ add_executable(${test_name}
     proactor/ProactorCo.cpp
     proactor/ProactorEvent.cpp
     proactor/ProactorFiles.cpp
+    proactor/ProactorIpc.cpp
     proactor/ProactorTimer.cpp
     proactor/ProactorUdp.cpp
     process/Process.cpp
