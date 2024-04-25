@@ -1,4 +1,6 @@
 
+// reference: https://datatracker.ietf.org/doc/html/rfc5424
+
 #include "utils/log.h"
 
 #include <stdarg.h>
@@ -40,40 +42,41 @@ struct LogData {
   TimeClockT now;
   std::thread::id thread_id;
   const char *filename;
-  int line;
+  size_t line;
   const char *func_name;
 };
 
 const char *get_enum_str(LogLevel level) {
   switch (level) {
-  case kTrace:
-    return "Trace";
-    break;
   case kDebug:
     return "Debug";
-    break;
-  case kWarn:
+  case kWarning:
     return "Warn";
-    break;
   case kInfo:
     return "Info";
-    break;
   case kError:
     return "Error";
-    break;
-
+  case kEmergency:
+    return "Emergency";
+  case kAlert:
+    return "Alert";
+  case kCritical:
+    return "Critical";
+  case kNotice:
+    return "Notice";
   default:
     return "None";
-    break;
   }
 }
 
-static LogLevel skip_log_level = kTrace;
+static LogLevel skip_log_level = kDebug;
+static int skip_funname = 1;
+static int skip_filename = 0;
 static void (*export_callback)(LogLevel, const char *, int) = nullptr;
 
-bool is_skip_log(const LogData &data) { return data.level < skip_log_level; }
+bool is_skip_log(const LogData &data) { return data.level >= skip_log_level; }
 
-void format_log(const LogData &data, std::string &log) {
+int format_head(const LogData &data, char *str, size_t size) {
   // log head
   std::time_t const now_time = std::chrono::system_clock::to_time_t(data.now);
   auto us = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -81,52 +84,98 @@ void format_log(const LogData &data, std::string &log) {
                 .count() %
             1000000;
 
-  std::stringstream ss_h;
-  // ISO 8601 data format
-  struct tm buff;
-  ss_h << "["
-       << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "(%z)%Y-%m-%d %H:%M:%S.")
-       << std::setfill('0') << std::setw(6) << us << "]"
-       << "[" << data.thread_id << "]"
-       << "[" << get_enum_str(data.level) << "]"
-       << "[" << data.filename << ":" << data.line << "]"
-       << "[" << data.func_name << "]"
-       << " " << log.c_str();
-  // log tail
+  // RFC5234:
+  // SYSLOG-MSG: HEADER SP STRUCTURED-DATA [SP MSG]
+  // HEADER: PRI VERSION SP TIMESTAMP SP HOSTNAME SP APP-NAME SP PROCID SP MSGID
+  // STRUCTURED-DATA: NILVALUE / 1*SD-ELEMENT
+  // SD-ELEMENT: "[" SD-ID *(SP SD-PARAM) "]"
+  // message: [SP MSG]
+  int n = 0;
+  // format PRI VERSION SP
+  n += snprintf(str + n, size - n, "<%d>1 ",
+                16 * 8 + data.level); // 16 = local use 0  (local0)
 
-  if (!(log.size() > 0 && *log.rbegin() == '\n')) {
-    ss_h << ("\n");
+  // format TIMESTAMP SP
+  // ISO 8601 data format
+  // YY-MM-DDThh:mm::ss.000000Z+00:00
+  struct tm buff;
+  n += snprintf(str + n, size - n, "%s",
+                FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S"));
+  n += snprintf(str + n, size - n, ".%06ldZ", us);
+  int min_zone = 0;
+  sscanf(FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z"), "%d", &min_zone);
+  min_zone = min_zone / 100 * 60 + min_zone % 100;
+  n += snprintf(str + n, size - n, "%s%02d:%02d ", min_zone < 0 ? "-" : "+",
+                abs(min_zone) / 60, abs(min_zone) % 60);
+
+  // format HOSTNAME SP
+  // n += snprintf(str + n, size - n, "%s ", hostname);
+  n += snprintf(str + n, size - n, "- ");
+
+  // format APP-NAME SP
+  // n += snprintf(str + n, size - n, "%s ", pid_name);
+  n += snprintf(str + n, size - n, "- ");
+
+  // format PROCID SP
+  // n += snprintf(str + n, size - n, "%s ", pid);
+  n += snprintf(str + n, size - n, "- ");
+
+  // format MSGID SP
+  n += snprintf(str + n, size - n, "- ");
+
+  // format STRUCTURED-DATA {
+  // format thread id
+  std::stringstream ss;
+  ss << data.thread_id;
+  n += snprintf(str + n, size - n, "[Tid@%s", ss.str().c_str());
+
+  // format level
+  n += snprintf(str + n, size - n, " Level=\"%s\"", get_enum_str(data.level));
+
+  // format file and line
+  if (!skip_filename) {
+    n += snprintf(str + n, size - n, " File=\"%s:%zu\"", data.filename,
+                  data.line);
   }
 
-  log = ss_h.str();
+  // format function name
+  if (!skip_funname) {
+    n += snprintf(str + n, size - n, " fun=\"%s\"", data.func_name);
+  }
+  n += snprintf(str + n, size - n, "]");
+  // format STRUCTURED-DATA }
+
+  return n;
 }
 
-void export_log(const LogData &data, const std::string &log) {
+void export_log(const LogData &data, const char *log, size_t size) {
   if (export_callback) {
-    export_callback(data.level, log.c_str(), (int)log.size());
+    export_callback(data.level, log, (int)size);
     return;
   }
   auto *out_stream = data.level >= kError ? stderr : stdout;
-  fprintf(out_stream, "%s", log.c_str());
+  fprintf(out_stream, "%.*s", (int)size, log);
 }
 
 } // namespace
 
 void set_log_level(LogLevel level) { skip_log_level = level; }
+void set_skip_funname(int skip) { skip_funname = !!skip; }
+void set_skip_filename(int skip) { skip_filename = !!skip; }
 
 void set_export_callback(void (*callback)(LogLevel, const char *, int)) {
   export_callback = callback;
 }
 
-void log_print(LogLevel level, const char *filename, int line,
-               const char *func_name, const char *fmt, ...) {
+void log_print(LogLevel level, source_location const location, const char *fmt,
+               ...) {
 
   LogData log_data = {};
 
   log_data.level = level;
-  log_data.filename = filename;
-  log_data.line = line;
-  log_data.func_name = func_name;
+  log_data.filename = location.file_name();
+  log_data.line = location.line();
+  log_data.func_name = location.function_name();
   log_data.now = std::chrono::system_clock::now();
   log_data.thread_id = std::this_thread::get_id();
 
@@ -140,13 +189,31 @@ void log_print(LogLevel level, const char *filename, int line,
   size_t const size = vsnprintf(nullptr, 0, fmt, args);
   va_end(args);
 
-  std::string log(size, 0);
-  va_start(args, fmt);
-  vsnprintf((char *)log.c_str(), log.size() + 1, fmt, args);
-  va_end(args);
+  std::string log;
+  char str_data[1024];
+  int const head_size = format_head(log_data, str_data, sizeof(str_data));
+  size_t all_size = head_size + size + 2; // terminal: '\n' + '\0'
 
-  format_log(log_data, log);
+  char *log_begin = str_data + head_size;
+  char *data_begin = str_data;
+  size_t log_size = sizeof(str_data) - head_size;
+  if (all_size > sizeof(str_data)) {
+    log.resize(all_size, 0);
+    data_begin = log.begin().base();
+    memcpy(data_begin, str_data, head_size);
+    log_size = log.size() - head_size;
+    log_begin = data_begin + head_size;
+  }
+  va_start(args, fmt);
+  vsnprintf(log_begin, log_size, fmt, args);
+  va_end(args);
+  if (data_begin[all_size - 3] == '\n') {
+    --all_size;
+  } else {
+    data_begin[all_size - 2] = '\n';
+    data_begin[all_size - 1] = '\0';
+  }
 
   // export the log
-  export_log(log_data, log);
+  export_log(log_data, data_begin, all_size);
 }
