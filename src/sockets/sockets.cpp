@@ -51,8 +51,8 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
   return s;
 }
 
-void set_keepalive(socket_type s, std::error_code &ec, int enable, int time_s,
-                   int intvl, int times) {
+void set_keepalive(socket_type s, std::error_code &ec, int enable,
+                   KeepAliveParam param) {
 
   /*
   #ifdef _WIN32
@@ -92,18 +92,18 @@ void set_keepalive(socket_type s, std::error_code &ec, int enable, int time_s,
     ec = get_net_error_code();
     return;
   }
-  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPIDLE, (const char *)&time_s,
-                   sizeof(time_s)) < 0) {
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPIDLE, (const char *)&param.time_s,
+                   sizeof(param.time_s)) < 0) {
     ec = get_net_error_code();
     return;
   }
-  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPINTVL, (const char *)&intvl,
-                   sizeof(intvl)) < 0) {
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPINTVL, (const char *)&param.intvl,
+                   sizeof(param.intvl)) < 0) {
     ec = get_net_error_code();
     return;
   }
-  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPCNT, (const char *)&times,
-                   sizeof(times)) < 0) {
+  if (::setsockopt(s, IPPROTO_TCP, TCP_KEEPCNT, (const char *)&param.times,
+                   sizeof(param.times)) < 0) {
     ec = get_net_error_code();
     return;
   }
@@ -122,7 +122,7 @@ void set_reuseaddr(socket_type s, std::error_code &ec) {
   }
 }
 
-void set_read_timeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
+void set_read_timeout(socket_type s, std::error_code &ec, size_t timeout_ms) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
 #else
@@ -137,7 +137,7 @@ void set_read_timeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
   }
 }
 
-void set_write_timeout(socket_type s, size_t timeout_ms, std::error_code &ec) {
+void set_write_timeout(socket_type s, std::error_code &ec, size_t timeout_ms) {
 #ifdef _WIN32
   size_t time_out = timeout_ms;
 #else

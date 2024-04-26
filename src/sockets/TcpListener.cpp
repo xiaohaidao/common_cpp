@@ -109,7 +109,7 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
 }
 
 void TcpListener::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::set_read_timeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
 size_t TcpListener::read_timeout(std::error_code &ec) const {

@@ -86,6 +86,7 @@ public:
                  1) {
 
         static_cast<void>(ptr->internal_count.load(std::memory_order_acquire));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete)
         delete ptr;
       }
     }

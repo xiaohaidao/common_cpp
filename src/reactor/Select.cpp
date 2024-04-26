@@ -111,7 +111,7 @@ size_t Select::run_once(QueueOp &queue, std::error_code &ec) {
 size_t Select::run_once_timeout(QueueOp &queue, size_t timeout_ms,
                                 std::error_code &ec) {
   struct timeval time = {};
-  time.tv_usec = timeout_ms % 1000u * 1000u;
+  time.tv_usec = static_cast<long>(timeout_ms % 1000u * 1000u);
   time.tv_sec = static_cast<long>(timeout_ms / 1000u);
   fd_type readability = read_;
   fd_type writability = write_;

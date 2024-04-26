@@ -51,7 +51,7 @@ public:
   void read(void *reactor) {
     LOG_TRACE("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
-    size_t n = client_.read(buff_, sizeof(buff_), ec);
+    size_t const n = client_.read(buff_, sizeof(buff_), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
@@ -117,14 +117,14 @@ public:
   void accept(void *reactor) {
     LOG_TRACE("server socket %d begin accpet", native());
     std::error_code ec;
-    std::pair<TcpStream, SocketAddr> rec = server_.accept(ec);
+    std::pair<TcpStream, SocketAddr> const rec = server_.accept(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     LOG_TRACE("server accpet client socket %d ip and port %s:%d",
               rec.first.native(), rec.second.get_ip(), rec.second.get_port());
 
-    TcpStream &st = rec.first;
-    socket_type s = st.native();
+    TcpStream const &st = rec.first;
+    socket_type const s = st.native();
     tcps_[s] = Tcp<T>(st, "server");
     char buff[128] = "server begin send message";
     tcps_[s].write(buff, strlen(buff));
@@ -151,7 +151,7 @@ private:
 
 template <typename T> void reactor_func() {
   std::error_code ec;
-  SocketAddr addr(nullptr, "8988");
+  SocketAddr const addr(nullptr, "8988");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
@@ -180,7 +180,7 @@ template <typename T> void reactor_func() {
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
     QueueOp queue;
-    size_t size = reactor.run_once_timeout(queue, 1000, ec);
+    size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     LOG_TRACE("reactor timeout get size %d", size);

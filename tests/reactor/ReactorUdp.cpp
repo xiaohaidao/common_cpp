@@ -53,12 +53,12 @@ public:
   void read(void * /*reactor*/) {
     LOG_TRACE("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
-    std::pair<size_t, SocketAddr> recv =
+    std::pair<size_t, SocketAddr> const recv =
         client_.recv_from(buff_, sizeof(buff_), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
-    size_t n = recv.first;
+    size_t const n = recv.first;
     buff_[n] = 0;
     LOG_TRACE("module: %s, client read from %s:%d buff %d \"%s\"",
               module_.c_str(), recv.second.get_ip(), recv.second.get_port(), n,
@@ -75,7 +75,7 @@ public:
       return;
     }
 
-    SocketAddr &to = recv.second;
+    SocketAddr const &to = recv.second;
     LOG_TRACE("module: %s, client write to %s:%d message %d \"%s\"",
               module_.c_str(), to.get_ip(), to.get_port(), n, buff_);
     client_.send_to(buff_, n, to, ec);
@@ -99,7 +99,7 @@ private:
 
 template <typename T> void reactor_udp_func() {
   std::error_code ec;
-  SocketAddr addr(nullptr, "8989");
+  SocketAddr const addr(nullptr, "8989");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
@@ -130,7 +130,7 @@ template <typename T> void reactor_udp_func() {
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
     QueueOp queue;
-    size_t size = reactor.run_once_timeout(queue, 1000, ec);
+    size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     LOG_TRACE("reactor timeout get size %d", size);

@@ -47,7 +47,8 @@ TEST(IPCTest, MMSocket) {
   LOG_TRACE("client connect %d", ret);
   EXPECT_TRUE(ret == 0);
 
-  bool ok = client.send(nullptr, 0) == 0 && s_client.send(nullptr, 0) == 0;
+  bool const ok =
+      client.send(nullptr, 0) == 0 && s_client.send(nullptr, 0) == 0;
   LOG_ERROR("ok %d", ok);
 
   // read and write

@@ -88,11 +88,11 @@ void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
 }
 
 void UdpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::set_read_timeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
 void UdpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
-  sockets::set_write_timeout(socket_, timeout_ms, ec);
+  sockets::set_write_timeout(socket_, ec, timeout_ms);
 }
 
 size_t UdpSocket::read_timeout(std::error_code &ec) const {

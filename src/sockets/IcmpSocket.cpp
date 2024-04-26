@@ -32,7 +32,7 @@ struct icmphdr {
     } echo;           /* echo datagram */
     uint32_t gateway; /* gateway address */
     struct {
-      uint16_t __unused;
+      uint16_t _unused;
       uint16_t mtu;
     } frag; /* path mtu discovery */
   } un;
@@ -85,7 +85,7 @@ struct iphdr {
 
 namespace {
 
-unsigned short in_cksum(const char *addr, int len, unsigned short csum) {
+unsigned short in_cksum(unsigned short csum, const char *addr, int len) {
   int nleft = len;
   const unsigned short *w = (const unsigned short *)addr;
   int sum = csum;
@@ -151,18 +151,19 @@ void IcmpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   read_timeout_ = timeout_ms;
 #endif // _WIN32
-  sockets::set_read_timeout(socket_, timeout_ms, ec);
+  sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
 void IcmpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   send_timeout_ = timeout_ms;
 #endif // _WIN32
-  sockets::set_write_timeout(socket_, timeout_ms, ec);
+  sockets::set_write_timeout(socket_, ec, timeout_ms);
 }
 
 size_t IcmpSocket::read_timeout(std::error_code &ec) const {
 #ifdef _WIN32
+  (void)(&ec);
   return read_timeout_;
 #else
   return sockets::read_timeout(socket_, ec);
@@ -171,6 +172,7 @@ size_t IcmpSocket::read_timeout(std::error_code &ec) const {
 
 size_t IcmpSocket::write_timeout(std::error_code &ec) const {
 #ifdef _WIN32
+  (void)(&ec);
   return send_timeout_;
 #else
   return sockets::write_timeout(socket_, ec);
@@ -191,7 +193,7 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
 
   struct icmphdr icmp_hdr = {};
   constexpr size_t kIcmpHeadSize = sizeof(icmphdr);
-  size_t const ip_head_size = reinterpret_cast<iphdr *>(buf)->ihl * 4;
+  size_t const ip_head_size = (size_t)(reinterpret_cast<iphdr *>(buf)->ihl) * 4;
   ret -= static_cast<int>(kIcmpHeadSize);
   ret -= static_cast<int>(ip_head_size); // ip protocal struct size
   memcpy(&icmp_hdr, buf + ip_head_size, kIcmpHeadSize);
@@ -214,7 +216,7 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
   memcpy(buf, &icmp_hdr, sizeof(icmp_hdr));
   memcpy(buf + sizeof(icmp_hdr), data, data_size);
   icmp_hdr.checksum =
-      in_cksum(buf, static_cast<int>(data_size + sizeof(icmp_hdr)), 0);
+      in_cksum(0, buf, static_cast<int>(data_size + sizeof(icmp_hdr)));
   memcpy(buf, &icmp_hdr, sizeof(icmp_hdr));
 
   int const rev =

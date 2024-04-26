@@ -43,11 +43,18 @@ namespace sockets {
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec);
 
+struct KeepAliveParam {
+  KeepAliveParam(int time_s = 7200, int intvl = 75, int times = 0)
+      : time_s(time_s), intvl(intvl), times(times) {}
+  int time_s;
+  int intvl;
+  int times;
+};
 void set_keepalive(socket_type s, std::error_code &ec, int enable,
-                   int time_s = 7200, int intvl = 75, int times = 9);
+                   KeepAliveParam param = {});
 void set_reuseaddr(socket_type s, std::error_code &ec);
-void set_read_timeout(socket_type s, size_t timeout_ms, std::error_code &ec);
-void set_write_timeout(socket_type s, size_t timeout_ms, std::error_code &ec);
+void set_read_timeout(socket_type s, std::error_code &ec, size_t timeout_ms);
+void set_write_timeout(socket_type s, std::error_code &ec, size_t timeout_ms);
 size_t read_timeout(socket_type s, std::error_code &ec);
 size_t write_timeout(socket_type s, std::error_code &ec);
 int get_error_status(socket_type s, std::error_code &ec);

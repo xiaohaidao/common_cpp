@@ -23,7 +23,7 @@ void co_close(socket_type s, const char *module) {
 void async_read(socket_type s, const char *module);
 void connected(const char *module, const SocketAddr &addr) {
   std::error_code ec;
-  socket_type s = co_connect(addr, ec);
+  socket_type const s = co_connect(addr, ec);
   EXPECT_FALSE(ec) << "module: " << module << ", " << addr.get_ip() << ":"
                    << addr.get_port() << ", " << ec.value() << " : "
                    << ec.message();
@@ -111,8 +111,8 @@ public:
       }
       std::error_code ec;
       SocketAddr from = {};
-      socket_type new_socket = {};
-      if ((new_socket = co_accept(listener_.native(), from, ec)) == 0) {
+      socket_type const new_socket = co_accept(listener_.native(), from, ec);
+      if (new_socket == 0) {
         break;
       }
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -148,7 +148,7 @@ TEST(ProactorTest, ProactorCo) {
 
   set_proactor(&p);
 
-  SocketAddr addr(nullptr, "8989");
+  SocketAddr const addr(nullptr, "8989");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());

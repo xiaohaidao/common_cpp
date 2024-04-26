@@ -109,7 +109,7 @@ TEST(ProactorTest, ProactorFiles) {
 
   LOG_TRACE("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
-    p.run_one(1000 * 1000, ec);
+    p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }

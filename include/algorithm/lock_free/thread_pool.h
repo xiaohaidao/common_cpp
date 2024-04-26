@@ -151,7 +151,11 @@ public:
   template <typename FunctionType>
   std::future<typename std::result_of<FunctionType()>::type>
   submit(FunctionType f) {
+#if __cplusplus < 201703L // C++17
     typedef typename std::result_of<FunctionType()>::type result_type;
+#else
+    typedef typename std::invoke_result_t<FunctionType> result_type;
+#endif
 
     std::packaged_task<result_type()> task(std::move(f));
     std::future<result_type> res(task.get_future());

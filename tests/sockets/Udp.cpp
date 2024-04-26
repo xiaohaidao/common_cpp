@@ -48,7 +48,7 @@ TEST(SocketsTest, UdpSocketTest) {
             local_addr.get_ip(), local_addr.get_port());
 
   const char port[] = "8981";
-  SocketAddr addr("224.1.1.5", port);
+  SocketAddr const addr("224.1.1.5", port);
   LOG_TRACE("multicast ip is %s port %d", addr.get_ip(), addr.get_port());
 
   // initialize client
@@ -112,7 +112,7 @@ TEST(SocketsTest, UdpSocketTest) {
 
   // recv multicast message
   for (size_t i = 0; i < locals_ip.size(); ++i) {
-    std::pair<size_t, SocketAddr> rev =
+    std::pair<size_t, SocketAddr> const rev =
         client.recv_from(buff, sizeof(buff), ec);
     if (!ec) {
       LOG_TRACE("client recv from %s:%d message size %d : %s",

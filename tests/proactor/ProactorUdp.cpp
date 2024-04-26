@@ -91,7 +91,7 @@ TEST(ProactorTest, ProactorUdp) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr addr(nullptr, "8989");
+  SocketAddr const addr(nullptr, "8989");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
@@ -111,7 +111,7 @@ TEST(ProactorTest, ProactorUdp) {
 
   LOG_TRACE("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
-    p.run_one(1000 * 1000, ec);
+    p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }

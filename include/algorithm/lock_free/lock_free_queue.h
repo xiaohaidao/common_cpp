@@ -140,6 +140,7 @@ public:
         free_external_counter(old_head);
         return std::unique_ptr<T>(res);
       }
+      // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDelete)
       ptr->release_ref();
     }
   }

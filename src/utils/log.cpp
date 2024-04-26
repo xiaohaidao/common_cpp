@@ -101,7 +101,7 @@ int format_head(const LogData &data, char *str, size_t size) {
   struct tm buff;
   n += snprintf(str + n, size - n, "%s",
                 FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S"));
-  n += snprintf(str + n, size - n, ".%06ldZ", us);
+  n += snprintf(str + n, size - n, ".%06lldZ", us);
   int min_zone = 0;
   sscanf(FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z"), "%d", &min_zone);
   min_zone = min_zone / 100 * 60 + min_zone % 100;

@@ -7,34 +7,38 @@
 #include "coroutine/coroutine.h"
 #include "utils/log.h"
 
-static void func1(coroutine &co) {
+namespace {
+
+void func1(coroutine &co) {
   LOG_TRACE("func1: started\n");
   LOG_TRACE("func1: swapcontext next\n");
   co.yield();
   LOG_TRACE("func1: returning\n");
 }
 
-static void func2(void) {
+void func2(void) {
   LOG_TRACE("func2: started\n");
   LOG_TRACE("func2: swapcontext next\n");
   co_yield();
   LOG_TRACE("func2: returning\n");
 }
 
-static void func4(void) {
+void func4(void) {
   LOG_TRACE("func4: started\n");
   LOG_TRACE("func4: swapcontext next\n");
   co_yield();
   LOG_TRACE("func4: returning\n");
 }
 
-static void func3(void) {
+void func3(void) {
   LOG_TRACE("func3: started\n");
   func4();
   LOG_TRACE("func3: swapcontext next\n");
   co_yield();
   LOG_TRACE("func3: returning\n");
 }
+
+} // namespace
 
 void co_call() {
   LOG_TRACE("task begin\n");

@@ -10,7 +10,7 @@ TEST(SocketsTest, TcpTest) {
   // server
   std::error_code ec;
 
-  SocketAddr addr("127.0.0.1", "8988");
+  SocketAddr const addr("127.0.0.1", "8988");
   LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   auto tcp = TcpListener::bind(std::to_string(addr.get_port()).c_str(), ec);
@@ -34,7 +34,7 @@ TEST(SocketsTest, TcpTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(st.native() > 0);
-  SocketAddr local_addr = SocketAddr::get_local_socket(st.native(), ec);
+  SocketAddr const local_addr = SocketAddr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
@@ -53,7 +53,7 @@ TEST(SocketsTest, TcpTest) {
 
   char buff[] = "send message!";
   memset(buff, 0, sizeof(buff));
-  size_t s = st.read(buff, sizeof(buff), ec);
+  size_t const s = st.read(buff, sizeof(buff), ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_TRACE("read buff %d: %s", s, buff);

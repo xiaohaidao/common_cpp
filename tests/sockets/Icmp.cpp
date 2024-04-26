@@ -18,7 +18,7 @@ TEST(SocketsTest, IcmpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr addr("www.baidu.com", "8981");
+  SocketAddr const addr("www.baidu.com", "8981");
   LOG_TRACE("ping ip %s", addr.get_ip());
 
   auto now = std::chrono::steady_clock::now();
