@@ -8,12 +8,14 @@ extern "C" {
 
 #include <string.h>
 
+#define SUB_UNIX_PATH(file) (strrchr(file, '/') ? strrchr(file, '/') + 1 : file)
+#define SUB_WIN_PATH(file)                                                     \
+  (strrchr(file, '\\') ? strrchr(file, '\\') + 1 : file)
+
 #ifndef _MSC_VER
-#define __FILENAME__                                                           \
-  (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+#define __FILENAME__ SUB_UNIX_PATH(__FILE__)
 #else
-#define __FILENAME__                                                           \
-  (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
+#define __FILENAME__ SUB_WIN_PATH(__FILE__)
 
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
@@ -54,9 +56,6 @@ private:
   const char *file_name_;
   const char *func_name_;
 };
-
-// deprecated
-#define LOG_TRACE(...) LOG_LEVEL_NOSD(kDebug, __VA_ARGS__)
 
 #define LOG_DEBUG(...) LOG_LEVEL_NOSD(kDebug, __VA_ARGS__)
 #define LOG_WARN(...) LOG_LEVEL_NOSD(kWarning, __VA_ARGS__)

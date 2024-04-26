@@ -3,6 +3,12 @@
 
 #include "utils/log.h"
 
+#ifdef _WIN32
+#include <winsock.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -51,7 +57,7 @@ const char *get_enum_str(LogLevel level) {
   case kDebug:
     return "Debug";
   case kWarning:
-    return "Warn";
+    return "Warning";
   case kInfo:
     return "Info";
   case kError:
@@ -98,27 +104,66 @@ int format_head(const LogData &data, char *str, size_t size) {
   // format TIMESTAMP SP
   // ISO 8601 data format
   // YY-MM-DDThh:mm::ss.000000Z+00:00
-  struct tm buff;
-  n += snprintf(str + n, size - n, "%s",
-                FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S"));
-  n += snprintf(str + n, size - n, ".%06lldZ", us);
-  int min_zone = 0;
-  sscanf(FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z"), "%d", &min_zone);
-  min_zone = min_zone / 100 * 60 + min_zone % 100;
-  n += snprintf(str + n, size - n, "%s%02d:%02d ", min_zone < 0 ? "-" : "+",
-                abs(min_zone) / 60, abs(min_zone) % 60);
-
+  {
+    std::stringstream ss;
+    struct tm buff;
+    ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S");
+    n += snprintf(str + n, size - n, "%s", ss.str().c_str());
+    n += snprintf(str + n, size - n, ".%06lldZ", us);
+    int min_zone = 0;
+    ss.str(std::string());
+    ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z");
+#ifdef _MSC_VER
+    sscanf_s(ss.str().c_str(), "%d", &min_zone);
+#else
+    sscanf(ss.str().c_str(), "%d", &min_zone);
+#endif
+    min_zone = min_zone / 100 * 60 + min_zone % 100;
+    n += snprintf(str + n, size - n, "%s%02d:%02d ", min_zone < 0 ? "-" : "+",
+                  abs(min_zone) / 60, abs(min_zone) % 60);
+  }
   // format HOSTNAME SP
-  // n += snprintf(str + n, size - n, "%s ", hostname);
-  n += snprintf(str + n, size - n, "- ");
+  {
+    char hostname[32] = {};
+    if (::gethostname(hostname, sizeof(hostname))) {
+      n += snprintf(str + n, size - n, "- ");
+    } else {
+      n += snprintf(str + n, size - n, "%s ", hostname);
+    }
+  }
 
+#ifdef _WIN32
   // format APP-NAME SP
-  // n += snprintf(str + n, size - n, "%s ", pid_name);
-  n += snprintf(str + n, size - n, "- ");
+  {
+    char pid_name[512] = {};
+    DWORD pid_size = sizeof(pid_name);
+    if (QueryFullProcessImageName(GetCurrentProcess(), 0, pid_name,
+                                  &pid_size)) {
+      n += snprintf(str + n, size - n, "%s ", SUB_WIN_PATH(pid_name));
+    } else {
+      n += snprintf(str + n, size - n, "- ");
+    }
+  }
 
   // format PROCID SP
-  // n += snprintf(str + n, size - n, "%s ", pid);
-  n += snprintf(str + n, size - n, "- ");
+  n += snprintf(str + n, size - n, "%d ", GetCurrentProcessId());
+#else
+  // format APP-NAME SP
+  {
+    FILE *f = ::fopen("/proc/self/cmdline", "r");
+    if (f != NULL) {
+      char pid_name[512] = {};
+      fgets(pid_name, sizeof(pid_name), f); // get line
+      n += snprintf(str + n, size - n, "%s ", SUB_UNIX_PATH(pid_name));
+      ::fclose(f);
+    } else {
+      n += snprintf(str + n, size - n, "- ");
+    }
+  }
+
+  // format PROCID SP
+  n += snprintf(str + n, size - n, "%d ", getpid());
+#endif
 
   // format MSGID SP
   n += snprintf(str + n, size - n, "- ");
@@ -199,7 +244,7 @@ void log_print(LogLevel level, source_location const location, const char *fmt,
   size_t log_size = sizeof(str_data) - head_size;
   if (all_size > sizeof(str_data)) {
     log.resize(all_size, 0);
-    data_begin = log.begin().base();
+    data_begin = &log[0];
     memcpy(data_begin, str_data, head_size);
     log_size = log.size() - head_size;
     log_begin = data_begin + head_size;

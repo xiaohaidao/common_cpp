@@ -31,7 +31,7 @@ TEST(IPCTest, SharedMemoryTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   sh1.remove(ec); // windows do nothing
-  // LOG_TRACE("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
   sh2.remove(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

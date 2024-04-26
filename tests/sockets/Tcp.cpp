@@ -11,13 +11,13 @@ TEST(SocketsTest, TcpTest) {
   std::error_code ec;
 
   SocketAddr const addr("127.0.0.1", "8988");
-  LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   auto tcp = TcpListener::bind(std::to_string(addr.get_port()).c_str(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(tcp.native() > 0);
-  LOG_TRACE("server socket value %d, default read timeout %d", tcp.native(),
+  LOG_DEBUG("server socket value %d, default read timeout %d", tcp.native(),
             tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -25,7 +25,7 @@ TEST(SocketsTest, TcpTest) {
   tcp.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("server socket read timeout %d", tcp.read_timeout(ec));
+  LOG_DEBUG("server socket read timeout %d", tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -37,7 +37,7 @@ TEST(SocketsTest, TcpTest) {
   SocketAddr const local_addr = SocketAddr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
+  LOG_DEBUG("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
             local_addr.get_port());
 
   st.set_read_timeout(100, ec);
@@ -46,7 +46,7 @@ TEST(SocketsTest, TcpTest) {
   st.set_write_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("client read timeout %dms and write timeout %dms",
+  LOG_DEBUG("client read timeout %dms and write timeout %dms",
             st.read_timeout(ec), st.write_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -56,7 +56,7 @@ TEST(SocketsTest, TcpTest) {
   size_t const s = st.read(buff, sizeof(buff), ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("read buff %d: %s", s, buff);
+  LOG_DEBUG("read buff %d: %s", s, buff);
   // if (s == 0 && !ec) {
   //   st.close(ec);
   //   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -88,14 +88,14 @@ TEST(SocketsTest, TcpUnixTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(tcp.native() > 0);
-  LOG_TRACE("server socket value %d, default read timeout %d", tcp.native(),
+  LOG_DEBUG("server socket value %d, default read timeout %d", tcp.native(),
             tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   tcp.set_read_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("server socket read timeout %d", tcp.read_timeout(ec));
+  LOG_DEBUG("server socket read timeout %d", tcp.read_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -107,7 +107,7 @@ TEST(SocketsTest, TcpUnixTest) {
   SocketAddr local_addr = SocketAddr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
+  LOG_DEBUG("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
             local_addr.get_port());
 
   st.set_read_timeout(100, ec);
@@ -116,7 +116,7 @@ TEST(SocketsTest, TcpUnixTest) {
   st.set_write_timeout(100, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("client read timeout %dms and write timeout %dms",
+  LOG_DEBUG("client read timeout %dms and write timeout %dms",
             st.read_timeout(ec), st.write_timeout(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -126,7 +126,7 @@ TEST(SocketsTest, TcpUnixTest) {
   size_t s = st.read(buff, sizeof(buff), ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("read buff %d: %s", s, buff);
+  LOG_DEBUG("read buff %d: %s", s, buff);
   // if (s == 0 && !ec) {
   //   st.close(ec);
   //   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

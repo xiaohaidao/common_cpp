@@ -22,9 +22,9 @@ TEST(ProcessTest, Process) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("wait begin");
+  LOG_DEBUG("wait begin");
   child.wait(ec);
-  LOG_TRACE("wait end");
+  LOG_DEBUG("wait end");
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -37,17 +37,17 @@ TEST(ProcessTest, Process) {
   ec.clear();
 
   Process p = Process::open(115200, ec); // empty pid
-  // LOG_TRACE("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
   EXPECT_FALSE(p.running(ec));
-  // LOG_TRACE("EXPECT_FALSE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_FALSE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
 
   p.terminate(ec);
-  // LOG_TRACE("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
 
   p.wait(ec);
-  // LOG_TRACE("EXPECT_FALSE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_FALSE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
 }

@@ -19,7 +19,7 @@ public:
   ::native_handle native() const { return file_op_.native(); }
 
   void close() {
-    LOG_TRACE("module: %s, close fd %d", module_.c_str(), native());
+    LOG_DEBUG("module: %s, close fd %d", module_.c_str(), native());
     std::error_code ec;
     file_op_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -29,7 +29,7 @@ public:
   void read(const std::error_code &re_ec, size_t size, Files *f) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
+    LOG_DEBUG("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
               size, strlen(buff_), buff_);
     if (!re_ec) {
       f->async_write(buff_, size, this);
@@ -39,7 +39,7 @@ public:
   void write(const std::error_code &re_ec, size_t size, Files *f) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async write buff complete %d %d \"%s\"", module_.c_str(),
+    LOG_DEBUG("%s: %d async write buff complete %d %d \"%s\"", module_.c_str(),
               native(), size, strlen(buff_), buff_);
     if (!re_ec) {
       f->async_read(this);
@@ -59,7 +59,7 @@ public:
     size = (std::min)(size, sizeof(buff));
     memcpy(buff_, buff, size);
     buff_[size] = 0;
-    LOG_TRACE("%s: write message \"%s\"", module_.c_str(), buff);
+    LOG_DEBUG("%s: write message \"%s\"", module_.c_str(), buff);
     std::error_code ec;
     file_op_.async_write((char *)buff_, size,
                          std::bind(&Files::write, this, _1, _2, f), ec);
@@ -81,7 +81,7 @@ TEST(ProactorTest, ProactorFiles) {
   ec.clear();
 
   char path[] = "test_pipe_name";
-  LOG_TRACE("op file %s", path);
+  LOG_DEBUG("op file %s", path);
 
   using ipc::Pipe;
   Pipe pipe = Pipe::create(path, ec);
@@ -100,20 +100,20 @@ TEST(ProactorTest, ProactorFiles) {
   Files server(p, "Server", pipe.read_native());
   Files client(p, "client", client_pipe.write_native());
 
-  LOG_TRACE("async read");
+  LOG_DEBUG("async read");
   server.async_read(&client);
-  LOG_TRACE("async read complete");
+  LOG_DEBUG("async read complete");
 
   char buff[] = "client file write message!";
   client.async_write(buff, sizeof(buff), &server);
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
   client.close();
   server.close();
 

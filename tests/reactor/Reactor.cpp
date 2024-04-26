@@ -21,7 +21,7 @@ public:
       : client_(stream), module_(module) {}
 
   void close() {
-    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native());
+    LOG_DEBUG("module: %s, close socket %d", module_.c_str(), native());
     std::error_code ec;
     client_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -40,7 +40,7 @@ public:
   }
 
   void write(const char *buff, size_t buff_size) {
-    LOG_TRACE("module: %s, write message %d, \"%s\"", module_.c_str(),
+    LOG_DEBUG("module: %s, write message %d, \"%s\"", module_.c_str(),
               buff_size, buff);
     std::error_code ec;
     client_.write(buff, buff_size, ec);
@@ -49,18 +49,18 @@ public:
   }
 
   void read(void *reactor) {
-    LOG_TRACE("module: %s, socket %d begin read", module_.c_str(), native());
+    LOG_DEBUG("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
     size_t const n = client_.read(buff_, sizeof(buff_), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
     buff_[n] = 0;
-    LOG_TRACE("module: %s, client read buff %d \"%s\"", module_.c_str(), n,
+    LOG_DEBUG("module: %s, client read buff %d \"%s\"", module_.c_str(), n,
               buff_);
 
     if (n == 0) {
-      LOG_TRACE("module: %s, close socket %d", module_.c_str(),
+      LOG_DEBUG("module: %s, close socket %d", module_.c_str(),
                 client_.native());
       client_.close(ec);
       EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -74,7 +74,7 @@ public:
       return;
     }
 
-    LOG_TRACE("module: %s, client write message %d \"%s\"", module_.c_str(), n,
+    LOG_DEBUG("module: %s, client write message %d \"%s\"", module_.c_str(), n,
               buff_);
     client_.write(buff_, n, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -105,7 +105,7 @@ public:
       i.second.close();
     }
     tcps_.clear();
-    LOG_TRACE("server close socket %d", native());
+    LOG_DEBUG("server close socket %d", native());
     std::error_code ec;
     server_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -115,12 +115,12 @@ public:
   socket_type native() const { return server_.native(); }
 
   void accept(void *reactor) {
-    LOG_TRACE("server socket %d begin accpet", native());
+    LOG_DEBUG("server socket %d begin accpet", native());
     std::error_code ec;
     std::pair<TcpStream, SocketAddr> const rec = server_.accept(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("server accpet client socket %d ip and port %s:%d",
+    LOG_DEBUG("server accpet client socket %d ip and port %s:%d",
               rec.first.native(), rec.second.get_ip(), rec.second.get_port());
 
     TcpStream const &st = rec.first;
@@ -152,7 +152,7 @@ private:
 template <typename T> void reactor_func() {
   std::error_code ec;
   SocketAddr const addr(nullptr, "8988");
-  LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
@@ -168,7 +168,7 @@ template <typename T> void reactor_func() {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("client begin connect server %s:%d", addr.get_ip(),
+  LOG_DEBUG("client begin connect server %s:%d", addr.get_ip(),
             addr.get_port());
   Tcp<T> client("client");
   client.connect(addr);
@@ -176,17 +176,17 @@ template <typename T> void reactor_func() {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
     QueueOp queue;
     size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("reactor timeout get size %d", size);
+    LOG_DEBUG("reactor timeout get size %d", size);
     reactor.call(queue);
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
 
   client.close();
   server.close();

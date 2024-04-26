@@ -15,7 +15,7 @@ int main(int args, char **argv, char * /*env*/[]) {
   std::vector<const char *> argsv;
   for (int i = 2; i < args; ++i) {
     argsv.emplace_back(argv[i]);
-    LOG_TRACE("argsv emplace back: %s", argv[i]);
+    LOG_DEBUG("argsv emplace back: %s", argv[i]);
   }
   Process p = Process::call(argv[1], argsv, ec);
   // Process p = Process::call("cmd", {"/c echo 3 && pause"}, ec);

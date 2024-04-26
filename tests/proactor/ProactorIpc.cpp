@@ -136,13 +136,13 @@ TEST(ProactorTest, IpcOp) {
   client->connect(name);
   client->write("client send message!");
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
 
   p.close(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

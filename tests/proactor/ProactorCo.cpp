@@ -12,7 +12,7 @@ namespace proactor_co {
 bool stop_task = false;
 
 void co_close(socket_type s, const char *module) {
-  LOG_TRACE("module: %s, close socket %d", module, s);
+  LOG_DEBUG("module: %s, close socket %d", module, s);
   std::error_code ec;
   TcpStream(s).close(ec);
   if (!stop_task)
@@ -28,7 +28,7 @@ void connected(const char *module, const SocketAddr &addr) {
                    << addr.get_port() << ", " << ec.value() << " : "
                    << ec.message();
   ec.clear();
-  LOG_TRACE("%s: connect %s:%d complete", module, addr.get_ip(),
+  LOG_DEBUG("%s: connect %s:%d complete", module, addr.get_ip(),
             addr.get_port());
 
   async_read(s, module);
@@ -40,7 +40,7 @@ void async_connect(const char *module, const SocketAddr &addr) {
 
 void co_write(socket_type s, const char *module, const char *buff, size_t size);
 void read(socket_type s, const char *module) {
-  LOG_TRACE("[%s] %d begin read", module, s);
+  LOG_DEBUG("[%s] %d begin read", module, s);
   char buff[1024] = {};
   std::error_code ec;
   if (co_tcp_read(s, buff, sizeof(buff), ec) <= 0) {
@@ -49,7 +49,7 @@ void read(socket_type s, const char *module) {
   }
   EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                    << ec.message();
-  LOG_TRACE("[%s] read \"%s\"", module, buff);
+  LOG_DEBUG("[%s] read \"%s\"", module, buff);
 
   if (ec) {
     return;
@@ -63,12 +63,12 @@ void async_read(socket_type s, const char *module) {
 
 void co_write(socket_type s, const char *module, const char *buff,
               size_t size) {
-  LOG_TRACE("[%s] %d write message (%d)%s", module, s, size, buff);
+  LOG_DEBUG("[%s] %d write message (%d)%s", module, s, size, buff);
   std::error_code ec;
   co_tcp_write(s, buff, size, ec);
   EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                    << ec.message();
-  LOG_TRACE("[%s] write message completely (%d)%s", module, size, buff);
+  LOG_DEBUG("[%s] write message completely (%d)%s", module, size, buff);
   if (ec) {
     return;
   }
@@ -89,7 +89,7 @@ public:
       if (!stop_task)
         EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     }
-    LOG_TRACE("server close socket %d", native());
+    LOG_DEBUG("server close socket %d", native());
     std::error_code ec;
     listener_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -116,7 +116,7 @@ public:
         break;
       }
       EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
-      LOG_TRACE("socket %d client ip %d and port %s:%d", native(), new_socket,
+      LOG_DEBUG("socket %d client ip %d and port %s:%d", native(), new_socket,
                 from.get_ip(), from.get_port());
       if (ec) {
         continue;
@@ -149,20 +149,20 @@ TEST(ProactorTest, ProactorCo) {
   set_proactor(&p);
 
   SocketAddr const addr(nullptr, "8989");
-  LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
 
   Service server;
-  LOG_TRACE("bind port %s", port);
+  LOG_DEBUG("bind port %s", port);
   server.bind(port);
-  LOG_TRACE("server accept");
+  LOG_DEBUG("server accept");
   server.async_accept();
 
-  LOG_TRACE("client async connect");
+  LOG_DEBUG("client async connect");
   async_connect("client", addr);
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   size_t i = 0;
   co_loop_call([&p, &ec, &i]() {
     p.run_one(0, ec);
@@ -174,7 +174,7 @@ TEST(ProactorTest, ProactorCo) {
       p.shutdown();
     }
   });
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
   server.close();
 
   p.close(ec);

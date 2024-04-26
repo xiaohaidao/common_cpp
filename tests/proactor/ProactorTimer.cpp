@@ -17,9 +17,9 @@ TEST(ProactorTest, ProactorTimer) {
 
   TimerOp timer(p);
   auto call_back = [](const char *b, const std::error_code &ec, size_t n) {
-    LOG_TRACE("%s timer async call n %u!", b, n);
+    LOG_DEBUG("%s timer async call n %u!", b, n);
     if (ec) {
-      LOG_TRACE("error %s", ec.message().c_str());
+      LOG_DEBUG("error %s", ec.message().c_str());
     }
   };
   timer.set_timeout(600);
@@ -44,7 +44,7 @@ TEST(ProactorTest, ProactorTimer) {
   TimerOp timer3(p);
   timer3.set_timeout(100, 300);
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 20; ++i) {
     p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -60,7 +60,7 @@ TEST(ProactorTest, ProactorTimer) {
       ec.clear();
     }
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
 
   timer.close(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

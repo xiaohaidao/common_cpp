@@ -45,7 +45,7 @@ TEST(IPCTest, SemaphoresTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   sem1.remove(ec); // windows do nothing
-  // LOG_TRACE("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
+  // LOG_DEBUG("EXPECT_TRUE %d : %s", ec.value(), ec.message().c_str());
   ec.clear();
   sem2.remove(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

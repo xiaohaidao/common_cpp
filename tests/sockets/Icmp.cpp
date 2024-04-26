@@ -19,7 +19,7 @@ TEST(SocketsTest, IcmpSocketTest) {
   ec.clear();
 
   SocketAddr const addr("www.baidu.com", "8981");
-  LOG_TRACE("ping ip %s", addr.get_ip());
+  LOG_DEBUG("ping ip %s", addr.get_ip());
 
   auto now = std::chrono::steady_clock::now();
   auto last_now = std::chrono::steady_clock::now();
@@ -33,10 +33,10 @@ TEST(SocketsTest, IcmpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   now = std::chrono::steady_clock::now();
-  LOG_TRACE("recv time %dus",
+  LOG_DEBUG("recv time %dus",
             duration_cast<microseconds>(now - last_now).count());
 
-  LOG_TRACE("client recv from %s:%d message size %d : %s", rev.second.get_ip(),
+  LOG_DEBUG("client recv from %s:%d message size %d : %s", rev.second.get_ip(),
             rev.second.get_port(), rev.first, buff);
 
   last_now = std::chrono::steady_clock::now();
@@ -48,10 +48,10 @@ TEST(SocketsTest, IcmpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   now = std::chrono::steady_clock::now();
-  LOG_TRACE("recv time %dus",
+  LOG_DEBUG("recv time %dus",
             duration_cast<microseconds>(now - last_now).count());
 
-  LOG_TRACE("client recv from %s:%d message size %d : %s", rev.second.get_ip(),
+  LOG_DEBUG("client recv from %s:%d message size %d : %s", rev.second.get_ip(),
             rev.second.get_port(), rev.first, buff);
 
   server.close(ec);

@@ -14,7 +14,7 @@ public:
   explicit Udp(const char *module) : module_(module) {}
 
   void close() {
-    LOG_TRACE("module: %s, close socket %d", module_.c_str(), native());
+    LOG_DEBUG("module: %s, close socket %d", module_.c_str(), native());
     std::error_code ec;
     client_.close(ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -42,7 +42,7 @@ public:
   }
 
   void write(const char *buff, size_t buff_size) {
-    LOG_TRACE("module: %s, write to %s:%d message %d, \"%s\"", module_.c_str(),
+    LOG_DEBUG("module: %s, write to %s:%d message %d, \"%s\"", module_.c_str(),
               to_.get_ip(), to_.get_port(), buff_size, buff);
     std::error_code ec;
     client_.send_to(buff, buff_size, to_, ec);
@@ -51,7 +51,7 @@ public:
   }
 
   void read(void * /*reactor*/) {
-    LOG_TRACE("module: %s, socket %d begin read", module_.c_str(), native());
+    LOG_DEBUG("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
     std::pair<size_t, SocketAddr> const recv =
         client_.recv_from(buff_, sizeof(buff_), ec);
@@ -60,12 +60,12 @@ public:
     ec.clear();
     size_t const n = recv.first;
     buff_[n] = 0;
-    LOG_TRACE("module: %s, client read from %s:%d buff %d \"%s\"",
+    LOG_DEBUG("module: %s, client read from %s:%d buff %d \"%s\"",
               module_.c_str(), recv.second.get_ip(), recv.second.get_port(), n,
               buff_);
 
     if (n == 0) {
-      LOG_TRACE("module: %s, close socket %d", module_.c_str(),
+      LOG_DEBUG("module: %s, close socket %d", module_.c_str(),
                 client_.native());
       client_.close(ec);
       EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -76,7 +76,7 @@ public:
     }
 
     SocketAddr const &to = recv.second;
-    LOG_TRACE("module: %s, client write to %s:%d message %d \"%s\"",
+    LOG_DEBUG("module: %s, client write to %s:%d message %d \"%s\"",
               module_.c_str(), to.get_ip(), to.get_port(), n, buff_);
     client_.send_to(buff_, n, to, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
@@ -100,7 +100,7 @@ private:
 template <typename T> void reactor_udp_func() {
   std::error_code ec;
   SocketAddr const addr(nullptr, "8989");
-  LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
@@ -115,7 +115,7 @@ template <typename T> void reactor_udp_func() {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("client begin connect server %s:%d", addr.get_ip(),
+  LOG_DEBUG("client begin connect server %s:%d", addr.get_ip(),
             addr.get_port());
   Udp<T> client("client");
   client.connect(addr);
@@ -126,17 +126,17 @@ template <typename T> void reactor_udp_func() {
   char buff[] = "client write message!";
   client.write(buff, sizeof(buff));
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
     QueueOp queue;
     size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("reactor timeout get size %d", size);
+    LOG_DEBUG("reactor timeout get size %d", size);
     reactor.call(queue);
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
 
   client.close();
   server.close();

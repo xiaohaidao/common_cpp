@@ -15,7 +15,7 @@ TEST(SocketsTest, UdpSocketTest) {
   // #endif
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("server udp default value: loop %d ttl %d ",
+  LOG_DEBUG("server udp default value: loop %d ttl %d ",
             server.multicast_loop(ec), server.multicast_ttl(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -24,16 +24,16 @@ TEST(SocketsTest, UdpSocketTest) {
   ec.clear();
 
   // braodcast
-  LOG_TRACE("server braodcast enable %d", server.broadcast(ec));
+  LOG_DEBUG("server braodcast enable %d", server.broadcast(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("set server braodcast enable 1");
+  LOG_DEBUG("set server braodcast enable 1");
   server.set_broadcast(true, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  LOG_TRACE("server braodcast enable %d", server.broadcast(ec));
+  LOG_DEBUG("server braodcast enable %d", server.broadcast(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -44,12 +44,12 @@ TEST(SocketsTest, UdpSocketTest) {
   SocketAddr local_addr = SocketAddr::get_local_socket(server.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("server socket value %d  %s:%d", server.native(),
+  LOG_DEBUG("server socket value %d  %s:%d", server.native(),
             local_addr.get_ip(), local_addr.get_port());
 
   const char port[] = "8981";
   SocketAddr const addr("224.1.1.5", port);
-  LOG_TRACE("multicast ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("multicast ip is %s port %d", addr.get_ip(), addr.get_port());
 
   // initialize client
   UdpSocket client = UdpSocket::bind(port, ec);
@@ -59,7 +59,7 @@ TEST(SocketsTest, UdpSocketTest) {
   local_addr = SocketAddr::get_local_socket(client.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  LOG_TRACE("clinet socket value %d  %s:%d", client.native(),
+  LOG_DEBUG("clinet socket value %d  %s:%d", client.native(),
             local_addr.get_ip(), local_addr.get_port());
 
   // set loop
@@ -82,7 +82,7 @@ TEST(SocketsTest, UdpSocketTest) {
              ec ? ec.message().c_str() : "success");
     ec.clear();
   }
-  LOG_TRACE("client udp value: loop %d ttl %d ",
+  LOG_DEBUG("client udp value: loop %d ttl %d ",
             (uint8_t)client.multicast_loop(ec), client.multicast_ttl(ec));
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
@@ -93,7 +93,7 @@ TEST(SocketsTest, UdpSocketTest) {
     server.set_multicast_interface(std::get<0>(i), ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    LOG_TRACE("send message to multicast %s !", std::get<0>(i).get_ip());
+    LOG_DEBUG("send message to multicast %s !", std::get<0>(i).get_ip());
     server.send_to(buff, sizeof(buff), addr, ec);
 #ifdef _WIN32
     if (ec) {
@@ -115,7 +115,7 @@ TEST(SocketsTest, UdpSocketTest) {
     std::pair<size_t, SocketAddr> const rev =
         client.recv_from(buff, sizeof(buff), ec);
     if (!ec) {
-      LOG_TRACE("client recv from %s:%d message size %d : %s",
+      LOG_DEBUG("client recv from %s:%d message size %d : %s",
                 rev.second.get_ip(), rev.second.get_port(), rev.first, buff);
 
     } else {

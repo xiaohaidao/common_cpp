@@ -21,17 +21,17 @@ void local_unix() {
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 
-    LOG_TRACE("accept from %s:%d", s_c.second.get_ip(), s_c.second.get_port());
+    LOG_DEBUG("accept from %s:%d", s_c.second.get_ip(), s_c.second.get_port());
 
     auto &s_client = s_c.first;
     // read and write
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
     for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-      // LOG_TRACE("read write index %d", i);
+      // LOG_DEBUG("read write index %d", i);
       char buff[256] = {};
       size_t ret = s_client.read(buff, sizeof(buff) - 1, ec);
-      // LOG_TRACE("server receive msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("server receive msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
       // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
@@ -45,7 +45,7 @@ void local_unix() {
       }
 
       ret = s_client.write(buff, strlen(buff) + 1, ec);
-      // LOG_TRACE("server send msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("server send msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == strlen(buff) + 1);
       // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
@@ -55,7 +55,7 @@ void local_unix() {
         break;
       }
     }
-    LOG_TRACE("count %d send size %d and recv size %d", i, send_size,
+    LOG_DEBUG("count %d send size %d and recv size %d", i, send_size,
               recv_size);
 
     s_client.close(ec);
@@ -71,7 +71,7 @@ void local_unix() {
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
   for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-    // LOG_TRACE("read write index %d", i);
+    // LOG_DEBUG("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
@@ -90,7 +90,7 @@ void local_unix() {
     }
 
     ret = client.read(buff, sizeof(buff) - 1, ec);
-    // LOG_TRACE("client receive msg size %d:%d", ret, strlen(buff) + 1);
+    // LOG_DEBUG("client receive msg size %d:%d", ret, strlen(buff) + 1);
     // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
@@ -100,7 +100,7 @@ void local_unix() {
       break;
     }
   }
-  LOG_TRACE("count %d send size %d and recv size %d", i, send_size, recv_size);
+  LOG_DEBUG("count %d send size %d and recv size %d", i, send_size, recv_size);
 
   client.close(ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -124,17 +124,17 @@ void tcp() {
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 
-    LOG_TRACE("accept from %s:%d", s_c.second.get_ip(), s_c.second.get_port());
+    LOG_DEBUG("accept from %s:%d", s_c.second.get_ip(), s_c.second.get_port());
 
     auto &s_client = s_c.first;
     // read and write
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
     for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-      // LOG_TRACE("read write index %d", i);
+      // LOG_DEBUG("read write index %d", i);
       char buff[256] = {};
       size_t ret = s_client.read(buff, sizeof(buff) - 1, ec);
-      // LOG_TRACE("server receive msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("server receive msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
       // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
@@ -148,7 +148,7 @@ void tcp() {
       }
 
       ret = s_client.write(buff, strlen(buff) + 1, ec);
-      // LOG_TRACE("server send msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("server send msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == strlen(buff) + 1);
       // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
       ec.clear();
@@ -158,7 +158,7 @@ void tcp() {
         break;
       }
     }
-    LOG_TRACE("count %d send size %d and recv size %d", i, send_size,
+    LOG_DEBUG("count %d send size %d and recv size %d", i, send_size,
               recv_size);
 
     s_client.close(ec);
@@ -174,7 +174,7 @@ void tcp() {
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
   for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-    // LOG_TRACE("read write index %d", i);
+    // LOG_DEBUG("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
@@ -193,7 +193,7 @@ void tcp() {
     }
 
     ret = client.read(buff, sizeof(buff) - 1, ec);
-    // LOG_TRACE("client receive msg size %d:%d", ret, strlen(buff) + 1);
+    // LOG_DEBUG("client receive msg size %d:%d", ret, strlen(buff) + 1);
     // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
@@ -203,7 +203,7 @@ void tcp() {
       break;
     }
   }
-  LOG_TRACE("count %d send size %d and recv size %d", i, send_size, recv_size);
+  LOG_DEBUG("count %d send size %d and recv size %d", i, send_size, recv_size);
 
   client.close(ec);
   // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -215,17 +215,17 @@ void c() {
 
   mm_socket s;
   int ret = s.bind(server);
-  LOG_TRACE("server bind %d", ret);
+  LOG_DEBUG("server bind %d", ret);
   bool const is_server = !(ret < 0);
 
   if (is_server) {
     mm_client s_client;
 
     // connect
-    LOG_TRACE("connect");
+    LOG_DEBUG("connect");
     do {
       ret = s.accept(s_client);
-      LOG_TRACE("server connect %d", ret);
+      LOG_DEBUG("server connect %d", ret);
       // EXPECT_TRUE(ret > 0);
     } while (ret != 0);
 
@@ -236,11 +236,11 @@ void c() {
     size_t send_size = 0, recv_size = 0;
     size_t i = 0, first_size = 0;
     for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-      // LOG_TRACE("read write index %d", i);
+      // LOG_DEBUG("read write index %d", i);
       char buff[256] = {};
       do {
         ret = s_client.recv(buff, sizeof(buff) - 1);
-        // LOG_TRACE("server receive msg size %d:%d", ret, strlen(buff) + 1);
+        // LOG_DEBUG("server receive msg size %d:%d", ret, strlen(buff) + 1);
         // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
         recv_size += ret;
         if (!first_size) {
@@ -253,7 +253,7 @@ void c() {
       } while (ret == 0);
 
       ret = s_client.send(buff, strlen(buff) + 1);
-      // LOG_TRACE("server send msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("server send msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == strlen(buff) + 1);
       send_size += ret;
       if (first_size != ret && ret > 0) {
@@ -261,22 +261,22 @@ void c() {
         break;
       }
     }
-    LOG_TRACE("count %d send size %d and recv size %d", i, send_size,
+    LOG_DEBUG("count %d send size %d and recv size %d", i, send_size,
               recv_size);
 
     // close
     s_client.close();
     s.close();
-    LOG_TRACE("mm socket end");
+    LOG_DEBUG("mm socket end");
     return;
   }
   mm_client client;
 
   // connect
-  LOG_TRACE("connect");
+  LOG_DEBUG("connect");
   do {
     ret = client.connect(server);
-    LOG_TRACE("client connect %d", ret);
+    LOG_DEBUG("client connect %d", ret);
     // EXPECT_TRUE(ret > 0);
   } while (ret != 0);
 
@@ -287,13 +287,13 @@ void c() {
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
   for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-    // LOG_TRACE("read write index %d", i);
+    // LOG_DEBUG("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
     snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     ret = client.send(msg_buff, strlen(msg_buff) + 1);
-    // LOG_TRACE("client send msg size %d:%d", ret, strlen(msg_buff) + 1);
+    // LOG_DEBUG("client send msg size %d:%d", ret, strlen(msg_buff) + 1);
     // EXPECT_TRUE(ret == strlen(msg_buff) + 1);
     send_size += ret;
     if (!first_size) {
@@ -306,7 +306,7 @@ void c() {
 
     do {
       ret = client.recv(buff, sizeof(buff) - 1);
-      // LOG_TRACE("client receive msg size %d:%d", ret, strlen(buff) + 1);
+      // LOG_DEBUG("client receive msg size %d:%d", ret, strlen(buff) + 1);
       // EXPECT_TRUE(ret == 0 || ret == strlen(buff) + 1);
       recv_size += ret;
       if (first_size != ret && ret > 0) {
@@ -315,12 +315,12 @@ void c() {
       }
     } while (ret == 0);
   }
-  LOG_TRACE("count %d send size %d and recv size %d", i, send_size, recv_size);
+  LOG_DEBUG("count %d send size %d and recv size %d", i, send_size, recv_size);
 
   // close
   client.close();
   s.close();
-  LOG_TRACE("mm socket end");
+  LOG_DEBUG("mm socket end");
 }
 
 int main() {

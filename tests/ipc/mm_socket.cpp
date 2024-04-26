@@ -9,42 +9,42 @@ TEST(IPCTest, MMSocket) {
 
   mm_socket s;
   int ret = s.bind(server);
-  LOG_TRACE("server bind %d", ret);
+  LOG_DEBUG("server bind %d", ret);
 
   mm_client client, s_client;
 
   // connect
-  LOG_TRACE("connect");
+  LOG_DEBUG("connect");
   ret = s.accept(s_client);
-  LOG_TRACE("server connect %d", ret);
+  LOG_DEBUG("server connect %d", ret);
   EXPECT_TRUE(ret > 0);
 
   ret = client.connect(server);
-  LOG_TRACE("client connect %d", ret);
+  LOG_DEBUG("client connect %d", ret);
   EXPECT_TRUE(ret > 0);
 
   ret = s.accept(s_client);
-  LOG_TRACE("server connect %d", ret);
+  LOG_DEBUG("server connect %d", ret);
   EXPECT_TRUE(ret > 0);
 
   ret = client.connect(server);
-  LOG_TRACE("client connect %d", ret);
+  LOG_DEBUG("client connect %d", ret);
   EXPECT_TRUE(ret == 0);
 
   ret = s.accept(s_client);
-  LOG_TRACE("server connect %d", ret);
+  LOG_DEBUG("server connect %d", ret);
   EXPECT_TRUE(ret == 0);
 
   ret = client.connect(server);
-  LOG_TRACE("client connect %d", ret);
+  LOG_DEBUG("client connect %d", ret);
   EXPECT_TRUE(ret == 0);
 
   ret = s.accept(s_client);
-  LOG_TRACE("server connect %d", ret);
+  LOG_DEBUG("server connect %d", ret);
   EXPECT_TRUE(ret > 0);
 
   ret = client.connect(server);
-  LOG_TRACE("client connect %d", ret);
+  LOG_DEBUG("client connect %d", ret);
   EXPECT_TRUE(ret == 0);
 
   bool const ok =
@@ -55,13 +55,13 @@ TEST(IPCTest, MMSocket) {
   size_t send_size = 0, recv_size = 0;
   size_t i = 0, first_size = 0;
   for (i = 0; i < (size_t)(1024 * 1024 * 8) && ok; ++i) {
-    // LOG_TRACE("read write index %d", i);
+    // LOG_DEBUG("read write index %d", i);
     char buff[256] = {};
     const char message[] = "client send message";
     char msg_buff[256] = {};
     snprintf(msg_buff, sizeof(msg_buff) - 1, "%s:%.100zu", message, i);
     ret = client.send(msg_buff, strlen(msg_buff) + 1);
-    // LOG_TRACE("client send msg size %d:%d", ret, strlen(msg_buff));
+    // LOG_DEBUG("client send msg size %d:%d", ret, strlen(msg_buff));
     EXPECT_TRUE(ret == strlen(msg_buff) + 1);
     send_size += ret;
     if (!first_size) {
@@ -73,7 +73,7 @@ TEST(IPCTest, MMSocket) {
     }
 
     ret = s_client.recv(buff, sizeof(buff) - 1);
-    // LOG_TRACE("server receive msg size %d:%d", ret, strlen(buff));
+    // LOG_DEBUG("server receive msg size %d:%d", ret, strlen(buff));
     EXPECT_TRUE(ret == strlen(msg_buff) + 1);
     recv_size += ret;
     if (first_size != ret) {
@@ -82,7 +82,7 @@ TEST(IPCTest, MMSocket) {
     }
 
     ret = s_client.send(buff, strlen(buff) + 1);
-    // LOG_TRACE("server send msg size %d:%d", ret, strlen(buff));
+    // LOG_DEBUG("server send msg size %d:%d", ret, strlen(buff));
     EXPECT_TRUE(ret == strlen(buff) + 1);
     send_size += ret;
     if (first_size != ret) {
@@ -91,7 +91,7 @@ TEST(IPCTest, MMSocket) {
     }
 
     ret = client.recv(msg_buff, sizeof(msg_buff) - 1);
-    // LOG_TRACE("client receive msg size %d:%d", ret, strlen(msg_buff));
+    // LOG_DEBUG("client receive msg size %d:%d", ret, strlen(msg_buff));
     EXPECT_TRUE(ret == strlen(buff) + 1);
     recv_size += ret;
     if (first_size != ret) {
@@ -99,11 +99,11 @@ TEST(IPCTest, MMSocket) {
       break;
     }
   }
-  LOG_TRACE("count %d send size %d and recv size %d", i, send_size, recv_size);
+  LOG_DEBUG("count %d send size %d and recv size %d", i, send_size, recv_size);
 
   // close
   client.close();
   s_client.close();
   s.close();
-  LOG_TRACE("mm socket end");
+  LOG_DEBUG("mm socket end");
 }

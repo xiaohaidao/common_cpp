@@ -20,7 +20,7 @@ public:
   socket_type native() const { return tcp_op_.native(); }
 
   void close() {
-    LOG_TRACE("module_: %s, close socket %d", module_.c_str(), native());
+    LOG_DEBUG("module_: %s, close socket %d", module_.c_str(), native());
     std::error_code ec;
     tcp_op_.close(ec);
     EXPECT_FALSE(ec) << "module_: " << module_ << ", " << ec.value() << " : "
@@ -30,7 +30,7 @@ public:
   void read(const std::error_code &re_ec, size_t size) {
     EXPECT_FALSE(re_ec) << "module_: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
+    LOG_DEBUG("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
               size, strlen(buff_), buff_);
     async_write(buff_, size);
   }
@@ -38,7 +38,7 @@ public:
   void write(const std::error_code &re_ec, size_t size) {
     EXPECT_FALSE(re_ec) << "module_: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: %d async send buff_ complete %d %d \"%s\"", module_.c_str(),
+    LOG_DEBUG("%s: %d async send buff_ complete %d %d \"%s\"", module_.c_str(),
               native(), size, strlen(buff_), buff_);
     async_read();
   }
@@ -47,7 +47,7 @@ public:
   void connected(F f, const std::error_code &re_ec, size_t size) {
     EXPECT_FALSE(re_ec) << "module_: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
-    LOG_TRACE("%s: async connect complete %d", module_.c_str(), size);
+    LOG_DEBUG("%s: async connect complete %d", module_.c_str(), size);
     f();
   }
 
@@ -72,7 +72,7 @@ public:
     size = (std::min)(size, sizeof(buff_));
     memcpy(&buff_, b, size);
     buff_[size] = 0;
-    LOG_TRACE("%s: write message \"%s\"", module_.c_str(), buff_);
+    LOG_DEBUG("%s: write message \"%s\"", module_.c_str(), buff_);
     std::error_code ec;
     tcp_op_.async_write((char *)buff_, size,
                         std::bind(&Tcp::write, this, _1, _2), ec);
@@ -97,7 +97,7 @@ public:
     for (auto &i : tcps_) {
       i.close();
     }
-    LOG_TRACE("server close socket %d", native());
+    LOG_DEBUG("server close socket %d", native());
     std::error_code ec;
     listener_.close(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -116,11 +116,11 @@ public:
   void accept(const std::error_code &re_ec,
               const std::pair<TcpStreamOp, SocketAddr> &ac) {
 
-    LOG_TRACE("server socket %d begin accpet", native());
+    LOG_DEBUG("server socket %d begin accpet", native());
 
     EXPECT_FALSE(re_ec) << re_ec.value() << " : " << re_ec.message();
     Tcp service_tcp(ac.first, "server");
-    LOG_TRACE("socket %d client ip and port %s:%d", service_tcp.native(),
+    LOG_DEBUG("socket %d client ip and port %s:%d", service_tcp.native(),
               ac.second.get_ip(), ac.second.get_port());
 
     tcps_.push_back(std::move(service_tcp));
@@ -160,35 +160,35 @@ TEST(ProactorTest, Proactor) {
   ec.clear();
 
   SocketAddr const addr(nullptr, "8989");
-  LOG_TRACE("local ip is %s port %d", addr.get_ip(), addr.get_port());
+  LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
 
   Service<> server(p);
 
-  LOG_TRACE("bind port %s", port);
+  LOG_DEBUG("bind port %s", port);
   server.bind(port);
 
-  LOG_TRACE("server accept");
+  LOG_DEBUG("server accept");
   server.async_accept();
 
   Tcp client(p, "client");
 
-  LOG_TRACE("client async connect");
+  LOG_DEBUG("client async connect");
   auto client_call_back = [&client]() {
-    LOG_TRACE("client async read");
+    LOG_DEBUG("client async read");
     client.async_read();
     client.async_write("client write", 13);
   };
   client.async_connect(addr, client_call_back);
 
-  LOG_TRACE("-------------------- begin run while --------------------");
+  LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
-  LOG_TRACE("-------------------- end run while --------------------");
+  LOG_DEBUG("-------------------- end run while --------------------");
   client.close();
   server.close();
 

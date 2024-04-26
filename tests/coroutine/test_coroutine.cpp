@@ -10,58 +10,58 @@
 namespace {
 
 void func1(coroutine &co) {
-  LOG_TRACE("func1: started\n");
-  LOG_TRACE("func1: swapcontext next\n");
+  LOG_DEBUG("func1: started\n");
+  LOG_DEBUG("func1: swapcontext next\n");
   co.yield();
-  LOG_TRACE("func1: returning\n");
+  LOG_DEBUG("func1: returning\n");
 }
 
 void func2(void) {
-  LOG_TRACE("func2: started\n");
-  LOG_TRACE("func2: swapcontext next\n");
+  LOG_DEBUG("func2: started\n");
+  LOG_DEBUG("func2: swapcontext next\n");
   co_yield();
-  LOG_TRACE("func2: returning\n");
+  LOG_DEBUG("func2: returning\n");
 }
 
 void func4(void) {
-  LOG_TRACE("func4: started\n");
-  LOG_TRACE("func4: swapcontext next\n");
+  LOG_DEBUG("func4: started\n");
+  LOG_DEBUG("func4: swapcontext next\n");
   co_yield();
-  LOG_TRACE("func4: returning\n");
+  LOG_DEBUG("func4: returning\n");
 }
 
 void func3(void) {
-  LOG_TRACE("func3: started\n");
+  LOG_DEBUG("func3: started\n");
   func4();
-  LOG_TRACE("func3: swapcontext next\n");
+  LOG_DEBUG("func3: swapcontext next\n");
   co_yield();
-  LOG_TRACE("func3: returning\n");
+  LOG_DEBUG("func3: returning\n");
 }
 
 } // namespace
 
 void co_call() {
-  LOG_TRACE("task begin\n");
+  LOG_DEBUG("task begin\n");
   // coroutine co;
   co_await(func1);
   co_await(func2);
   co_await(func3);
 
-  LOG_TRACE("main task\n");
+  LOG_DEBUG("main task\n");
   co_yield();
-  LOG_TRACE("main run yield\n");
+  LOG_DEBUG("main run yield\n");
   co_yield();
 
-  LOG_TRACE("main append task again\n");
+  LOG_DEBUG("main append task again\n");
   co_await(func2);
   co_await(func3);
   co_await(func1);
   co_loop();
-  LOG_TRACE("main task done\n");
+  LOG_DEBUG("main task done\n");
 }
 
 TEST(Coroutine, coroutine) {
-  LOG_TRACE("test task begin\n");
+  LOG_DEBUG("test task begin\n");
 
   co_call();
 
@@ -75,5 +75,5 @@ TEST(Coroutine, coroutine) {
   t4.join();
 
   co_call();
-  LOG_TRACE("test task begin end \n");
+  LOG_DEBUG("test task begin end \n");
 }

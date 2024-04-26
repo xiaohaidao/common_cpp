@@ -4,13 +4,11 @@
 #include "utils/log.h"
 
 TEST(LogTest, log) {
-  LOG_TRACE("log trace int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_DEBUG("log debug int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_INFO("log info int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_WARN("log warn int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_ERROR("log error int %d, double %f, str %s .", 1, 1.0, "1");
 
-  LOG_TRACE("log trace int %d, double %f, str %s .\n", 1, 1.0, "1");
   LOG_DEBUG("log debug int %d, double %f, str %s .\n", 1, 1.0, "1");
   LOG_INFO("log info int %d, double %f, str %s .\n", 1, 1.0, "1");
   LOG_WARN("log warn int %d, double %f, str %s .\n", 1, 1.0, "1");
@@ -53,19 +51,16 @@ TEST(LogTest, log) {
   LOG_ERROR("%s", kBuff915Char);
 
   set_skip_filename(1);
-  LOG_TRACE("log trace int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_DEBUG("log debug int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_INFO("log info int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_WARN("log warn int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_ERROR("log error int %d, double %f, str %s .", 1, 1.0, "1");
   set_skip_funname(0);
-  LOG_TRACE("log trace int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_DEBUG("log debug int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_INFO("log info int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_WARN("log warn int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_ERROR("log error int %d, double %f, str %s .", 1, 1.0, "1");
   set_skip_filename(0);
-  LOG_TRACE("log trace int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_DEBUG("log debug int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_INFO("log info int %d, double %f, str %s .", 1, 1.0, "1");
   LOG_WARN("log warn int %d, double %f, str %s .", 1, 1.0, "1");
