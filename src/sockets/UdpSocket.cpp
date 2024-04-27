@@ -38,7 +38,12 @@ UdpSocket::UdpSocket(const socket_type &s) : socket_(s) {}
 UdpSocket UdpSocket::create(FamilyType family, std::error_code &ec) {
 
   UdpSocket re;
-  socket_type const s = sockets::socket(family, kDgram, kUDP, ec);
+  socket_type const s = sockets::socket(family, kDgram,
+#ifdef __linux__
+                                        family == kUnix ? kIp :
+#endif // __linux__
+                                                        kUDP,
+                                        ec);
   if (ec) {
     return re;
   }
@@ -53,14 +58,24 @@ UdpSocket UdpSocket::bind(const char *port_or_service, std::error_code &ec) {
 UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
                           std::error_code &ec) {
   SocketAddr const addr =
-      SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+#ifdef __linux__
+      family == kUnix
+          ? SocketAddr(port_or_service)
+          :
+#endif // __linux__
+          SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
     return UdpSocket();
   }
 
   UdpSocket re;
-  socket_type const s = sockets::socket(family, kDgram, kUDP, ec);
+  socket_type const s = sockets::socket(family, kDgram,
+#ifdef __linux__
+                                        family == kUnix ? kIp :
+#endif // __linux__
+                                                        kUDP,
+                                        ec);
   if (ec) {
     return re;
   }

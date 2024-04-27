@@ -85,12 +85,12 @@ bool is_skip_log(const LogData &data) { return data.level >= skip_log_level; }
 int format_head(const LogData &data, char *str, size_t size) {
   // log head
   std::time_t const now_time = std::chrono::system_clock::to_time_t(data.now);
-  auto us = std::chrono::duration_cast<std::chrono::microseconds>(
-                data.now.time_since_epoch())
-                .count() %
-            1000000;
+  int64_t const us = std::chrono::duration_cast<std::chrono::microseconds>(
+                         data.now.time_since_epoch())
+                         .count() %
+                     1000000;
 
-  // RFC5234:
+  // RFC5424:
   // SYSLOG-MSG: HEADER SP STRUCTURED-DATA [SP MSG]
   // HEADER: PRI VERSION SP TIMESTAMP SP HOSTNAME SP APP-NAME SP PROCID SP MSGID
   // STRUCTURED-DATA: NILVALUE / 1*SD-ELEMENT
@@ -109,7 +109,7 @@ int format_head(const LogData &data, char *str, size_t size) {
     struct tm buff;
     ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S");
     n += snprintf(str + n, size - n, "%s", ss.str().c_str());
-    n += snprintf(str + n, size - n, ".%06lldZ", us);
+    n += snprintf(str + n, size - n, ".%06lld", us);
     int min_zone = 0;
     ss.str(std::string());
     ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z");
