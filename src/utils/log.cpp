@@ -109,7 +109,7 @@ int format_head(const LogData &data, char *str, size_t size) {
     struct tm buff;
     ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%Y-%m-%dT%H:%M:%S");
     n += snprintf(str + n, size - n, "%s", ss.str().c_str());
-    n += snprintf(str + n, size - n, ".%06lld", us);
+    n += snprintf(str + n, size - n, ".%06ld", us);
     int min_zone = 0;
     ss.str(std::string());
     ss << FORMAT_TM(LOCALTIME_S(&now_time, &buff), "%z");

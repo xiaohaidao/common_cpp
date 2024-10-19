@@ -3,6 +3,8 @@
 
 #include "coroutine/coroutine.h"
 
+#include <errno.h>
+#include <stdio.h>
 #include <string.h>
 #include <ucontext.h>
 
