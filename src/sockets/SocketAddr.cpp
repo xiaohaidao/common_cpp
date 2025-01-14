@@ -71,6 +71,15 @@ typedef int SizeType;
 typedef socklen_t SizeType;
 #endif // _WIN32
 
+constexpr size_t get_native_addr_size(FamilyType type) {
+  return
+#ifdef __linux__
+      type == kUnix ? sizeof(sockaddr_un) :
+#endif // __linux__
+                    type == kIpV4 ? sizeof(struct sockaddr_in)
+                                  : sizeof(struct sockaddr_in6);
+}
+
 } // namespace sockets
 
 using namespace sockets;
@@ -154,12 +163,7 @@ int SocketAddr::native_family() const {
 void *SocketAddr::native_addr() const { return (void *)sock_addr_; }
 
 size_t SocketAddr::native_addr_size() const {
-  return
-#ifdef __linux__
-      get_family() == kUnix ? sizeof(sockaddr_un) :
-#endif // __linux__
-                            get_family() == kIpV4 ? sizeof(struct sockaddr_in)
-                                                  : sizeof(struct sockaddr_in6);
+  return get_native_addr_size(get_family());
 }
 
 void *SocketAddr::native_ip_addr() const {
@@ -245,7 +249,7 @@ SocketAddr SocketAddr::resolve_host(const char *host,
   }
 
   for (auto *ptr = result; ptr != NULL; ptr = ptr->ai_next) {
-    memcpy(re.sock_addr_, ptr->ai_addr, re.native_addr_size());
+    memcpy(re.sock_addr_, ptr->ai_addr, get_native_addr_size(family));
     // sockaddr_ipv4->ai_canonname
     re.get_ip(re.ip_addr_, sizeof(re.ip_addr_), ec);
     break;

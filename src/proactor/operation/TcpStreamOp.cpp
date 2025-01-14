@@ -169,6 +169,9 @@ void TcpStreamOp::close(std::error_code &ec) {
   ::close(write_socket_);
   write_socket_ = -1;
 #endif
+  send_op_ = {};
+  connect_op_ = {};
+  recv_op_ = {};
 }
 
 socket_type TcpStreamOp::native() const { return socket_; }

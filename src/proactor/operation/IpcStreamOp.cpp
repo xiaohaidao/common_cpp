@@ -118,6 +118,8 @@ void IpcStreamOp::close(std::error_code &ec) {
     ctx_->cancel(pipe_.native(), t_ec);
   }
   pipe_.close(ec);
+  read_ = {};
+  write_ = {};
 #elif defined(__linux__)
   tcp_.shutdown(ec);
   tcp_.close(ec);

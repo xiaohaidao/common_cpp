@@ -137,6 +137,8 @@ void FilesOp::close(std::error_code &ec) {
   }
 #endif
   fd_ = 0;
+  read_op_ = {};
+  write_op_ = {};
 }
 
 native_handle FilesOp::native() const { return fd_; }

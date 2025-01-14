@@ -19,6 +19,13 @@ public:
   ~Client() {
     std::error_code ec;
     tcp_op_.close(ec);
+    LOG_INFO("~ %d close remote client %s\n", tcp_op_.native(),
+             ec.message().c_str());
+  }
+
+  void close() {
+    std::error_code ec;
+    tcp_op_.close(ec);
     LOG_INFO("%d close remote client %s\n", tcp_op_.native(),
              ec.message().c_str());
   }
@@ -143,6 +150,13 @@ TEST(ProactorTest, IpcOp) {
     ec.clear();
   }
   LOG_DEBUG("-------------------- end run while --------------------");
+
+  client->close();
+  for (size_t i = 0; i < 2; ++i) {
+    p.run_one(1000ull * 1000ull, ec);
+    EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
+    ec.clear();
+  }
 
   p.close(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

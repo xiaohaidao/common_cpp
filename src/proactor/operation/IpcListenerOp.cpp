@@ -106,6 +106,7 @@ void IpcListenerOp::close(std::error_code &ec) {
     ctx_->cancel((::native_handle)pipe_.native(), t_ec);
   }
   pipe_.remove(ec);
+  connect_op_ = {};
 #elif defined(__linux__)
   unix_op_.close(ec);
 #endif

@@ -80,6 +80,7 @@ void TcpListenerOp::close(std::error_code &ec) {
   TcpListener listener(socket_);
   listener.close(ec);
   socket_ = -1;
+  accept_op_ = {};
 }
 
 socket_type TcpListenerOp::native() const { return socket_; }

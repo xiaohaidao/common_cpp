@@ -27,7 +27,7 @@ void callback(LogLevel, const char *data, int size) {
   if (use_udp) {
     udp.send_to(data, (size_t)size, kLogAddr, ec);
   } else {
-    printf(data);
+    printf("%s", data);
   }
 }
 

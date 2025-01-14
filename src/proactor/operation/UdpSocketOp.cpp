@@ -169,6 +169,8 @@ void UdpSocketOp::close(std::error_code &ec) {
   ::close(write_socket_);
   write_socket_ = -1;
 #endif
+  recvfrom_op_ = {};
+  sendto_op_ = {};
 }
 
 socket_type UdpSocketOp::native() const { return socket_; }
