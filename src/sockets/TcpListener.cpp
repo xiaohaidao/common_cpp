@@ -97,7 +97,7 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
   std::pair<TcpStream, SocketAddr> re;
 
   // Accept a client socket
-  socket_type const client = ::accept(socket_, NULL, NULL);
+  socket_type const client = ::accept(socket_, nullptr, nullptr);
   if (client == INVALID_SOCKET) {
     ::CLOSESOCKET(client);
     ec = get_net_error_code();

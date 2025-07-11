@@ -42,7 +42,7 @@ IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
 
 #elif defined(__linux__)
 
-IpcStreamOp::IpcStreamOp(const IpcStreamOp &other) : tcp_(other.tcp_) {}
+IpcStreamOp::IpcStreamOp(const IpcStreamOp &other) = default;
 
 IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
   if (&other == this) {

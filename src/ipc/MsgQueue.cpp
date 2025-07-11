@@ -7,6 +7,6 @@ namespace ipc {
 
 MsgQueue::MsgQueue() : msgid_(0) {}
 
-MsgQueue::~MsgQueue() {}
+MsgQueue::~MsgQueue() = default;
 
 } // namespace ipc

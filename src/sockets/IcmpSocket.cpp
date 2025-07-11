@@ -87,7 +87,7 @@ namespace {
 
 unsigned short in_cksum(unsigned short csum, const char *addr, int len) {
   int nleft = len;
-  const unsigned short *w = (const unsigned short *)addr;
+  const auto *w = (const unsigned short *)addr;
   int sum = csum;
 
   /*
@@ -183,7 +183,7 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
                                                     std::error_code &ec) {
 
   std::pair<size_t, SocketAddr> re;
-  socklen_t len = static_cast<socklen_t>(re.second.native_addr_size());
+  auto len = static_cast<socklen_t>(re.second.native_addr_size());
   int ret = ::recvfrom(socket_, buf, static_cast<int>(buf_size), 0,
                        (sockaddr *)re.second.native_addr(), &len);
   if (ret < 0) {

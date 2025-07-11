@@ -11,7 +11,7 @@ namespace {
 constexpr char kServerPrefix[] = "MMSOCKET";
 constexpr size_t kClientSize = (size_t)(512 * 4096); // 2M
 
-struct Protocal {
+struct protocal {
   uint32_t id;
   uint32_t ask_id;
   uint32_t status;
@@ -70,10 +70,10 @@ int mm_client::connect(const char *address) {
   if (handle_.memory()) {
     return 0; // had connect
   }
-  Protocal *pro = (Protocal *)server_handle_.memory();
+  auto *pro = (protocal *)server_handle_.memory();
   if (!pro || id_ == 0) {
     connect_server(address);
-    pro = (Protocal *)server_handle_.memory();
+    pro = (protocal *)server_handle_.memory();
     if (!pro) {
       return -1; // no server
     }
@@ -196,7 +196,7 @@ int mm_client::recv(char *data, size_t data_size) {
 }
 
 void mm_socket::init_protocal(void *p) {
-  Protocal *pro = (Protocal *)p;
+  auto *pro = (protocal *)p;
   pro->id = -1;
   pro->ask_id = 0;
   pro->status = 0;
@@ -214,7 +214,7 @@ int mm_socket::bind(const char *address, bool force) {
     // fprintf(stderr, "create mm error %s\n", ec.message().c_str());
     return -1;
   }
-  Protocal *pro = (Protocal *)bind_handle_.memory();
+  auto *pro = (protocal *)bind_handle_.memory();
   if (!pro) {
     close();
     return -1;
@@ -228,7 +228,7 @@ int mm_socket::bind(const char *address, bool force) {
 }
 
 int mm_socket::accept(mm_client &client) {
-  Protocal *pro = (Protocal *)bind_handle_.memory();
+  auto *pro = (protocal *)bind_handle_.memory();
   if (!pro) {
     return -1; // no bind
   }
@@ -256,7 +256,7 @@ int mm_socket::accept(mm_client &client) {
 
 void mm_socket::close() {
   std::error_code ec;
-  Protocal *pro = (Protocal *)bind_handle_.memory();
+  auto *pro = (protocal *)bind_handle_.memory();
   if (pro) {
     pro->id = 0;
   }

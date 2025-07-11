@@ -1,3 +1,5 @@
+// NOLINT(llvm-header-guard)
+#pragma once
 
 #ifdef _WIN32
 

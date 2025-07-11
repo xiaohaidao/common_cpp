@@ -2,7 +2,7 @@
 #include "proactor/operation/IpcListenerOp.h"
 
 #if defined(__linux__)
-#include <errno.h>
+#include <cerrno>
 #include <unistd.h>
 #endif
 
@@ -37,8 +37,7 @@ IpcListenerOp &IpcListenerOp::operator=(const IpcListenerOp &other) {
 
 #elif defined(__linux__)
 
-IpcListenerOp::IpcListenerOp(const IpcListenerOp &other)
-    : unix_op_(other.unix_op_) {}
+IpcListenerOp::IpcListenerOp(const IpcListenerOp &other) = default;
 
 IpcListenerOp &IpcListenerOp::operator=(const IpcListenerOp &other) {
   if (&other == this) {

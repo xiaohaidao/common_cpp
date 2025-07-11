@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include "ipc/PipeListener.h"
 #include "ipc/PipeStream.h"

@@ -1,6 +1,5 @@
-
-#ifndef UTILS_ERROR_CODE_H
-#define UTILS_ERROR_CODE_H
+// NOLINT(llvm-header-guard)
+#pragma once
 
 #include <system_error>
 
@@ -25,5 +24,3 @@ static inline std::error_code get_error_code() {
 }
 
 #define THROW_EC(ec) throw std::system_error(ec)
-
-#endif // UTILS_ERROR_CODE_H

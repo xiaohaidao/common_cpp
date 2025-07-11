@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 
 #include "process/Process.h"
 #include "utils/log.h"

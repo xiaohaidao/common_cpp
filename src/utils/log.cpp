@@ -9,8 +9,8 @@
 #include <unistd.h>
 #endif
 
-#include <stdarg.h>
-#include <stdio.h>
+#include <cstdarg>
+#include <cstdio>
 
 #include <chrono>
 #include <iomanip>
@@ -20,7 +20,7 @@
 
 namespace {
 
-using TimeClockT = std::chrono::time_point<std::chrono::system_clock>;
+using time_clock_t = std::chrono::time_point<std::chrono::system_clock>;
 
 #if defined(_WIN32)
 #define LOCALTIME_S(timer, buf)                                                \
@@ -43,9 +43,9 @@ using TimeClockT = std::chrono::time_point<std::chrono::system_clock>;
 #define FORMAT_TM std::put_time
 #endif
 
-struct LogData {
+struct log_data {
   LogLevel level;
-  TimeClockT now;
+  time_clock_t now;
   std::thread::id thread_id;
   const char *filename;
   size_t line;
@@ -80,9 +80,9 @@ static int skip_funname = 1;
 static int skip_filename = 0;
 static void (*export_callback)(LogLevel, const char *, int) = nullptr;
 
-bool is_skip_log(const LogData &data) { return data.level >= skip_log_level; }
+bool is_skip_log(const log_data &data) { return data.level >= skip_log_level; }
 
-int format_head(const LogData &data, char *str, size_t size) {
+int format_head(const log_data &data, char *str, size_t size) {
   // log head
   std::time_t const now_time = std::chrono::system_clock::to_time_t(data.now);
   int64_t const us = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -151,7 +151,7 @@ int format_head(const LogData &data, char *str, size_t size) {
   // format APP-NAME SP
   {
     FILE *f = ::fopen("/proc/self/cmdline", "r");
-    if (f != NULL) {
+    if (f != nullptr) {
       char pid_name[512] = {};
       fgets(pid_name, sizeof(pid_name), f); // get line
       n += snprintf(str + n, size - n, "%s ", SUB_UNIX_PATH(pid_name));
@@ -193,7 +193,7 @@ int format_head(const LogData &data, char *str, size_t size) {
   return n;
 }
 
-void export_log(const LogData &data, const char *log, size_t size) {
+void export_log(const log_data &data, const char *log, size_t size) {
   if (export_callback) {
     export_callback(data.level, log, (int)size);
     return;
@@ -215,7 +215,7 @@ void set_export_callback(void (*callback)(LogLevel, const char *, int)) {
 void log_print(LogLevel level, source_location const location, const char *fmt,
                ...) {
 
-  LogData log_data = {};
+  log_data log_data = {};
 
   log_data.level = level;
   log_data.filename = location.file_name();

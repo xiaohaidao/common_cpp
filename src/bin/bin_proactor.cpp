@@ -1,5 +1,5 @@
 
-#include <stdio.h>
+#include <cstdio>
 
 #include <memory>
 
@@ -7,12 +7,12 @@
 #include "proactor/operation/TcpListenerOp.h"
 #include "proactor/operation/TcpStreamOp.h"
 
-class Client : public std::enable_shared_from_this<Client> {
+class client : public std::enable_shared_from_this<client> {
   char buff_[1024];
   TcpStreamOp tcp_op_;
 
 public:
-  Client(const TcpStreamOp &op) : tcp_op_(op) {
+  client(const TcpStreamOp &op) : tcp_op_(op) {
     std::error_code ec;
     sockets::set_keepalive(tcp_op_.native(), ec, 1, {10, 1, 3});
     if (ec) {
@@ -21,7 +21,7 @@ public:
     }
   }
 
-  ~Client() {
+  ~client() {
     std::error_code ec;
     auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
     tcp_op_.close(ec);
@@ -65,7 +65,7 @@ public:
   }
 };
 
-class Server {
+class server {
 
   TcpListenerOp server_;
 
@@ -73,11 +73,11 @@ class Server {
     std::error_code ec;
     server_.async_accept(
         [this](const std::error_code &re,
-               const std::pair<TcpStreamOp, SocketAddr> &client) {
+               const std::pair<TcpStreamOp, SocketAddr> &c) {
           if (!re) {
-            printf("connect remote %s:%d\n", client.second.get_ip(),
-                   client.second.get_port());
-            std::make_shared<Client>(client.first)->read();
+            printf("connect remote %s:%d\n", c.second.get_ip(),
+                   c.second.get_port());
+            std::make_shared<client>(c.first)->read();
           }
           do_accept();
         },
@@ -88,7 +88,7 @@ class Server {
   }
 
 public:
-  Server(Proactor &p, const char *port) : server_(p) {
+  server(Proactor &p, const char *port) : server_(p) {
     std::error_code ec;
     server_.bind(port, ec);
     if (ec) {
@@ -97,7 +97,7 @@ public:
     do_accept();
   }
 
-  ~Server() {
+  ~server() {
     std::error_code ec;
     server_.close(ec);
     printf("close server\n");
@@ -117,7 +117,7 @@ int main(int args, char **argv) {
     fprintf(stderr, "Proactor create error %s\n", ec.message().c_str());
   }
 
-  Server const server(a, argv[1]);
+  server const server(a, argv[1]);
 
   a.run();
   return 0;

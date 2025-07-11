@@ -11,9 +11,9 @@
 #else
 #include <arpa/inet.h>
 #include <csignal>
+#include <cstring>
 #include <ifaddrs.h>
 #include <netdb.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/un.h>
@@ -56,9 +56,9 @@ private:
 
 #else
 
-class SocketStart {
+class socket_start {
 public:
-  SocketStart() { std::signal(SIGPIPE, SIG_IGN); }
+  socket_start() { std::signal(SIGPIPE, SIG_IGN); }
 } g_socket_start;
 
 #endif // _WIN32
@@ -66,9 +66,9 @@ public:
 } // namespace
 
 #ifdef _WIN32
-typedef int SizeType;
+typedef int size_type;
 #else
-typedef socklen_t SizeType;
+using size_type = socklen_t;
 #endif // _WIN32
 
 constexpr size_t get_native_addr_size(FamilyType type) {
@@ -102,7 +102,7 @@ SocketAddr::SocketAddr(const char *host_or_ip, const char *port_or_service,
 
 #ifdef __linux__
 SocketAddr::SocketAddr(const char *path) {
-  struct sockaddr_un *addr = (struct sockaddr_un *)native_addr();
+  auto *addr = (struct sockaddr_un *)native_addr();
   addr->sun_family = enum_to_native(kUnix);
   snprintf(addr->sun_path, sizeof(addr->sun_path), "%s", path);
 }
@@ -180,8 +180,8 @@ void *SocketAddr::native_ip_addr() const {
 
 SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
-  sockaddr *addr = (sockaddr *)re.sock_addr_;
-  SizeType size = static_cast<SizeType>(re.native_addr_size());
+  auto *addr = (sockaddr *)re.sock_addr_;
+  auto size = static_cast<size_type>(re.native_addr_size());
   if (::getsockname(s, addr, &size)) {
     ec = get_net_error_code();
     return re;
@@ -192,8 +192,8 @@ SocketAddr SocketAddr::get_local_socket(socket_type s, std::error_code &ec) {
 
 SocketAddr SocketAddr::get_remote_socket(socket_type s, std::error_code &ec) {
   SocketAddr re;
-  sockaddr *addr = (sockaddr *)re.sock_addr_;
-  SizeType size = static_cast<SizeType>(re.native_addr_size());
+  auto *addr = (sockaddr *)re.sock_addr_;
+  auto size = static_cast<size_type>(re.native_addr_size());
   if (::getpeername(s, addr, &size)) {
     ec = get_net_error_code();
     return re;
@@ -206,9 +206,9 @@ void SocketAddr::get_nameinfo(char *host, size_t host_size, char *service,
                               size_t service_size, std::error_code &ec) const {
 
   if (::getnameinfo((const sockaddr *)native_addr(),
-                    static_cast<SizeType>(native_addr_size()), host,
-                    static_cast<SizeType>(host_size), service,
-                    static_cast<SizeType>(service_size), NI_NUMERICSERV)) {
+                    static_cast<size_type>(native_addr_size()), host,
+                    static_cast<size_type>(host_size), service,
+                    static_cast<size_type>(service_size), NI_NUMERICSERV)) {
 
     ec = get_net_error_code();
   }
@@ -248,7 +248,7 @@ SocketAddr SocketAddr::resolve_host(const char *host,
     return re;
   }
 
-  for (auto *ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+  for (auto *ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
     memcpy(re.sock_addr_, ptr->ai_addr, get_native_addr_size(family));
     // sockaddr_ipv4->ai_canonname
     re.get_ip(re.ip_addr_, sizeof(re.ip_addr_), ec);
@@ -276,7 +276,7 @@ SocketAddr::resolve_host_all(const char *host, const char *port_or_service,
     return re;
   }
 
-  for (auto *ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+  for (auto *ptr = result; ptr != nullptr; ptr = ptr->ai_next) {
     SocketAddr address = {};
     memcpy(address.sock_addr_, ptr->ai_addr,
            ptr->ai_family == AF_INET ? sizeof(sockaddr_in)
@@ -383,7 +383,7 @@ SocketAddr::get_local_ip_mask(std::error_code &ec, FamilyType family) {
         broadaddr.get_ip(broadaddr.ip_addr_, sizeof(broadaddr.ip_addr_), ec);
       }
 
-      re.push_back(std::make_tuple(address, mask, broadaddr));
+      re.emplace_back(address, mask, broadaddr);
     }
   }
 

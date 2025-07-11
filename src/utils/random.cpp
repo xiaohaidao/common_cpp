@@ -7,15 +7,14 @@
 
 namespace {
 
-typedef std::chrono::time_point<std::chrono::steady_clock> TimeType;
+using time_type = std::chrono::time_point<std::chrono::steady_clock>;
 
-class Xorshift32 {
-  uint32_t seed_;
+class xorshift32 {
+  uint32_t seed_{static_cast<uint32_t>(
+      time_type::clock::now().time_since_epoch().count())};
 
 public:
-  Xorshift32()
-      : seed_(static_cast<uint32_t>(
-            TimeType::clock::now().time_since_epoch().count())) {}
+  xorshift32() = default;
 
   uint32_t operator()() {
     uint64_t x = seed_;
@@ -26,11 +25,12 @@ public:
   }
 };
 
-class Xorshift64 {
-  uint64_t seed_;
+class xorshift64 {
+  uint64_t seed_{static_cast<uint64_t>(
+      time_type::clock::now().time_since_epoch().count())};
 
 public:
-  Xorshift64() : seed_(TimeType::clock::now().time_since_epoch().count()) {}
+  xorshift64() = default;
 
   uint64_t operator()() {
     uint64_t x = seed_;
@@ -41,22 +41,22 @@ public:
   }
 };
 
-class Seed {
-  bool fix_seed_;
+class seed {
+  bool fix_seed_{false};
   static constexpr uint64_t kFixSeed = 15011051792192176828u;
 
 public:
-  Seed() : fix_seed_(false) {}
+  seed() = default;
 
   void gen32(uint32_t *dst, size_t size) {
-    Xorshift32 xor32;
+    xorshift32 xor32;
     for (size_t i = 0; i < size; ++i) {
       dst[i] = static_cast<uint32_t>(fix_seed_ ? (kFixSeed | i) : xor32());
     }
   }
 
   void gen64(uint64_t *dst, size_t size) {
-    Xorshift64 xor64;
+    xorshift64 xor64;
     for (size_t i = 0; i < size; ++i) {
       dst[i] = fix_seed_ ? (kFixSeed | i) : xor64();
     }
@@ -65,12 +65,12 @@ public:
   void set_fix(bool fix) { fix_seed_ = fix; }
 };
 
-class Xorshift128 {
+class xorshift128 {
   uint32_t seed_[4];
-  Seed gen_seed_;
+  seed gen_seed_;
 
 public:
-  Xorshift128() { set_fix_seed(false); }
+  xorshift128() { set_fix_seed(false); }
 
   uint32_t operator()() {
     uint32_t t = seed_[3];
@@ -91,14 +91,14 @@ public:
   }
 };
 
-class Xoshiro256ss {
+class xoshiro256ss {
   uint64_t seed_[4];
-  Seed gen_seed_;
+  seed gen_seed_;
 
   uint64_t rol64(uint64_t x, uint64_t k) { return (x << k) | (x >> (64 - k)); }
 
 public:
-  Xoshiro256ss() { set_fix_seed(false); }
+  xoshiro256ss() { set_fix_seed(false); }
 
   uint64_t operator()() {
     uint64_t *s = seed_;
@@ -136,7 +136,7 @@ public:
   }
 };
 
-Xoshiro256ss g_xorshfit;
+xoshiro256ss g_xorshfit;
 
 } // namespace
 

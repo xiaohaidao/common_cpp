@@ -96,7 +96,7 @@ size_t Select::call(QueueOp &queue) {
 }
 
 size_t Select::call_one(QueueOp &queue) {
-  if (ReactorOp *op = (ReactorOp *)queue.begin()) {
+  if (auto *op = (ReactorOp *)queue.begin()) {
     op->complete(this, std::error_code(), 0);
     queue.pop();
     return 1;

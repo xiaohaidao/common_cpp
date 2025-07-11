@@ -13,6 +13,7 @@ extern "C" {
   (strrchr(file, '\\') ? strrchr(file, '\\') + 1 : file)
 
 #ifndef _MSC_VER
+// NOLINTNEXTLINE
 #define __FILENAME__ SUB_UNIX_PATH(__FILE__)
 #else
 #define __FILENAME__ SUB_WIN_PATH(__FILE__)

@@ -1,3 +1,5 @@
+// NOLINT(llvm-header-guard)
+#pragma once
 
 #ifdef __linux__
 

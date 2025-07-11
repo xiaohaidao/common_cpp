@@ -11,7 +11,7 @@
 
 namespace detail {
 
-RecvFromOp::RecvFromOp() {}
+RecvFromOp::RecvFromOp() = default;
 
 void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
                                  size_t size, func_type async_func,

@@ -25,7 +25,7 @@
 
 namespace ipc {
 
-SharedMemory::~SharedMemory() {}
+SharedMemory::~SharedMemory() = default;
 
 SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   SharedMemory result;

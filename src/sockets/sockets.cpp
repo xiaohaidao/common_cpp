@@ -8,10 +8,10 @@
 #include <ws2tcpip.h>
 #else
 #include <arpa/inet.h>
+#include <cstring>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>

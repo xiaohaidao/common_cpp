@@ -60,7 +60,7 @@ size_t Epoll::call(QueueOp &queue) {
 }
 
 size_t Epoll::call_one(QueueOp &queue) {
-  if (ReactorOp *op = (ReactorOp *)queue.begin()) {
+  if (auto *op = (ReactorOp *)queue.begin()) {
     queue.pop();
     void *p = proactor_ ? proactor_ : this;
     op->complete(p, std::error_code(), 0);
@@ -84,7 +84,7 @@ size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
     return 0;
   }
   for (size_t i = 0; i < number; ++i) {
-    ReactorOp *ptr = (ReactorOp *)events[i].data.ptr;
+    auto *ptr = (ReactorOp *)events[i].data.ptr;
     ptr->set_event_data(events[i].events);
     queue.push(ptr);
   }

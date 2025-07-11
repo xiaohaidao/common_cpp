@@ -66,7 +66,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
           SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
-    return UdpSocket();
+    return {};
   }
 
   UdpSocket re;

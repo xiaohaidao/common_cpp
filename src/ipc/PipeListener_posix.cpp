@@ -36,7 +36,7 @@ PipeStream PipeListener::accept(std::error_code &ec) {
   if (server == -1) {
     ec = get_error_code();
   } else {
-    return PipeStream(server);
+    return {server};
   }
   return re;
 }
