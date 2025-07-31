@@ -1,6 +1,6 @@
 
-#ifndef MAX_HEAP_H
-#define MAX_HEAP_H
+#ifndef ALGORITHM_MIN_HEAP_MAX_HEAP_H
+#define ALGORITHM_MIN_HEAP_MAX_HEAP_H
 
 #include "min_heap.h"
 
@@ -10,4 +10,4 @@ template <typename T> using max_heap = min_heap<T, std::greater<T> >;
 template <typename T> class max_heap : public min_heap<T, std::greater<T> > {};
 #endif
 
-#endif // MAX_HEAP_H
+#endif // ALGORITHM_MIN_HEAP_MAX_HEAP_H

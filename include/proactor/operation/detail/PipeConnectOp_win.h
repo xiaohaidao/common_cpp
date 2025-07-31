@@ -8,12 +8,12 @@
 
 namespace detail {
 
-class PipeConnectOp : public Operation {
+class pipe_connect_op : public operation {
 public:
-  typedef std::function<void(void *p, const std::error_code &, size_t)>
-      func_type;
+  using func_type =
+      std::function<void(void *, const std::error_code &, size_t)>;
 
-  PipeConnectOp();
+  pipe_connect_op();
 
   void async_connect(void *proactor, func_type async_func,
                      const native_handle &h, std::error_code &ec);

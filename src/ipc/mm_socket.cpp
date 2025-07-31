@@ -17,41 +17,41 @@ struct protocal {
   uint32_t status;
 };
 
-ipc::SharedMemory open_client(const char *address, uint32_t id) {
+ipc::shared_memory open_client(const char *address, uint32_t id) {
   char pre_address[256] = {};
   snprintf(pre_address, sizeof(pre_address), "%s_%s_%X", kServerPrefix, address,
            id);
   std::error_code ec;
-  return ipc::SharedMemory::open(pre_address, ec);
+  return ipc::shared_memory::open(pre_address, ec);
 }
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-ipc::SharedMemory create_client(const char *address, size_t mm_size,
-                                uint32_t id) {
+ipc::shared_memory create_client(const char *address, size_t mm_size,
+                                 uint32_t id) {
   char pre_address[256] = {};
   snprintf(pre_address, sizeof(pre_address), "%s_%s_%X", kServerPrefix, address,
            id);
   std::error_code ec;
-  return ipc::SharedMemory::create(pre_address, mm_size, ec);
+  return ipc::shared_memory::create(pre_address, mm_size, ec);
 }
 
-ipc::SharedMemory open(const char *address) {
+ipc::shared_memory open(const char *address) {
   char pre_address[256] = {};
   snprintf(pre_address, sizeof(pre_address), "%s_%s", kServerPrefix, address);
   std::error_code ec;
-  return ipc::SharedMemory::open(pre_address, ec);
+  return ipc::shared_memory::open(pre_address, ec);
 }
 
-ipc::SharedMemory create(const char *address, size_t mm_size, bool force) {
+ipc::shared_memory create(const char *address, size_t mm_size, bool force) {
   char pre_address[256] = {};
   snprintf(pre_address, sizeof(pre_address), "%s_%s", kServerPrefix, address);
   std::error_code ec;
-  ipc::SharedMemory re = ipc::SharedMemory::create(pre_address, mm_size, ec);
+  ipc::shared_memory re = ipc::shared_memory::create(pre_address, mm_size, ec);
   if (force && ec) {
-    ipc::SharedMemory exist = open(address);
+    ipc::shared_memory exist = open(address);
     exist.close(ec);
     exist.remove(ec);
-    re = ipc::SharedMemory::create(pre_address, mm_size, ec);
+    re = ipc::shared_memory::create(pre_address, mm_size, ec);
   }
   return re;
 }
@@ -64,7 +64,7 @@ void mm_client::connect_server(const char *address) {
   id_ = (uint32_t)rand_num();
 }
 
-mm_client::mm_client() : id_(0), is_server_(false) {}
+mm_client::mm_client() = default;
 
 int mm_client::connect(const char *address) {
   if (handle_.memory()) {

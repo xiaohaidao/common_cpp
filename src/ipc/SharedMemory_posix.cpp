@@ -25,10 +25,10 @@
 
 namespace ipc {
 
-SharedMemory::~SharedMemory() = default;
+shared_memory::~shared_memory() = default;
 
-SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
-  SharedMemory result;
+shared_memory shared_memory::open(const char *key, std::error_code &ec) {
+  shared_memory result;
   if ((result.shmid_ = shm_open(key, O_RDWR, 0)) == -1) {
     ec = get_error_code();
     return result;
@@ -46,9 +46,9 @@ SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   return result;
 }
 
-SharedMemory SharedMemory::create(const char *key, size_t mem_size,
-                                  std::error_code &ec) {
-  SharedMemory result;
+shared_memory shared_memory::create(const char *key, size_t mem_size,
+                                    std::error_code &ec) {
+  shared_memory result;
   //  delete O_EXCL will create force
   if ((result.shmid_ = shm_open(key, O_CREAT | O_EXCL | O_RDWR, DEFFILEMODE)) ==
       -1) {
@@ -69,7 +69,7 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
   return result;
 }
 
-void SharedMemory::deatch(std::error_code &ec) {
+void shared_memory::deatch(std::error_code &ec) {
   if (memory_ == nullptr) {
     return;
   }
@@ -82,7 +82,7 @@ void SharedMemory::deatch(std::error_code &ec) {
   size_ = 0;
 }
 
-void SharedMemory::attach(std::error_code &ec) {
+void shared_memory::attach(std::error_code &ec) {
   if ((memory_ = mmap(nullptr, size_, PROT_READ | PROT_WRITE, MAP_SHARED,
                       shmid_, 0)) == MAP_FAILED) {
     ec = get_error_code();
@@ -91,7 +91,7 @@ void SharedMemory::attach(std::error_code &ec) {
   }
 }
 
-void SharedMemory::close(std::error_code &ec) {
+void shared_memory::close(std::error_code &ec) {
   deatch(ec);
   if (shmid_ <= 0) {
     return;
@@ -103,7 +103,7 @@ void SharedMemory::close(std::error_code &ec) {
   shmid_ = 0;
 }
 
-void SharedMemory::remove(std::error_code &ec) {
+void shared_memory::remove(std::error_code &ec) {
   close(ec);
   if (shm_unlink(key_.c_str()) == -1) {
     ec = get_error_code();

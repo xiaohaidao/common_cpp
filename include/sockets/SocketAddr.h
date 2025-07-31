@@ -33,9 +33,9 @@ enum Protocal {
 };
 
 #ifdef _WIN32
-typedef uint64_t socket_type;
+using socket_type = uint64_t;
 #else  // _WIN32
-typedef int socket_type;
+using socket_type = int;
 #endif // _WIN32
 
 namespace sockets {
@@ -43,15 +43,13 @@ namespace sockets {
 socket_type socket(FamilyType family, SocketType type, Protocal protocal,
                    std::error_code &ec);
 
-struct KeepAliveParam {
-  KeepAliveParam(int time_s = 7200, int intvl = 75, int times = 0)
-      : time_s(time_s), intvl(intvl), times(times) {}
-  int time_s;
-  int intvl;
-  int times;
+struct keep_alive_param {
+  int time_s; // default 7200
+  int intvl;  // default 75
+  int times;  // default 0
 };
 void set_keepalive(socket_type s, std::error_code &ec, int enable,
-                   KeepAliveParam param = {});
+                   keep_alive_param param = {7200, 75, 0});
 void set_reuseaddr(socket_type s, std::error_code &ec);
 void set_read_timeout(socket_type s, std::error_code &ec, size_t timeout_ms);
 void set_write_timeout(socket_type s, std::error_code &ec, size_t timeout_ms);
@@ -75,32 +73,30 @@ uint32_t host_to_net(uint32_t v);
 uint64_t host_to_net(uint64_t v);
 
 } // namespace sockets
-
-class SocketAddr {
+class socket_addr {
 public:
-  SocketAddr();
-  SocketAddr(const char *host_or_ip, const char *port_or_service,
-             FamilyType family = kIpV4);
+  socket_addr();
+  socket_addr(const char *host_or_ip, const char *port_or_service,
+              FamilyType family = kIpV4);
 #ifdef __linux__
-  SocketAddr(const char *path);
+  socket_addr(const char *path);
 #endif // __linux__
 
-  static SocketAddr get_local_socket(socket_type handle, std::error_code &ec);
-  static SocketAddr get_remote_socket(socket_type handle, std::error_code &ec);
+  static socket_addr get_local_socket(socket_type handle, std::error_code &ec);
+  static socket_addr get_remote_socket(socket_type handle, std::error_code &ec);
 
   static const char *get_localhost(std::error_code &ec);
 
   // @return [ip, mask, broadaddr]
-  static std::vector<std::tuple<SocketAddr, SocketAddr, SocketAddr> >
+  static std::vector<std::tuple<socket_addr, socket_addr, socket_addr> >
   get_local_ip_mask(std::error_code &ec, FamilyType family = kIpV4);
-
-  static SocketAddr resolve_host(const char *host, const char *port_or_service,
-                                 std::error_code &ec, FamilyType family = kIpV4,
-                                 bool bind = false);
-  static std::vector<SocketAddr> resolve_host_all(const char *host,
-                                                  const char *port_or_service,
-                                                  std::error_code &ec,
-                                                  FamilyType family = kIpV4);
+  static socket_addr resolve_host(const char *host, const char *port_or_service,
+                                  std::error_code &ec,
+                                  FamilyType family = kIpV4, bool bind = false);
+  static std::vector<socket_addr> resolve_host_all(const char *host,
+                                                   const char *port_or_service,
+                                                   std::error_code &ec,
+                                                   FamilyType family = kIpV4);
 
   const char *get_ip() const;
   void get_ip(char *ip, size_t size, std::error_code &ec) const;

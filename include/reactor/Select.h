@@ -13,45 +13,45 @@
 
 #include "reactor/detail/QueueOp.h"
 
-class Select {
+class select {
 public:
-  typedef fd_set fd_type;
+  using fd_type = fd_set;
 #ifdef _WIN32
-  typedef SOCKET socket_type;
+  using socket_type = SOCKET;
 #else
-  typedef int socket_type;
+  using socket_type = int;
 #endif // _WIN32
 
-  Select(const Select &) = delete;
-  const Select &operator=(const Select &) = delete;
+  select(const select &) = delete;
+  const select &operator=(const select &) = delete;
 
-  explicit Select(std::error_code &ec);
+  explicit select(std::error_code &ec);
 
-  size_t call(QueueOp &queue);
-  size_t call_one(QueueOp &queue);
+  size_t call(queue_op &queue);
+  size_t call_one(queue_op &queue);
 
-  size_t run_once(QueueOp &queue, std::error_code &ec);
-  size_t run_once_timeout(QueueOp &queue, size_t timeout_ms,
+  size_t run_once(queue_op &queue, std::error_code &ec);
+  size_t run_once_timeout(queue_op &queue, size_t timeout_ms,
                           std::error_code &ec);
 
   void close(std::error_code & /*ec*/) {}
 
-  void post_read(socket_type s, ReactorOp *op, std::error_code &ec);
-  void post_write(socket_type s, ReactorOp *op, std::error_code &ec);
-  void post_except(socket_type s, ReactorOp *op, std::error_code &ec);
+  void post_read(socket_type s, reactor_op *op, std::error_code &ec);
+  void post_write(socket_type s, reactor_op *op, std::error_code &ec);
+  void post_except(socket_type s, reactor_op *op, std::error_code &ec);
   void cancel(socket_type s, std::error_code &ec);
 
 private:
-  Select();
+  select();
 
   socket_type fd_;
 
-  std::array<std::pair<socket_type, ReactorOp *>, FD_SETSIZE> map_read_op_;
-  std::array<std::pair<socket_type, ReactorOp *>, FD_SETSIZE> map_write_op_;
-  std::array<std::pair<socket_type, ReactorOp *>, FD_SETSIZE> map_except_op_;
-  size_t map_read_op_size_;
-  size_t map_write_op_size_;
-  size_t map_except_op_size_;
+  std::array<std::pair<socket_type, reactor_op *>, FD_SETSIZE> map_read_op_;
+  std::array<std::pair<socket_type, reactor_op *>, FD_SETSIZE> map_write_op_;
+  std::array<std::pair<socket_type, reactor_op *>, FD_SETSIZE> map_except_op_;
+  size_t map_read_op_size_{0};
+  size_t map_write_op_size_{0};
+  size_t map_except_op_size_{0};
 
   fd_type read_;
   fd_type write_;

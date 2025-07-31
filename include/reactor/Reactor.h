@@ -6,11 +6,11 @@
 #include "reactor/Select.h"
 
 #ifdef _WIN32
-typedef Select Reactor;
-typedef Select ReactorSelect;
+using reactor = class select;
+using reactor_select = class select;
 #else
-typedef Epoll Reactor;
-typedef Select ReactorSelect;
+using reactor = epoll;
+using reactor_select = class select;
 
 #endif // _WIN32
 

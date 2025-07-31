@@ -1,8 +1,8 @@
 // Copyright (C) 2021 All rights reserved.
 // Email: oxox0@qq.com. Created in 202105
 
-#ifndef THREAD_THREAD_QUICK_SORT_H
-#define THREAD_THREAD_QUICK_SORT_H
+#ifndef ALGORITHM_LOCK_FREE_QUICK_SORT_H
+#define ALGORITHM_LOCK_FREE_QUICK_SORT_H
 
 #include <algorithm>
 #include <functional>
@@ -21,7 +21,7 @@ template <typename T> struct sorter {
     std::list<T> result;
     result.splice(result.begin(), chunk_data, chunk_data.begin());
     T const &partition_val = *result.begin();
-    typename std::list<T>::iterator divide_point =
+    auto divide_point =
         std::partition(chunk_data.begin(), chunk_data.end(),
                        [&](T const &val) { return val < partition_val; });
 
@@ -54,4 +54,4 @@ template <typename T> std::list<T> parallel_quick_sort(std::list<T> input) {
 
 } // namespace thread
 
-#endif // THREAD_THREAD_QUICK_SORT_H
+#endif // ALGORITHM_LOCK_FREE_QUICK_SORT_H

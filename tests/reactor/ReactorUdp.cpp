@@ -8,10 +8,10 @@
 #include "sockets/UdpSocket.h"
 #include "utils/log.h"
 
-template <typename T> class Udp : public ReactorOp {
+template <typename T> class udp : public reactor_op {
 public:
-  Udp() = default;
-  explicit Udp(const char *module) : module_(module) {}
+  udp() = default;
+  explicit udp(const char *module) : module_(module) {}
 
   void close() {
     LOG_DEBUG("module: %s, close socket %d", module_.c_str(), native());
@@ -26,16 +26,16 @@ public:
 
   void bind(const char *port) {
     std::error_code ec;
-    client_ = UdpSocket::bind(port, ec);
+    client_ = udp_socket::bind(port, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
   }
 
-  void connect(const SocketAddr &addr) {
+  void connect(const socket_addr &addr) {
     to_ = addr;
     std::error_code ec;
-    client_ = UdpSocket::create(kIpV4, ec);
+    client_ = udp_socket::create(kIpV4, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
@@ -53,7 +53,7 @@ public:
   void read(void * /*reactor*/) {
     LOG_DEBUG("module: %s, socket %d begin read", module_.c_str(), native());
     std::error_code ec;
-    std::pair<size_t, SocketAddr> const recv =
+    std::pair<size_t, socket_addr> const recv =
         client_.recv_from(buff_, sizeof(buff_), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
@@ -75,7 +75,7 @@ public:
       return;
     }
 
-    SocketAddr const &to = recv.second;
+    socket_addr const &to = recv.second;
     LOG_DEBUG("module: %s, client write to %s:%d message %d \"%s\"",
               module_.c_str(), to.get_ip(), to.get_port(), n, buff_);
     client_.send_to(buff_, n, to, ec);
@@ -90,8 +90,8 @@ public:
   }
 
 private:
-  SocketAddr to_;
-  UdpSocket client_;
+  socket_addr to_;
+  udp_socket client_;
   char buff_[1024];
   std::string module_;
 
@@ -99,12 +99,12 @@ private:
 
 template <typename T> void reactor_udp_func() {
   std::error_code ec;
-  SocketAddr const addr(nullptr, "8989");
+  socket_addr const addr(nullptr, "8989");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
-  Udp<T> server("server");
+  udp<T> server("server");
   server.bind(port);
   EXPECT_TRUE(server.native() > 0);
 
@@ -117,7 +117,7 @@ template <typename T> void reactor_udp_func() {
 
   LOG_DEBUG("client begin connect server %s:%d", addr.get_ip(),
             addr.get_port());
-  Udp<T> client("client");
+  udp<T> client("client");
   client.connect(addr);
   reactor.post_read(client.native(), &client, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -129,7 +129,7 @@ template <typename T> void reactor_udp_func() {
   LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
-    QueueOp queue;
+    queue_op queue;
     size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
@@ -146,6 +146,6 @@ template <typename T> void reactor_udp_func() {
   ec.clear();
 }
 
-TEST(ReactorTest, ReactorUdp) { reactor_udp_func<Reactor>(); }
+TEST(ReactorTest, ReactorUdp) { reactor_udp_func<reactor>(); }
 
-TEST(ReactorTest, SelectUdp) { reactor_udp_func<ReactorSelect>(); }
+TEST(ReactorTest, SelectUdp) { reactor_udp_func<reactor_select>(); }

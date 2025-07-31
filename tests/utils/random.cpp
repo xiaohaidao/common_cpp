@@ -55,7 +55,7 @@ TEST(RandomTest, randomNumTest) {
       2273620603928325263u,  6536478448155270017u,  1833753642079743296u,
       3618716850736863959u,  15043758070891452689u, 13653306181875854466u,
       582806529032327977u,   5780455872252895938u};
-  for (size_t i = 0; i < 20; ++i) {
-    EXPECT_TRUE(mem[i] == rand_num());
+  for (unsigned long i : mem) {
+    EXPECT_TRUE(i == rand_num());
   }
 }

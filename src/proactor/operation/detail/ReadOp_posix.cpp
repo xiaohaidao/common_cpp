@@ -12,10 +12,10 @@
 
 namespace detail {
 
-ReadOp::ReadOp() : fd_(0), buff_({}) {}
+read_op::read_op() : buff_({}) {}
 
-void ReadOp::async_read(void *proactor, func_type async_func, native_handle fd,
-                        const char *buff, size_t size, std::error_code &ec) {
+void read_op::async_read(void *proactor, func_type async_func, native_handle fd,
+                         const char *buff, size_t size, std::error_code &ec) {
 
   func_ = std::move(async_func);
   fd_ = fd;
@@ -26,11 +26,11 @@ void ReadOp::async_read(void *proactor, func_type async_func, native_handle fd,
     return;
   }
   set_event_data(READ_OP_ENUM_ONCE);
-  static_cast<Proactor *>(proactor)->post(fd, this, ec);
+  static_cast< ::proactor *>(proactor)->post(fd, this, ec);
 }
 
-void ReadOp::complete(void *p, const std::error_code &result_ec,
-                      size_t /*trans_size*/) {
+void read_op::complete(void *p, const std::error_code &result_ec,
+                       size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

@@ -22,12 +22,12 @@
 
 namespace ipc {
 
-Semaphores::Semaphores() : sem_(nullptr) {}
+semaphores::semaphores() : sem_(nullptr) {}
 
-Semaphores::~Semaphores() {}
+semaphores::~semaphores() {}
 
-Semaphores Semaphores::open(const char *key, std::error_code &ec) {
-  Semaphores result;
+semaphores semaphores::open(const char *key, std::error_code &ec) {
+  semaphores result;
   std::string const key_g = std::string("Global\\") + key;
   HANDLE han = OpenSemaphore(SEMAPHORE_ALL_ACCESS, false, key_g.c_str());
   if (han == nullptr) {
@@ -38,9 +38,9 @@ Semaphores Semaphores::open(const char *key, std::error_code &ec) {
   return result;
 }
 
-Semaphores Semaphores::create(const char *key, std::error_code &ec,
+semaphores semaphores::create(const char *key, std::error_code &ec,
                               unsigned int number) {
-  Semaphores result;
+  semaphores result;
   std::string const key_g = std::string("Global\\") + key;
   HANDLE han = CreateSemaphore(nullptr, (long)number, 256, key_g.c_str());
   std::error_code const er_code = get_error_code();
@@ -52,15 +52,15 @@ Semaphores Semaphores::create(const char *key, std::error_code &ec,
   return result;
 }
 
-void Semaphores::wait(std::error_code &ec) {
+void semaphores::wait(std::error_code &ec) {
   if (WaitForSingleObject(sem_, INFINITE) == WAIT_FAILED) {
     ec = get_error_code();
   }
 }
 
-bool Semaphores::try_wait(std::error_code &ec) { return try_wait_for(0, ec); }
+bool semaphores::try_wait(std::error_code &ec) { return try_wait_for(0, ec); }
 
-bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
+bool semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
   DWORD const re = ::WaitForSingleObject(sem_, static_cast<DWORD>(timeout_ms));
   if (re == WAIT_FAILED) {
     ec = get_error_code();
@@ -72,14 +72,14 @@ bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
   return true;
 }
 
-void Semaphores::notify_one(std::error_code &ec) {
+void semaphores::notify_one(std::error_code &ec) {
   if (ReleaseSemaphore(sem_, 1, nullptr) == 0) {
     ec = get_error_code();
     return;
   }
 }
 
-void Semaphores::close(std::error_code &ec) {
+void semaphores::close(std::error_code &ec) {
   if (sem_ == nullptr) {
     return;
   }
@@ -91,7 +91,7 @@ void Semaphores::close(std::error_code &ec) {
   sem_ = nullptr;
 }
 
-void Semaphores::remove(std::error_code &ec) { close(ec); }
+void semaphores::remove(std::error_code &ec) { close(ec); }
 
 } // namespace ipc
 

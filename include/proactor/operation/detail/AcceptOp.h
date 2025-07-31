@@ -8,13 +8,13 @@
 
 namespace detail {
 
-class AcceptOp : public Operation {
+class accept_op : public operation {
 public:
-  typedef std::function<void(void *, const std::error_code &,
-                             const std::pair<socket_type, SocketAddr> &)>
-      func_type;
+  using func_type =
+      std::function<void(void *, const std::error_code &,
+                         const std::pair<socket_type, socket_addr> &)>;
 
-  AcceptOp();
+  accept_op();
 
   void async_accept(void *proactor, socket_type s, func_type async_func,
                     std::error_code &ec);
@@ -26,13 +26,13 @@ public:
 
 private:
   func_type func_;
-  socket_type server_;
+  socket_type server_{-1};
 #ifdef _WIN32
   socket_type client_;
   char addresses_[32];
 #endif // _WIN32
 
-}; // class AcceptOp
+}; // class accept_op
 
 } // namespace detail
 

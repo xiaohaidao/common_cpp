@@ -5,11 +5,11 @@
 #include "sockets/TcpListener.h"
 #include "utils/error_code.h"
 
-TcpListenerOp::TcpListenerOp() : ctx_(nullptr), socket_(-1) {}
+tcp_listener_op::tcp_listener_op() = default;
 
-TcpListenerOp::TcpListenerOp(Proactor &context) : ctx_(&context), socket_(-1) {}
+tcp_listener_op::tcp_listener_op(proactor &context) : ctx_(&context) {}
 
-TcpListenerOp::TcpListenerOp(Proactor &context, socket_type s)
+tcp_listener_op::tcp_listener_op(proactor &context, socket_type s)
     : ctx_(&context), socket_(s) {
 
 #ifdef _WIN32
@@ -24,36 +24,39 @@ TcpListenerOp::TcpListenerOp(Proactor &context, socket_type s)
 #endif
 }
 
-TcpListenerOp::TcpListenerOp(const TcpListenerOp &other)
-    : ctx_(other.ctx_), socket_(other.socket_) {}
+tcp_listener_op::tcp_listener_op(const tcp_listener_op &other) noexcept
+    : ctx_(other.ctx_) {}
 
-TcpListenerOp &TcpListenerOp::operator=(const TcpListenerOp &other) {
+tcp_listener_op &tcp_listener_op::
+operator=(const tcp_listener_op &other) noexcept {
   if (&other == this) {
     return *this;
   }
   this->ctx_ = other.ctx_;
   this->socket_ = other.socket_;
-  // this->accept_op_ = detail::AcceptOp();
+  // this->accept_op_ = detail::accept_op();
   return *this;
 }
 
-std::pair<TcpStreamOp, SocketAddr> TcpListenerOp::accept(std::error_code &ec) {
-  TcpListener listener(socket_);
-  std::pair<TcpStream, SocketAddr> const ac = listener.accept(ec);
+std::pair<tcp_stream_op, socket_addr>
+tcp_listener_op::accept(std::error_code &ec) {
+  tcp_listener listener(socket_);
+  std::pair<tcp_stream, socket_addr> const ac = listener.accept(ec);
 
-  return {TcpStreamOp(ctx_, ac.first.native()), ac.second};
+  return {tcp_stream_op(ctx_, ac.first.native()), ac.second};
 }
 
-void TcpListenerOp::bind(const char *port_or_servicer, std::error_code &ec) {
+void tcp_listener_op::bind(const char *port_or_servicer, std::error_code &ec) {
   return bind(port_or_servicer, kIpV4, ec);
 }
 
-void TcpListenerOp::bind(const char *port_or_servicer, FamilyType family,
-                         std::error_code &ec) {
+void tcp_listener_op::bind(const char *port_or_servicer, FamilyType family,
+                           std::error_code &ec) {
   if (-1 != socket_ && socket_ != 0) {
     return;
   }
-  TcpListener const listener = TcpListener::bind(port_or_servicer, family, ec);
+  tcp_listener const listener =
+      tcp_listener::bind(port_or_servicer, family, ec);
   socket_ = listener.native();
 #ifdef _WIN32
   if (!ec && ctx_ != nullptr) {
@@ -63,24 +66,24 @@ void TcpListenerOp::bind(const char *port_or_servicer, FamilyType family,
 #endif
 }
 
-void TcpListenerOp::async_accept(const func_type &f, std::error_code &ec) {
+void tcp_listener_op::async_accept(const func_type &f, std::error_code &ec) {
   auto call_back = [f](void *ctx, const std::error_code &re_ec,
-                       std::pair<socket_type, SocketAddr> p) {
-    f(re_ec, {TcpStreamOp(static_cast<Proactor *>(ctx), p.first), p.second});
+                       std::pair<socket_type, socket_addr> p) {
+    f(re_ec, {tcp_stream_op(static_cast<proactor *>(ctx), p.first), p.second});
   };
   accept_op_.async_accept(ctx_, socket_, call_back, ec);
 }
 
-void TcpListenerOp::close(std::error_code &ec) {
+void tcp_listener_op::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
     // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->cancel((native_handle)socket_, t_ec);
   }
-  TcpListener listener(socket_);
+  tcp_listener listener(socket_);
   listener.close(ec);
   socket_ = -1;
   accept_op_ = {};
 }
 
-socket_type TcpListenerOp::native() const { return socket_; }
+socket_type tcp_listener_op::native() const { return socket_; }

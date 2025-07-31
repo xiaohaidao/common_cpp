@@ -1,8 +1,8 @@
 // Copyright (C) 2021 All rights reserved.
 // Email: oxox0@qq.com. Created in 202104
 
-#ifndef THREAD_LOCK_FREE_STACK_H
-#define THREAD_LOCK_FREE_STACK_H
+#ifndef ALGORITHM_LOCK_FREE_LOCK_FREE_STACK_H
+#define ALGORITHM_LOCK_FREE_LOCK_FREE_STACK_H
 
 #include <atomic>
 #include <memory>
@@ -21,26 +21,25 @@ template <typename T> class lock_free_stack {
     std::atomic<int> internal_count;
     counted_node_ptr next;
 
-    node(T const &data_)
-        : data(std::make_shared<T>(data_)), internal_count(0) {}
+    node(T const &data) : data(std::make_shared<T>(data)), internal_count(0) {}
   };
 
-  std::atomic<counted_node_ptr> head;
+  std::atomic<counted_node_ptr> head_;
 
   void increase_head_count(counted_node_ptr &old_counter) {
     counted_node_ptr new_counter;
     do {
       new_counter = old_counter;
       ++new_counter.external_count;
-    } while (!head.compare_exchange_strong(old_counter, new_counter,
-                                           std::memory_order_acquire,
-                                           std::memory_order_relaxed));
+    } while (!head_.compare_exchange_strong(old_counter, new_counter,
+                                            std::memory_order_acquire,
+                                            std::memory_order_relaxed));
 
     old_counter.external_count = new_counter.external_count;
   }
 
 public:
-  lock_free_stack() : head({1, nullptr}) {}
+  lock_free_stack() : head_({1, nullptr}) {}
   ~lock_free_stack() {
     while (pop())
       ;
@@ -50,16 +49,16 @@ public:
     counted_node_ptr new_node;
     new_node.ptr = new node(data);
     new_node.external_count = 1;
-    new_node.ptr->next = head.load(std::memory_order_relaxed);
+    new_node.ptr->next = head_.load(std::memory_order_relaxed);
 
-    while (!head.compare_exchange_weak(new_node.ptr->next, new_node,
-                                       std::memory_order_release,
-                                       std::memory_order_relaxed))
+    while (!head_.compare_exchange_weak(new_node.ptr->next, new_node,
+                                        std::memory_order_release,
+                                        std::memory_order_relaxed))
       ;
   }
 
   std::shared_ptr<T> pop() {
-    counted_node_ptr old_head = head.load(std::memory_order_relaxed);
+    counted_node_ptr old_head = head_.load(std::memory_order_relaxed);
 
     for (;;) {
       increase_head_count(old_head);
@@ -67,8 +66,8 @@ public:
       if (!ptr) {
         return std::shared_ptr<T>();
       }
-      if (head.compare_exchange_strong(old_head, ptr->next,
-                                       std::memory_order_relaxed)) {
+      if (head_.compare_exchange_strong(old_head, ptr->next,
+                                        std::memory_order_relaxed)) {
 
         std::shared_ptr<T> res;
         res.swap(ptr->data);
@@ -95,4 +94,4 @@ public:
 
 } // namespace thread
 
-#endif // THREAD_LOCK_FREE_STACK_H
+#endif // ALGORITHM_LOCK_FREE_LOCK_FREE_STACK_H

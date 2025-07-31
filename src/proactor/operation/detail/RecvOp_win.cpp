@@ -11,10 +11,10 @@
 
 namespace detail {
 
-RecvOp::RecvOp() {}
+recv_op::recv_op() {}
 
-void RecvOp::async_recv(void *proactor, socket_type s, char *buff, size_t size,
-                        func_type async_func, std::error_code &ec) {
+void recv_op::async_recv(void *proactor, socket_type s, char *buff, size_t size,
+                         func_type async_func, std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
   DWORD recv_flags = 0;
@@ -30,8 +30,8 @@ void RecvOp::async_recv(void *proactor, socket_type s, char *buff, size_t size,
   }
 }
 
-void RecvOp::complete(void *p, const std::error_code &result_ec,
-                      size_t trans_size) {
+void recv_op::complete(void *p, const std::error_code &result_ec,
+                       size_t trans_size) {
 
   if (func_) {
     auto tmp = std::move(func_);

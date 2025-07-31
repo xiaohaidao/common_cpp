@@ -8,12 +8,11 @@
 
 namespace detail {
 
-class WriteOp : public Operation {
+class write_op : public operation {
 public:
-  typedef std::function<void(void *, const std::error_code &, size_t)>
-      func_type;
-
-  WriteOp();
+  using func_type =
+      std::function<void(void *, const std::error_code &, size_t)>;
+  write_op();
 
   void async_write(void *proactor, func_type async_func, native_handle s,
                    const char *buff, size_t size, std::error_code &ec);
@@ -25,11 +24,11 @@ public:
 
 private:
 #ifndef _WIN32
-  native_handle fd_;
-  struct Buff {
+  native_handle fd_{0};
+  struct buff {
     uint32_t len;
     char *buff;
-  } buff_;
+  } buff_{};
 #endif // #ifndef _WIN32
 
   func_type func_;

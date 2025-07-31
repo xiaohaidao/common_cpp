@@ -6,7 +6,7 @@
 #include "sockets/TcpStream.h"
 #include "utils/error_code.h"
 
-IpcStreamOp::IpcStreamOp(Proactor *context)
+ipc_stream_op::ipc_stream_op(proactor *context)
     :
 #if defined(_WIN32)
       ctx_(context)
@@ -17,19 +17,19 @@ IpcStreamOp::IpcStreamOp(Proactor *context)
 }
 
 #if defined(_WIN32)
-IpcStreamOp::IpcStreamOp(Proactor *context, const ipc::PipeStream &pipe)
+ipc_stream_op::ipc_stream_op(proactor *context, const ipc::pipe_stream &pipe)
     : ctx_(context), pipe_(pipe) {}
 
 #elif defined(__linux__)
-IpcStreamOp::IpcStreamOp(const TcpStreamOp &tcp) : tcp_(tcp) {}
+ipc_stream_op::ipc_stream_op(const tcp_stream_op &tcp) : tcp_(tcp) {}
 #endif
 
 #if defined(_WIN32)
 
-IpcStreamOp::IpcStreamOp(const IpcStreamOp &other)
+ipc_stream_op::ipc_stream_op(const ipc_stream_op &other)
     : ctx_(other.ctx_), pipe_(other.pipe_) {}
 
-IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
+ipc_stream_op &ipc_stream_op::operator=(const ipc_stream_op &other) {
   if (&other == this) {
     return *this;
   }
@@ -42,9 +42,9 @@ IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
 
 #elif defined(__linux__)
 
-IpcStreamOp::IpcStreamOp(const IpcStreamOp &other) = default;
+ipc_stream_op::ipc_stream_op(const ipc_stream_op &other) = default;
 
-IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
+ipc_stream_op &ipc_stream_op::operator=(const ipc_stream_op &other) {
   if (&other == this) {
     return *this;
   }
@@ -54,7 +54,7 @@ IpcStreamOp &IpcStreamOp::operator=(const IpcStreamOp &other) {
 
 #endif
 
-size_t IpcStreamOp::read(char *buff, size_t buff_size, std::error_code &ec) {
+size_t ipc_stream_op::read(char *buff, size_t buff_size, std::error_code &ec) {
 #if defined(_WIN32)
   return pipe_.read(buff, buff_size, ec);
 #elif defined(__linux__)
@@ -62,8 +62,8 @@ size_t IpcStreamOp::read(char *buff, size_t buff_size, std::error_code &ec) {
 #endif
 }
 
-size_t IpcStreamOp::write(const char *buff, size_t buff_size,
-                          std::error_code &ec) {
+size_t ipc_stream_op::write(const char *buff, size_t buff_size,
+                            std::error_code &ec) {
 
 #if defined(_WIN32)
   return pipe_.write(buff, buff_size, ec);
@@ -72,21 +72,21 @@ size_t IpcStreamOp::write(const char *buff, size_t buff_size,
 #endif
 }
 
-void IpcStreamOp::connect(const char *buff, std::error_code &ec) {
+void ipc_stream_op::connect(const char *buff, std::error_code &ec) {
 #if defined(_WIN32)
-  pipe_ = ipc::PipeStream::connect(buff, ec);
+  pipe_ = ipc::pipe_stream::connect(buff, ec);
   if (ctx_ != nullptr) {
     // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->post((HANDLE)pipe_.native(), nullptr, ec); // register to io proactor
   }
 #elif defined(__linux__)
-  SocketAddr addr(buff);
+  socket_addr addr(buff);
   tcp_.connect(addr, ec);
 #endif
 }
 
-void IpcStreamOp::async_read(char *buff, size_t buff_size, const func_type &f,
-                             std::error_code &ec) {
+void ipc_stream_op::async_read(char *buff, size_t buff_size, const func_type &f,
+                               std::error_code &ec) {
 
 #if defined(_WIN32)
   read_.async_read(ctx_,
@@ -98,8 +98,8 @@ void IpcStreamOp::async_read(char *buff, size_t buff_size, const func_type &f,
 #endif
 }
 
-void IpcStreamOp::async_write(const char *buff, size_t buff_size,
-                              const func_type &f, std::error_code &ec) {
+void ipc_stream_op::async_write(const char *buff, size_t buff_size,
+                                const func_type &f, std::error_code &ec) {
 
 #if defined(_WIN32)
   write_.async_write(ctx_,
@@ -111,7 +111,7 @@ void IpcStreamOp::async_write(const char *buff, size_t buff_size,
 #endif
 }
 
-void IpcStreamOp::close(std::error_code &ec) {
+void ipc_stream_op::close(std::error_code &ec) {
 #if defined(_WIN32)
   if (ctx_) {
     std::error_code t_ec;
@@ -126,7 +126,7 @@ void IpcStreamOp::close(std::error_code &ec) {
 #endif
 }
 
-native_handle IpcStreamOp::native() const {
+native_handle ipc_stream_op::native() const {
 #if defined(_WIN32)
   return pipe_.native();
 #elif defined(__linux__)

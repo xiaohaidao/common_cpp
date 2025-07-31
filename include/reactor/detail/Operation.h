@@ -6,12 +6,12 @@
 #include "sockets/SocketAddr.h"
 
 // owner is Proactor
-typedef ReactorOp Operation;
+using operation = reactor_op;
 
 #ifdef _WIN32
-typedef void *native_handle;
+using native_handle = void *;
 #else  // _WIN32
-typedef int native_handle;
+using native_handle = int;
 #endif // _WIN32
 
 namespace detail {
@@ -34,11 +34,11 @@ public:
 class OperationAccess {
 public:
   static void set_next(void *operation, void *n) {
-    static_cast<OperationPosix *>(operation)->next_ = n;
+    static_cast<operation_posix *>(operation)->next_ = n;
   }
 
   static void *next(void *operation) {
-    return static_cast<OperationPosix *>(operation)->next_;
+    return static_cast<operation_posix *>(operation)->next_;
   }
 };
 

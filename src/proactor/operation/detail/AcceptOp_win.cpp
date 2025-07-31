@@ -12,10 +12,10 @@
 
 namespace detail {
 
-AcceptOp::AcceptOp() : server_(INVALID_SOCKET), client_(INVALID_SOCKET) {}
+accept_op::accept_op() : server_(INVALID_SOCKET), client_(INVALID_SOCKET) {}
 
-void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
-                            std::error_code &ec) {
+void accept_op::async_accept(void *proactor, socket_type s,
+                             func_type async_func, std::error_code &ec) {
   if (client_ == INVALID_SOCKET || client_ == 0) {
     client_ = sockets::socket(kUnspecified, kStream, kTCP, ec);
     if (ec) {
@@ -52,15 +52,15 @@ void AcceptOp::async_accept(void *proactor, socket_type s, func_type async_func,
   }
 }
 
-void AcceptOp::complete(void *p, const std::error_code &result_ec,
-                        size_t /*trans_size*/) {
+void accept_op::complete(void *p, const std::error_code &result_ec,
+                         size_t /*trans_size*/) {
 
   if (setsockopt(client_, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
                  (char *)&server_, sizeof(server_))) {
     // std::error_code ec = get_net_error_code();
   }
   if (func_) {
-    std::pair<socket_type, SocketAddr> ac_addr;
+    std::pair<socket_type, socket_addr> ac_addr;
     ac_addr.first = client_;
     memcpy(ac_addr.second.native_addr(), addresses_,
            ac_addr.second.native_addr_size());

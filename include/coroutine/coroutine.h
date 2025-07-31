@@ -1,6 +1,6 @@
 
-#ifndef COROUTINE_H
-#define COROUTINE_H
+#ifndef COROUTINE_COROUTINE_H
+#define COROUTINE_COROUTINE_H
 
 #include <functional>
 #include <memory>
@@ -29,9 +29,9 @@ private:
   void clear();
 
   template <typename T> struct vec {
-    size_t v_size;
+    size_t v_size{0};
     std::vector<T> v;
-    vec() : v_size(0) {}
+    vec() = default;
 
     typename std::vector<T>::pointer push_back() {
       if (size() >= v.size()) {
@@ -73,21 +73,25 @@ private:
   };
 
   vec<std::shared_ptr<context> > contexts_;
-  size_t current_index_;
-  bool is_exit_to_main_;
+  size_t current_index_{0};
+  bool is_exit_to_main_{true};
 
 }; // class coroutine
 
 coroutine &get_global_coroutine();
 
-#define co_yield() get_global_coroutine().yield()
-#define co_await(...) get_global_coroutine().append_task(__VA_ARGS__)
-#define co_loop() get_global_coroutine().loop()
-#define co_empty() get_global_coroutine().empty()
-#define co_loop_call(...)                                                      \
-  while (!co_empty()) {                                                        \
-    co_yield();                                                                \
+// NOLINTBEGIN
+
+#define CO_YIELD() get_global_coroutine().yield()
+#define CO_AWAIT(...) get_global_coroutine().append_task(__VA_ARGS__)
+#define CO_LOOP() get_global_coroutine().loop()
+#define CO_EMPTY() get_global_coroutine().empty()
+#define CO_LOOP_CALL(...)                                                      \
+  while (!CO_EMPTY()) {                                                        \
+    CO_YIELD();                                                                \
     __VA_ARGS__();                                                             \
   }
 
-#endif // COROUTINE_H
+// NOLINTEND
+
+#endif // COROUTINE_COROUTINE_H

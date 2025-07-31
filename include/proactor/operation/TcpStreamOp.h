@@ -9,19 +9,18 @@
 #include "proactor/operation/detail/RecvOp.h"
 #include "proactor/operation/detail/SendOp.h"
 
-class TcpStreamOp {
+class tcp_stream_op {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  using func_type = std::function<void(const std::error_code &, size_t)>;
 
-  TcpStreamOp();
-  explicit TcpStreamOp(Proactor *context);
-  TcpStreamOp(Proactor *context, socket_type s);
+  explicit tcp_stream_op(proactor *context);
+  tcp_stream_op(proactor *context, socket_type s);
 
-  TcpStreamOp(const TcpStreamOp &);
-  TcpStreamOp &operator=(const TcpStreamOp &);
+  tcp_stream_op(const tcp_stream_op &);
+  tcp_stream_op &operator=(const tcp_stream_op &);
 
-  void connect(const SocketAddr &addr, std::error_code &ec);
-  void async_connect(const SocketAddr &addr, const func_type &f,
+  void connect(const socket_addr &addr, std::error_code &ec);
+  void async_connect(const socket_addr &addr, const func_type &f,
                      std::error_code &ec);
 
   void async_read(char *buff, size_t buff_size, const func_type &f,
@@ -38,15 +37,15 @@ public:
   socket_type native() const;
 
 private:
-  Proactor *ctx_;
-  socket_type socket_;
-  detail::ConnectOp connect_op_;
-  detail::RecvOp recv_op_;
-  detail::SendOp send_op_;
+  proactor *ctx_{nullptr};
+  socket_type socket_{-1};
+  detail::connect_op connect_op_;
+  detail::recv_op recv_op_;
+  detail::send_op send_op_;
 #ifdef __linux__
-  socket_type write_socket_;
+  socket_type write_socket_{-1};
 #endif
 
-}; // class TcpStreamOp
+}; // class tcp_stream_op
 
 #endif // PROACTOR_OPERATION_TCPSTREAMOP_H

@@ -26,10 +26,10 @@ public:
 private:
   void connect_server(const char *address);
 
-  uint32_t id_;
-  bool is_server_;
-  ipc::SharedMemory server_handle_;
-  ipc::SharedMemory handle_;
+  uint32_t id_{0};
+  bool is_server_{false};
+  ipc::shared_memory server_handle_;
+  ipc::shared_memory handle_;
 
 }; // class mm_client
 
@@ -46,7 +46,7 @@ public:
 private:
   void init_protocal(void *pro);
 
-  ipc::SharedMemory bind_handle_;
+  ipc::shared_memory bind_handle_;
   std::string bind_name_;
 
 }; // class mm_socket

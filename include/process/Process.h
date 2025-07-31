@@ -7,26 +7,26 @@
 #include <vector>
 
 namespace ipc {
-class Pipe;
-}
+class pipe;
+} // namespace ipc
 
-class Process {
+class process {
 public:
 #ifdef _WIN32
-  typedef void *native_handle;
+  using native_handle = void *;
 #else  // _WIN32
-  typedef pid_t native_handle;
+  using native_handle = pid_t;
 #endif // _WIN32
-  Process();
+  process();
 
-  static Process call(const char *command,
+  static process call(const char *command,
                       const std::vector<const char *> &argv,
-                      const ipc::Pipe &pipe, std::error_code &ec);
-  static Process call(const char *command,
+                      const ipc::pipe &pipe, std::error_code &ec);
+  static process call(const char *command,
                       const std::vector<const char *> &argv,
                       std::error_code &ec);
 
-  static Process open(uint64_t pid, std::error_code &ec);
+  static process open(uint64_t pid, std::error_code &ec);
 
   bool running(std::error_code &ec);
 
@@ -37,7 +37,7 @@ public:
   void terminate(std::error_code &ec);
 
 private:
-  native_handle child_handle_;
+  native_handle child_handle_{0};
 };
 
 #endif // PROCESS_PROCESS_H

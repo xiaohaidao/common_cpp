@@ -9,33 +9,33 @@
 
 namespace ipc {
 
-class Semaphores {
+class semaphores {
 public:
-  Semaphores();
-  ~Semaphores();
+  semaphores();
+  ~semaphores();
 
   // the initial number is 1
-  static Semaphores create(const char *key, std::error_code &ec,
+  static semaphores create(const char *key, std::error_code &ec,
                            unsigned int number = 1);
 
-  static Semaphores create(char *key, std::error_code &ec,
+  static semaphores create(char *key, std::error_code &ec,
                            unsigned int number = 1) {
 
     return create((const char *)key, ec, number);
   }
 
   template <typename T>
-  static Semaphores create(T &&key, std::error_code &ec,
+  static semaphores create(T &&key, std::error_code &ec,
                            unsigned int number = 1) {
     return create(std::to_string(std::forward<T>(key)).c_str(), ec, number);
   }
 
-  static Semaphores open(const char *key, std::error_code &ec);
-  static Semaphores open(char *key, std::error_code &ec) {
+  static semaphores open(const char *key, std::error_code &ec);
+  static semaphores open(char *key, std::error_code &ec) {
     return open((const char *)key, ec);
   }
 
-  template <typename T> static Semaphores open(T &&key, std::error_code &ec) {
+  template <typename T> static semaphores open(T &&key, std::error_code &ec) {
     return open(std::to_string(std::forward<T>(key)).c_str(), ec);
   }
 
@@ -51,14 +51,14 @@ public:
   void remove(std::error_code &ec);
 
 private:
-  void *sem_;
+  void *sem_{nullptr};
 
 #if defined(__linux__)
   /// unlink need it
   std::string key_;
 #endif // __linux__
 
-}; // class Semaphores
+}; // class semaphores
 
 } // namespace ipc
 

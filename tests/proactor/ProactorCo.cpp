@@ -14,14 +14,14 @@ bool stop_task = false;
 void co_close(socket_type s, const char *module) {
   LOG_DEBUG("module: %s, close socket %d", module, s);
   std::error_code ec;
-  TcpStream(s).close(ec);
+  tcp_stream(s).close(ec);
   if (!stop_task)
     EXPECT_FALSE(ec) << "module: " << module << ", " << ec.value() << " : "
                      << ec.message();
 }
 
 void async_read(socket_type s, const char *module);
-void connected(const char *module, const SocketAddr &addr) {
+void connected(const char *module, const socket_addr &addr) {
   std::error_code ec;
   socket_type const s = co_connect(addr, ec);
   EXPECT_FALSE(ec) << "module: " << module << ", " << addr.get_ip() << ":"
@@ -34,8 +34,8 @@ void connected(const char *module, const SocketAddr &addr) {
   async_read(s, module);
 }
 
-void async_connect(const char *module, const SocketAddr &addr) {
-  co_await([&addr, module]() { connected(module, addr); });
+void async_connect(const char *module, const socket_addr &addr) {
+  CO_AWAIT([&addr, module]() { connected(module, addr); });
 }
 
 void co_write(socket_type s, const char *module, const char *buff, size_t size);
@@ -58,7 +58,7 @@ void read(socket_type s, const char *module) {
 }
 
 void async_read(socket_type s, const char *module) {
-  co_await([s, module]() { read(s, module); });
+  CO_AWAIT([s, module]() { read(s, module); });
 }
 
 void co_write(socket_type s, const char *module, const char *buff,
@@ -75,17 +75,17 @@ void co_write(socket_type s, const char *module, const char *buff,
   async_read(s, module);
 }
 
-class Service {
+class service {
 public:
-  Service() : exit_task_(false) {}
-  ~Service() {}
+  service() = default;
+  ~service() = default;
 
   socket_type native() const { return listener_.native(); }
 
   void close() {
     for (auto &i : tcps_) {
       std::error_code ec;
-      TcpStream(i).close(ec);
+      tcp_stream(i).close(ec);
       if (!stop_task)
         EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     }
@@ -110,7 +110,7 @@ public:
         break;
       }
       std::error_code ec;
-      SocketAddr from = {};
+      socket_addr from = {};
       socket_type const new_socket = co_accept(listener_.native(), from, ec);
       if (new_socket == 0) {
         break;
@@ -128,13 +128,13 @@ public:
   }
 
   void async_accept() {
-    co_await([this]() { accept(); });
+    CO_AWAIT([this]() { accept(); });
   }
 
 private:
-  TcpListener listener_;
+  tcp_listener listener_;
   std::vector<socket_type> tcps_;
-  bool exit_task_;
+  bool exit_task_{false};
 };
 
 } // namespace proactor_co
@@ -142,18 +142,18 @@ private:
 TEST(ProactorTest, ProactorCo) {
   using namespace proactor_co;
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
   set_proactor(&p);
 
-  SocketAddr const addr(nullptr, "8989");
+  socket_addr const addr(nullptr, "8989");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
 
-  Service server;
+  service server;
   LOG_DEBUG("bind port %s", port);
   server.bind(port);
   LOG_DEBUG("server accept");
@@ -164,7 +164,7 @@ TEST(ProactorTest, ProactorCo) {
 
   LOG_DEBUG("-------------------- begin run while --------------------");
   size_t i = 0;
-  co_loop_call([&p, &ec, &i]() {
+  CO_LOOP_CALL([&p, &ec, &i]() {
     p.run_one(0, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();

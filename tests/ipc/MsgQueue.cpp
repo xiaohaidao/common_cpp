@@ -7,23 +7,23 @@
 TEST(IPCTest, MsgQueueTest) {
 #ifndef _WIN32
   std::error_code ec;
-  ipc::MsgQueue::create(3, ec);
+  ipc::msg_queue::create(3, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  ipc::MsgQueue::create(3, ec);
+  ipc::msg_queue::create(3, ec);
   EXPECT_TRUE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  ipc::MsgQueue::create("/msg_queue", ec);
+  ipc::msg_queue::create("/msg_queue", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto msg1 = ipc::MsgQueue::open(3, ec);
+  auto msg1 = ipc::msg_queue::open(3, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto msg2 = ipc::MsgQueue::open("msg_queue", ec);
+  auto msg2 = ipc::msg_queue::open("msg_queue", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

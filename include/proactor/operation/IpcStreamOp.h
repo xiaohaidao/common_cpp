@@ -7,20 +7,19 @@
 #include "proactor/operation/detail/ReadOp.h"
 #include "proactor/operation/detail/WriteOp.h"
 
-class IpcStreamOp {
+class ipc_stream_op {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  using func_type = std::function<void(const std::error_code &, size_t)>;
 
-  explicit IpcStreamOp(Proactor *context);
+  explicit ipc_stream_op(proactor *context);
 
 #if defined(_WIN32)
-  explicit IpcStreamOp(Proactor *context, const ipc::PipeStream &pipe);
+  explicit ipc_stream_op(proactor *context, const ipc::pipe_stream &pipe);
 #elif defined(__linux__)
-  explicit IpcStreamOp(const TcpStreamOp &tcp);
+  explicit ipc_stream_op(const tcp_stream_op &tcp);
 #endif
-
-  IpcStreamOp(const IpcStreamOp &);
-  IpcStreamOp &operator=(const IpcStreamOp &);
+  ipc_stream_op(const ipc_stream_op &);
+  ipc_stream_op &operator=(const ipc_stream_op &);
 
   void connect(const char *name, std::error_code &ec);
 
@@ -37,13 +36,13 @@ public:
 
 private:
 #if defined(_WIN32)
-  Proactor *ctx_;
+  proactor *ctx_;
 
   detail::ReadOp read_;
   detail::WriteOp write_;
-  ipc::PipeStream pipe_;
+  ipc::pipe_stream pipe_;
 #elif defined(__linux__)
-  TcpStreamOp tcp_;
+  tcp_stream_op tcp_;
 #endif
 
 }; // class Ipc

@@ -1,5 +1,6 @@
-#include "lock_free/quick_sort.h"
 #include "gtest/gtest.h"
+
+#include "lock_free/quick_sort.h"
 
 TEST(QuickSort, QuickSortFunction1) {
   std::list<int> arrays = {

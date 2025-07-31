@@ -40,7 +40,7 @@ int main(int args, char **argv, char * /*env*/[]) {
   std::error_code ec;
   char buff[4096];
   if (strcmp(argv[1], "-s") == 0) {
-    auto pip_s = ipc::PipeListener::create(kPipeName, ec);
+    auto pip_s = ipc::pipe_listener::create(kPipeName, ec);
     if (ec) {
       printf("create pipe error %s\n", ec.message().c_str());
       ec.clear();
@@ -58,7 +58,7 @@ int main(int args, char **argv, char * /*env*/[]) {
       printf("pipe remove error %s\n", ec.message().c_str());
     }
   } else if (strcmp(argv[1], "-c") == 0) {
-    auto pip = ipc::PipeStream::connect(kPipeName, ec);
+    auto pip = ipc::pipe_stream::connect(kPipeName, ec);
     if (ec) {
       printf("connect pipe error %s\n", ec.message().c_str());
       return -1;

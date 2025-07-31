@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef TIMER_TASK_H
-#define TIMER_TASK_H
+#ifndef ALGORITHM_MIN_HEAP_TIMER_TASK_H
+#define ALGORITHM_MIN_HEAP_TIMER_TASK_H
 
 #include <cassert>
 #include <chrono>
@@ -22,7 +22,7 @@
 
 template <typename Key> class timer_task {
 public:
-  timer_task() : shutdown_(false), thread_(&timer_task::run, this) {}
+  timer_task() : thread_(&timer_task::run, this) {}
 
   ~timer_task() {
     shutdown_ = true;
@@ -34,7 +34,7 @@ public:
     push(handle, time_ms, f);
   }
 
-  void shutdown() { clearAllOp(); }
+  void shutdown() { clear_all_op(); }
 
   bool empty() { return heap_.empty(); }
 
@@ -59,7 +59,7 @@ private:
     heap_.erase(pair.first);
   }
 
-  std::chrono::microseconds getReadyTimeout(
+  std::chrono::microseconds get_ready_timeout(
       const std::chrono::microseconds &max_timeout = std::chrono::minutes(15)) {
     if (heap_.empty())
       return max_timeout;
@@ -70,7 +70,7 @@ private:
     return std::min(min_timeout, max_timeout);
   }
 
-  void clearAllOp() {
+  void clear_all_op() {
     std::lock_guard<std::mutex> lock(lck_);
     delay_task_.clear();
     delay_time_.clear();
@@ -79,7 +79,7 @@ private:
     cv_.notify_all();
   }
 
-  std::vector<std::function<void()> > getReadyOp() {
+  std::vector<std::function<void()> > get_ready_op() {
     std::vector<std::function<void()> > ops;
     auto now = time_type::clock::now();
     while (!heap_.empty() && *heap_.front() <= now) {
@@ -98,11 +98,11 @@ private:
   void run() {
     while (!shutdown_) {
       std::unique_lock<std::mutex> lock(lck_);
-      auto min_time_us = getReadyTimeout();
+      auto min_time_us = get_ready_timeout();
       if (min_time_us > std::chrono::microseconds(0) && !shutdown_) {
         cv_.wait_for(lock, min_time_us);
       }
-      auto ops = getReadyOp();
+      auto ops = get_ready_op();
       lock.unlock();
       for (auto &op : ops) {
         op();
@@ -113,10 +113,10 @@ private:
 private:
   std::mutex lck_;
   std::condition_variable cv_;
-  bool shutdown_;
+  bool shutdown_{false};
   std::thread thread_;
 
-  typedef std::chrono::time_point<std::chrono::steady_clock> time_type;
+  using time_type = std::chrono::time_point<std::chrono::steady_clock>;
   min_heap<time_type> heap_;
   // <index, func>
   std::map<Key, std::pair<time_type, std::function<void()> > > delay_task_;
@@ -124,4 +124,4 @@ private:
   std::map<time_type, Key> delay_time_;
 };
 
-#endif // TIMER_TASK_H
+#endif // ALGORITHM_MIN_HEAP_TIMER_TASK_H

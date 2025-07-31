@@ -16,25 +16,25 @@ void func1(coroutine &co) {
   LOG_DEBUG("func1: returning\n");
 }
 
-void func2(void) {
+void func2() {
   LOG_DEBUG("func2: started\n");
   LOG_DEBUG("func2: swapcontext next\n");
-  co_yield();
+  CO_YIELD();
   LOG_DEBUG("func2: returning\n");
 }
 
-void func4(void) {
+void func4() {
   LOG_DEBUG("func4: started\n");
   LOG_DEBUG("func4: swapcontext next\n");
-  co_yield();
+  CO_YIELD();
   LOG_DEBUG("func4: returning\n");
 }
 
-void func3(void) {
+void func3() {
   LOG_DEBUG("func3: started\n");
   func4();
   LOG_DEBUG("func3: swapcontext next\n");
-  co_yield();
+  CO_YIELD();
   LOG_DEBUG("func3: returning\n");
 }
 
@@ -43,20 +43,20 @@ void func3(void) {
 void co_call() {
   LOG_DEBUG("task begin\n");
   // coroutine co;
-  co_await(func1);
-  co_await(func2);
-  co_await(func3);
+  CO_AWAIT(func1);
+  CO_AWAIT(func2);
+  CO_AWAIT(func3);
 
   LOG_DEBUG("main task\n");
-  co_yield();
+  CO_YIELD();
   LOG_DEBUG("main run yield\n");
-  co_yield();
+  CO_YIELD();
 
   LOG_DEBUG("main append task again\n");
-  co_await(func2);
-  co_await(func3);
-  co_await(func1);
-  co_loop();
+  CO_AWAIT(func2);
+  CO_AWAIT(func3);
+  CO_AWAIT(func1);
+  CO_LOOP();
   LOG_DEBUG("main task done\n");
 }
 

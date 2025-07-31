@@ -9,26 +9,26 @@
 #endif
 #include "proactor/Proactor.h"
 
-class EventOp {
+class event_op {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  using func_type = std::function<void(const std::error_code &, size_t)>;
 
-  EventOp();
-  explicit EventOp(Proactor *context);
-  ~EventOp();
+  event_op();
+  explicit event_op(proactor *context);
+  ~event_op();
 
-  EventOp(const EventOp &);
-  EventOp &operator=(const EventOp &);
+  event_op(const event_op &);
+  event_op &operator=(const event_op &);
 
   void async_notify(const func_type &async_func, std::error_code &ec);
 
 private:
-  Proactor *ctx_;
+  proactor *ctx_{nullptr};
 
 #ifdef __linux__
-  detail::EventOp op_;
+  detail::event_op op_;
 #else
-  class Event : public Operation {
+  class Event : public operation {
   public:
     void async_notify(void *proactor, const func_type &async_func,
                       std::error_code &ec);
@@ -43,6 +43,6 @@ private:
   } op_;
 #endif
 
-}; // class EventOp
+}; // class event_op
 
 #endif // PROACTOR_OPERATION_EVENTOP_H

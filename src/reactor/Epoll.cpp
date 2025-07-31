@@ -8,18 +8,18 @@
 
 #include "utils/error_code.h"
 
-Epoll::Epoll() : fd_(-1), proactor_(nullptr) {}
+epoll::epoll() = default;
 
-Epoll::Epoll(int fd) : fd_(fd), proactor_(nullptr) {}
+epoll::epoll(int fd) : fd_(fd), proactor_(nullptr) {}
 
-Epoll::Epoll(std::error_code &ec)
+epoll::epoll(std::error_code &ec)
     : fd_(epoll_create1(EPOLL_CLOEXEC)), proactor_(nullptr) {
   if (fd_ == -1) {
     ec = get_error_code();
   }
 }
 
-void Epoll::post(int fd, ReactorOp *op, std::error_code &ec) {
+void epoll::post(int fd, reactor_op *op, std::error_code &ec) {
   struct epoll_event event = {};
   event.events = op->get_event_data();
   event.data.ptr = op;
@@ -35,32 +35,32 @@ void Epoll::post(int fd, ReactorOp *op, std::error_code &ec) {
   }
 }
 
-void Epoll::post_read(int fd, ReactorOp *op, std::error_code &ec) {
+void epoll::post_read(int fd, reactor_op *op, std::error_code &ec) {
   op->set_event_data(READ_OP_ENUM);
   post(fd, op, ec);
 }
 
-void Epoll::post_write(int fd, ReactorOp *op, std::error_code &ec) {
+void epoll::post_write(int fd, reactor_op *op, std::error_code &ec) {
   op->set_event_data(WRITE_OP_ENUM);
   post(fd, op, ec);
 }
 
-void Epoll::cancel(int fd, std::error_code &ec) {
+void epoll::cancel(int fd, std::error_code &ec) {
   struct epoll_event event = {};
   if (epoll_ctl(fd_, EPOLL_CTL_DEL, fd, &event)) {
     ec = get_error_code();
   }
 }
 
-size_t Epoll::call(QueueOp &queue) {
+size_t epoll::call(queue_op &queue) {
   size_t n = 0;
   while (call_one(queue))
     ++n;
   return n;
 }
 
-size_t Epoll::call_one(QueueOp &queue) {
-  if (auto *op = (ReactorOp *)queue.begin()) {
+size_t epoll::call_one(queue_op &queue) {
+  if (auto *op = (reactor_op *)queue.begin()) {
     queue.pop();
     void *p = proactor_ ? proactor_ : this;
     op->complete(p, std::error_code(), 0);
@@ -69,11 +69,11 @@ size_t Epoll::call_one(QueueOp &queue) {
   return 0;
 }
 
-size_t Epoll::run_once(QueueOp &queue, std::error_code &ec) {
+size_t epoll::run_once(queue_op &queue, std::error_code &ec) {
   return run_once_timeout(queue, -1, ec);
 }
 
-size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
+size_t epoll::run_once_timeout(queue_op &queue, int timeout_ms,
                                std::error_code &ec) {
 
   struct epoll_event events[1];
@@ -84,19 +84,19 @@ size_t Epoll::run_once_timeout(QueueOp &queue, int timeout_ms,
     return 0;
   }
   for (size_t i = 0; i < number; ++i) {
-    auto *ptr = (ReactorOp *)events[i].data.ptr;
+    auto *ptr = (reactor_op *)events[i].data.ptr;
     ptr->set_event_data(events[i].events);
     queue.push(ptr);
   }
   return number;
 }
 
-void Epoll::close(std::error_code &ec) {
+void epoll::close(std::error_code &ec) {
   if (::close(fd_)) {
     ec = get_error_code();
   }
 }
 
-void Epoll::set_proactor(void *proactor) { proactor_ = proactor; }
+void epoll::set_proactor(void *proactor) { proactor_ = proactor; }
 
 #endif // __linux__

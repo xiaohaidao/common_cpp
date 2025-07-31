@@ -116,7 +116,7 @@ unsigned short in_cksum(unsigned short csum, const char *addr, int len) {
 
 } // namespace
 
-IcmpSocket::IcmpSocket()
+icmp_socket::icmp_socket()
     : socket_(INVALID_SOCKET)
 #ifdef _WIN32
       ,
@@ -125,7 +125,7 @@ IcmpSocket::IcmpSocket()
 {
 }
 
-IcmpSocket::IcmpSocket(const socket_type &s)
+icmp_socket::icmp_socket(const socket_type &s)
     : socket_(s)
 #ifdef _WIN32
       ,
@@ -134,9 +134,9 @@ IcmpSocket::IcmpSocket(const socket_type &s)
 {
 }
 
-IcmpSocket IcmpSocket::create(FamilyType family, std::error_code &ec) {
+icmp_socket icmp_socket::create(FamilyType family, std::error_code &ec) {
 
-  IcmpSocket re;
+  icmp_socket re;
   socket_type const s =
       sockets::socket(family, kRaw, family == kIpV4 ? kIcmp : kIcmpV6, ec);
   // sockets::socket(family, kDgram, family == kIpV4 ? kIcmp : kIcmpV6, ec);
@@ -147,21 +147,21 @@ IcmpSocket IcmpSocket::create(FamilyType family, std::error_code &ec) {
   return re;
 }
 
-void IcmpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
+void icmp_socket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   read_timeout_ = timeout_ms;
 #endif // _WIN32
   sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
-void IcmpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
+void icmp_socket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
 #ifdef _WIN32
   send_timeout_ = timeout_ms;
 #endif // _WIN32
   sockets::set_write_timeout(socket_, ec, timeout_ms);
 }
 
-size_t IcmpSocket::read_timeout(std::error_code &ec) const {
+size_t icmp_socket::read_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   (void)(&ec);
   return read_timeout_;
@@ -170,7 +170,7 @@ size_t IcmpSocket::read_timeout(std::error_code &ec) const {
 #endif // _WIN32
 }
 
-size_t IcmpSocket::write_timeout(std::error_code &ec) const {
+size_t icmp_socket::write_timeout(std::error_code &ec) const {
 #ifdef _WIN32
   (void)(&ec);
   return send_timeout_;
@@ -179,10 +179,10 @@ size_t IcmpSocket::write_timeout(std::error_code &ec) const {
 #endif // _WIN32
 }
 
-std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
-                                                    std::error_code &ec) {
+std::pair<size_t, socket_addr>
+icmp_socket::recv_from(char *buf, size_t buf_size, std::error_code &ec) {
 
-  std::pair<size_t, SocketAddr> re;
+  std::pair<size_t, socket_addr> re;
   auto len = static_cast<socklen_t>(re.second.native_addr_size());
   int ret = ::recvfrom(socket_, buf, static_cast<int>(buf_size), 0,
                        (sockaddr *)re.second.native_addr(), &len);
@@ -207,8 +207,8 @@ std::pair<size_t, SocketAddr> IcmpSocket::recv_from(char *buf, size_t buf_size,
   return re;
 }
 
-size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
-                           const SocketAddr &to, std::error_code &ec) {
+size_t icmp_socket::send_to(char *buf, const char *data, size_t data_size,
+                            const socket_addr &to, std::error_code &ec) {
 
   struct icmphdr icmp_hdr = {};
   icmp_hdr.type = ICMP_ECHO;
@@ -230,7 +230,7 @@ size_t IcmpSocket::send_to(char *buf, const char *data, size_t data_size,
   return rev;
 }
 
-void IcmpSocket::close(std::error_code &ec) {
+void icmp_socket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_BOTH)) {
     std::error_code const re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
@@ -242,4 +242,4 @@ void IcmpSocket::close(std::error_code &ec) {
   }
 }
 
-socket_type IcmpSocket::native() const { return socket_; }
+socket_type icmp_socket::native() const { return socket_; }

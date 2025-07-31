@@ -6,9 +6,9 @@
 #include "reactor/detail/OperationWin.h"
 
 #ifdef _WIN32
-typedef detail::OperationWin ReactorOp;
+using reactor_op = detail::operation_win;
 #else
-typedef detail::OperationEpoll ReactorOp;
+using reactor_op = detail::operation_epoll;
 #endif // _WIN32
 
 #endif // REACTOR_DETAIL_REACTOROP_H

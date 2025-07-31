@@ -8,16 +8,16 @@
 #include "proactor/operation/detail/ReadOp.h"
 #include "proactor/operation/detail/WriteOp.h"
 
-class FilesOp {
+class files_op {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  using func_type = std::function<void(const std::error_code &, size_t)>;
 
-  FilesOp();
-  explicit FilesOp(Proactor *context);
-  FilesOp(Proactor *context, native_handle s);
+  files_op();
+  explicit files_op(proactor *context);
+  files_op(proactor *context, native_handle s);
 
-  FilesOp(const FilesOp &);
-  FilesOp &operator=(const FilesOp &);
+  files_op(const files_op &);
+  files_op &operator=(const files_op &);
 
   /** don't support file
   void open(const char *file_path, std::error_code &ec);
@@ -37,11 +37,11 @@ public:
   ::native_handle native() const;
 
 private:
-  Proactor *ctx_;
-  ::native_handle fd_;
-  detail::ReadOp read_op_;
-  detail::WriteOp write_op_;
+  proactor *ctx_{nullptr};
+  ::native_handle fd_{0};
+  detail::read_op read_op_;
+  detail::write_op write_op_;
 
-}; // class FilesOp
+}; // class files_op
 
 #endif // PROACTOR_OPERATION_FILESOP_H

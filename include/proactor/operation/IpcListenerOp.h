@@ -7,20 +7,20 @@
 #include "proactor/operation/TcpListenerOp.h"
 #include "proactor/operation/detail/PipeConnectOp_win.h"
 
-class IpcListenerOp {
+class ipc_listener_op {
 public:
-  typedef std::function<void(const std::error_code &, const IpcStreamOp &)>
-      func_type;
+  using func_type =
+      std::function<void(const std::error_code &, const ipc_stream_op &)>;
 
-  explicit IpcListenerOp(Proactor &context);
+  explicit ipc_listener_op(proactor &context);
 
-  IpcListenerOp(const IpcListenerOp &);
-  IpcListenerOp &operator=(const IpcListenerOp &);
+  ipc_listener_op(const ipc_listener_op &);
+  ipc_listener_op &operator=(const ipc_listener_op &);
 
   void bind(const char *name, std::error_code &ec);
 
   void async_accept(const func_type &f, std::error_code &ec);
-  IpcStreamOp accept(std::error_code &ec);
+  ipc_stream_op accept(std::error_code &ec);
 
   void close(std::error_code &ec);
 
@@ -28,11 +28,11 @@ public:
 
 private:
 #if defined(_WIN32)
-  Proactor *ctx_;
-  detail::PipeConnectOp connect_op_;
-  ipc::PipeListener pipe_;
+  proactor *ctx_;
+  detail::pipe_connect_op connect_op_;
+  ipc::pipe_listener pipe_;
 #elif defined(__linux__)
-  TcpListenerOp unix_op_;
+  tcp_listener_op unix_op_;
 #endif
 
 }; // class Ipc

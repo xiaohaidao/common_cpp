@@ -5,24 +5,23 @@
 #include "proactor/operation/TcpStreamOp.h"
 #include "proactor/operation/detail/AcceptOp.h"
 
-class TcpListenerOp {
+class tcp_listener_op {
 public:
-  typedef std::function<void(const std::error_code &,
-                             const std::pair<TcpStreamOp, SocketAddr> &)>
-      func_type;
+  using func_type = std::function<void(
+      const std::error_code &, const std::pair<tcp_stream_op, socket_addr> &)>;
 
-  TcpListenerOp();
-  explicit TcpListenerOp(Proactor &context);
-  TcpListenerOp(Proactor &context, socket_type s);
+  tcp_listener_op();
+  explicit tcp_listener_op(proactor &context);
+  tcp_listener_op(proactor &context, socket_type s);
 
-  TcpListenerOp(const TcpListenerOp &);
-  TcpListenerOp &operator=(const TcpListenerOp &);
+  tcp_listener_op(const tcp_listener_op &) noexcept;
+  tcp_listener_op &operator=(const tcp_listener_op &) noexcept;
 
   void bind(const char *port_or_service, std::error_code &ec);
   void bind(const char *port_or_service, FamilyType family,
             std::error_code &ec);
 
-  std::pair<TcpStreamOp, SocketAddr> accept(std::error_code &ec);
+  std::pair<tcp_stream_op, socket_addr> accept(std::error_code &ec);
   void async_accept(const func_type &f, std::error_code &ec);
 
   socket_type native() const;
@@ -30,10 +29,10 @@ public:
   void close(std::error_code &ec);
 
 private:
-  Proactor *ctx_;
+  proactor *ctx_{nullptr};
   socket_type socket_;
-  detail::AcceptOp accept_op_;
+  detail::accept_op accept_op_;
 
-}; // class TcpListener
+}; // class tcp_listener
 
 #endif // PROACTOR_OPERATION_TCPLISTENEROP_H

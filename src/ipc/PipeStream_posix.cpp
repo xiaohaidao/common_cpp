@@ -14,13 +14,13 @@
 
 namespace ipc {
 
-PipeStream::PipeStream() : named_pipe_(0) {}
+pipe_stream::pipe_stream() = default;
 
-PipeStream::PipeStream(native_handle native_handle)
+pipe_stream::pipe_stream(native_handle native_handle)
     : named_pipe_(native_handle) {}
 
-PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
-  PipeStream re;
+pipe_stream pipe_stream::connect(const char *name_pipe, std::error_code &ec) {
+  pipe_stream re;
   int server = ::open(name_pipe, O_RDWR);
   if (server == -1) {
     ec = get_error_code();
@@ -30,7 +30,7 @@ PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
   return re;
 }
 
-size_t PipeStream::read(char *buff, size_t buff_size, std::error_code &ec) {
+size_t pipe_stream::read(char *buff, size_t buff_size, std::error_code &ec) {
   int num = ::read(named_pipe_, buff, buff_size);
   if (num == -1) {
     ec = get_error_code();
@@ -39,8 +39,8 @@ size_t PipeStream::read(char *buff, size_t buff_size, std::error_code &ec) {
   return num;
 }
 
-size_t PipeStream::write(const char *buff, size_t buff_size,
-                         std::error_code &ec) {
+size_t pipe_stream::write(const char *buff, size_t buff_size,
+                          std::error_code &ec) {
   int num = ::write(named_pipe_, buff, buff_size);
   if (num == -1) {
     ec = get_error_code();
@@ -49,13 +49,13 @@ size_t PipeStream::write(const char *buff, size_t buff_size,
   return num;
 }
 
-void PipeStream::close(std::error_code &ec) {
+void pipe_stream::close(std::error_code &ec) {
   if (::close(named_pipe_) == -1) {
     ec = get_error_code();
   }
 }
 
-native_handle PipeStream::native() const { return named_pipe_; }
+native_handle pipe_stream::native() const { return named_pipe_; }
 
 } // namespace ipc
 

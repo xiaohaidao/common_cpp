@@ -44,7 +44,7 @@
   do {                                                                         \
     for (size_t i = 0; i < (op_size); ++i) {                                   \
       if (FD_ISSET((ops)[i].first, &(set))) {                                  \
-        ReactorOp *ptr = (ops)[i].second;                                      \
+        reactor_op *ptr = (ops)[i].second;                                     \
         if (!(queue).exist(ptr)) {                                             \
           (queue).push(ptr);                                                   \
           ++(re_size);                                                         \
@@ -53,50 +53,49 @@
     }                                                                          \
   } while (false)
 
-Select::Select()
+select::select() {
+  FD_ZERO(&read_);
+  FD_ZERO(&write_);
+  FD_ZERO(&except_);
+}
+
+select::select(std::error_code & /*ec*/)
     : map_read_op_size_(0), map_write_op_size_(0), map_except_op_size_(0) {
   FD_ZERO(&read_);
   FD_ZERO(&write_);
   FD_ZERO(&except_);
 }
 
-Select::Select(std::error_code & /*ec*/)
-    : map_read_op_size_(0), map_write_op_size_(0), map_except_op_size_(0) {
-  FD_ZERO(&read_);
-  FD_ZERO(&write_);
-  FD_ZERO(&except_);
-}
-
-void Select::post_read(socket_type s, ReactorOp *op, std::error_code &ec) {
+void select::post_read(socket_type s, reactor_op *op, std::error_code &ec) {
   POST_SOCKET(s, map_read_op_size_, map_read_op_, read_, op, ec);
   fd_ = (std::max)(fd_, s + 1);
 }
 
-void Select::post_write(socket_type s, ReactorOp *op, std::error_code &ec) {
+void select::post_write(socket_type s, reactor_op *op, std::error_code &ec) {
   POST_SOCKET(s, map_write_op_size_, map_write_op_, write_, op, ec);
   fd_ = (std::max)(fd_, s + 1);
 }
 
-void Select::post_except(socket_type s, ReactorOp *op, std::error_code &ec) {
+void select::post_except(socket_type s, reactor_op *op, std::error_code &ec) {
   POST_SOCKET(s, map_except_op_size_, map_except_op_, except_, op, ec);
   fd_ = (std::max)(fd_, s + 1);
 }
 
-void Select::cancel(socket_type s, std::error_code & /*ec*/) {
+void select::cancel(socket_type s, std::error_code & /*ec*/) {
   REMOVE_SOCKET(s, map_read_op_size_, map_read_op_, read_);
   REMOVE_SOCKET(s, map_write_op_size_, map_write_op_, write_);
   REMOVE_SOCKET(s, map_except_op_size_, map_except_op_, except_);
 }
 
-size_t Select::call(QueueOp &queue) {
+size_t select::call(queue_op &queue) {
   size_t n = 0;
   while (call_one(queue))
     ++n;
   return n;
 }
 
-size_t Select::call_one(QueueOp &queue) {
-  if (auto *op = (ReactorOp *)queue.begin()) {
+size_t select::call_one(queue_op &queue) {
+  if (auto *op = (reactor_op *)queue.begin()) {
     op->complete(this, std::error_code(), 0);
     queue.pop();
     return 1;
@@ -104,11 +103,11 @@ size_t Select::call_one(QueueOp &queue) {
   return 0;
 }
 
-size_t Select::run_once(QueueOp &queue, std::error_code &ec) {
+size_t select::run_once(queue_op &queue, std::error_code &ec) {
   return run_once_timeout(queue, (std::numeric_limits<size_t>::max)(), ec);
 }
 
-size_t Select::run_once_timeout(QueueOp &queue, size_t timeout_ms,
+size_t select::run_once_timeout(queue_op &queue, size_t timeout_ms,
                                 std::error_code &ec) {
   struct timeval time = {};
   time.tv_usec = static_cast<long>(timeout_ms % 1000u * 1000u);

@@ -9,10 +9,10 @@
 
 class client : public std::enable_shared_from_this<client> {
   char buff_[1024];
-  TcpStreamOp tcp_op_;
+  tcp_stream_op tcp_op_;
 
 public:
-  client(const TcpStreamOp &op) : tcp_op_(op) {
+  client(const tcp_stream_op &op) : tcp_op_(op) {
     std::error_code ec;
     sockets::set_keepalive(tcp_op_.native(), ec, 1, {10, 1, 3});
     if (ec) {
@@ -23,7 +23,7 @@ public:
 
   ~client() {
     std::error_code ec;
-    auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
+    auto address = socket_addr::get_remote_socket(tcp_op_.native(), ec);
     tcp_op_.close(ec);
     printf("close remote client %s:%d\n", address.get_ip(), address.get_port());
   }
@@ -38,7 +38,7 @@ public:
             read();
           } else {
             std::error_code ec;
-            auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
+            auto address = socket_addr::get_remote_socket(tcp_op_.native(), ec);
             printf("remote client close %s:%d re %s\n", address.get_ip(),
                    address.get_port(), re.message().c_str());
           }
@@ -56,7 +56,7 @@ public:
             write(size);
           } else {
             std::error_code ec;
-            auto address = SocketAddr::get_remote_socket(tcp_op_.native(), ec);
+            auto address = socket_addr::get_remote_socket(tcp_op_.native(), ec);
             printf("remote client close %s:%d re %s\n", address.get_ip(),
                    address.get_port(), re.message().c_str());
           }
@@ -67,13 +67,13 @@ public:
 
 class server {
 
-  TcpListenerOp server_;
+  tcp_listener_op server_;
 
   void do_accept() {
     std::error_code ec;
     server_.async_accept(
         [this](const std::error_code &re,
-               const std::pair<TcpStreamOp, SocketAddr> &c) {
+               const std::pair<tcp_stream_op, socket_addr> &c) {
           if (!re) {
             printf("connect remote %s:%d\n", c.second.get_ip(),
                    c.second.get_port());
@@ -88,7 +88,7 @@ class server {
   }
 
 public:
-  server(Proactor &p, const char *port) : server_(p) {
+  server(proactor &p, const char *port) : server_(p) {
     std::error_code ec;
     server_.bind(port, ec);
     if (ec) {
@@ -112,7 +112,7 @@ int main(int args, char **argv) {
     return -1;
   }
   std::error_code ec;
-  Proactor a(ec);
+  proactor a(ec);
   if (ec) {
     fprintf(stderr, "Proactor create error %s\n", ec.message().c_str());
   }

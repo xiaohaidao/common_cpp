@@ -11,11 +11,11 @@ using namespace std::placeholders; // for _1, _2, _3...
 
 TEST(ProactorTest, ProactorTimer) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  TimerOp timer(p);
+  timer_op timer(p);
   auto call_back = [](const char *b, const std::error_code &ec, size_t n) {
     LOG_DEBUG("%s timer async call n %u!", b, n);
     if (ec) {
@@ -27,13 +27,13 @@ TEST(ProactorTest, ProactorTimer) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  TimerOp timer1(p);
+  timer_op timer1(p);
   timer1.set_timeout(200, 300);
   timer1.async_wait(std::bind(call_back, "timer1 interval 300", _1, _2), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  TimerOp timer2(p);
+  timer_op timer2(p);
   timer2.set_timeout(100, 100);
   timer2.async_wait(std::bind(call_back, "timer2 interval 100", _1, _2), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -41,7 +41,7 @@ TEST(ProactorTest, ProactorTimer) {
 
   timer1.wait();
 
-  TimerOp timer3(p);
+  timer_op timer3(p);
   timer3.set_timeout(100, 300);
 
   LOG_DEBUG("-------------------- begin run while --------------------");

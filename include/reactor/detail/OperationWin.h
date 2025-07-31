@@ -1,8 +1,7 @@
+#ifndef REACTOR_DETAIL_OPERATIONWIN_H
+#define REACTOR_DETAIL_OPERATIONWIN_H
 
 #ifdef _WIN32
-
-#ifndef REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
-#define REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
 
 #include <winsock2.h>
 
@@ -32,8 +31,8 @@ private:
   void *next_;
 };
 
-} // namespace detail
+} /* namespace detail */
 
-#endif // REACTOR_OPERATION_DETAIL_OPERATIONWIN_H
+#endif /* _WIN32 */
 
-#endif // _WIN32
+#endif /* REACTOR_DETAIL_OPERATIONWIN_H */

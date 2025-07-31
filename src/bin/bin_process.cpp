@@ -17,8 +17,8 @@ int main(int args, char **argv, char * /*env*/[]) {
     argsv.emplace_back(argv[i]);
     LOG_DEBUG("argsv emplace back: %s", argv[i]);
   }
-  Process p = Process::call(argv[1], argsv, ec);
-  // Process p = Process::call("cmd", {"/c echo 3 && pause"}, ec);
+  process p = process::call(argv[1], argsv, ec);
+  // process p = process::call("cmd", {"/c echo 3 && pause"}, ec);
   if (ec) {
     LOG_ERROR("call process error %d:%s", ec.value(), ec.message().c_str());
     return -1;

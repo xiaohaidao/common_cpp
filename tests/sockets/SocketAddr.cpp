@@ -7,8 +7,8 @@
 TEST(SocketsTest, SocketAddr) {
   using namespace sockets;
   std::error_code ec;
-  auto local = SocketAddr::resolve_host(nullptr, "http", ec, kIpV6);
-  // auto local = SocketAddr::resolve_host(nullptr, "80", ec);
+  auto local = socket_addr::resolve_host(nullptr, "http", ec, kIpV6);
+  // auto local = socket_addr::resolve_host(nullptr, "80", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("local ip is %s port %d", local.get_ip(), local.get_port());
@@ -19,12 +19,12 @@ TEST(SocketsTest, SocketAddr) {
   ec.clear();
   LOG_DEBUG("hostname %s service %s", buff1, buff2);
 
-  const char *host = SocketAddr::get_localhost(ec);
+  const char *host = socket_addr::get_localhost(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("localhost name %s", host);
 
-  local = SocketAddr::resolve_host("www.baidu.com", nullptr, ec);
+  local = socket_addr::resolve_host("www.baidu.com", nullptr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("www.baidu.com ip is %s port %d", local.get_ip(), local.get_port());
@@ -35,21 +35,21 @@ TEST(SocketsTest, SocketAddr) {
   ec.clear();
   LOG_DEBUG("hostname %s service %s", buff1, buff2);
 
-  auto local_all = SocketAddr::resolve_host_all("www.jd.com", "ftp", ec);
+  auto local_all = socket_addr::resolve_host_all("www.jd.com", "ftp", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   for (auto &i : local_all) {
     LOG_DEBUG("www.jd.com ip is %s port %d", i.get_ip(), i.get_port());
   }
 
-  auto host_all = SocketAddr::resolve_host_all(host, "ftp", ec);
+  auto host_all = socket_addr::resolve_host_all(host, "ftp", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   for (auto &i : host_all) {
     LOG_DEBUG("host %s ip is %s port %d", host, i.get_ip(), i.get_port());
   }
 
-  local = SocketAddr::resolve_host("192.168.0.1", "http", ec);
+  local = socket_addr::resolve_host("192.168.0.1", "http", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("local ip is %s port %d", local.get_ip(), local.get_port());
@@ -65,7 +65,7 @@ TEST(SocketsTest, SocketAddr) {
 
   // get local ip mask
   LOG_DEBUG("get local all ipv4");
-  auto local_all_ip = SocketAddr::get_local_ip_mask(ec);
+  auto local_all_ip = socket_addr::get_local_ip_mask(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   for (auto &i : local_all_ip) {
@@ -76,7 +76,7 @@ TEST(SocketsTest, SocketAddr) {
   }
 
   LOG_DEBUG("get local all ipv6");
-  local_all_ip = SocketAddr::get_local_ip_mask(ec, kIpV6);
+  local_all_ip = socket_addr::get_local_ip_mask(ec, kIpV6);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   for (auto &i : local_all_ip) {

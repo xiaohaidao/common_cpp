@@ -1,8 +1,8 @@
 // Copyright (C) 2021 All rights reserved.
 // Email: oxox0@qq.com. Created in 202104
 
-#ifndef THREAD_LOCK_FREE_QUEUE_H
-#define THREAD_LOCK_FREE_QUEUE_H
+#ifndef ALGORITHM_LOCK_FREE_LOCK_FREE_QUEUE_H
+#define ALGORITHM_LOCK_FREE_LOCK_FREE_QUEUE_H
 
 #include <atomic>
 
@@ -15,8 +15,8 @@ template <typename T> class lock_free_queue {
     node *ptr;
   };
 
-  std::atomic<counted_node_ptr> head;
-  std::atomic<counted_node_ptr> tail;
+  std::atomic<counted_node_ptr> head_;
+  std::atomic<counted_node_ptr> tail_;
 
   struct node_counter {
     unsigned internal_count : 30;
@@ -98,7 +98,7 @@ template <typename T> class lock_free_queue {
                     counted_node_ptr const &new_tail) {
 
     node *const current_tail_ptr = old_tail.ptr;
-    while (!tail.compare_exchange_weak(old_tail, new_tail) &&
+    while (!tail_.compare_exchange_weak(old_tail, new_tail) &&
            old_tail.ptr == current_tail_ptr)
       ;
 
@@ -111,7 +111,7 @@ template <typename T> class lock_free_queue {
 
 public:
   lock_free_queue()
-      : head(counted_node_ptr({1, new node})), tail(head.load()) {}
+      : head_(counted_node_ptr({1, new node})), tail_(head_.load()) {}
 
   lock_free_queue(const lock_free_queue &other) = delete;
   lock_free_queue &operator=(const lock_free_queue &other) = delete;
@@ -119,23 +119,23 @@ public:
   ~lock_free_queue() {
     while (pop())
       ;
-    counted_node_ptr node_ptr = head.load();
+    counted_node_ptr node_ptr = head_.load();
     if (node_ptr.ptr) {
       delete node_ptr.ptr;
     }
   }
 
   std::unique_ptr<T> pop() {
-    counted_node_ptr old_head = head.load(std::memory_order_relaxed);
+    counted_node_ptr old_head = head_.load(std::memory_order_relaxed);
 
     for (;;) {
-      increase_external_count(head, old_head);
+      increase_external_count(head_, old_head);
       node *const ptr = old_head.ptr;
-      if (ptr == tail.load().ptr) {
+      if (ptr == tail_.load().ptr) {
         return std::unique_ptr<T>();
       }
       counted_node_ptr next = ptr->next.load();
-      if (head.compare_exchange_strong(old_head, next)) {
+      if (head_.compare_exchange_strong(old_head, next)) {
         T *const res = ptr->data.exchange(nullptr);
         free_external_counter(old_head);
         return std::unique_ptr<T>(res);
@@ -150,10 +150,10 @@ public:
     counted_node_ptr new_next;
     new_next.ptr = new node;
     new_next.external_count = 1;
-    counted_node_ptr old_tail = tail.load();
+    counted_node_ptr old_tail = tail_.load();
 
     for (;;) {
-      increase_external_count(tail, old_tail);
+      increase_external_count(tail_, old_tail);
 
       T *old_data = nullptr;
       if (old_tail.ptr->data.compare_exchange_strong(old_data,
@@ -166,6 +166,7 @@ public:
           new_next = old_next;
         }
         set_new_tail(old_tail, new_next);
+        // NOLINTNEXTLINE(bugprone-unused-return-value)
         new_data.release();
         break;
       } else {
@@ -183,4 +184,4 @@ public:
 
 } // namespace thread
 
-#endif // THREAD_LOCK_FREE_QUEUE_H
+#endif // ALGORITHM_LOCK_FREE_LOCK_FREE_QUEUE_H

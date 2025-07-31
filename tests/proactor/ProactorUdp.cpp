@@ -9,10 +9,10 @@
 
 using namespace std::placeholders; // for _1, _2, _3...
 
-class Udp {
+class udp {
 public:
-  Udp(Proactor &p, const char *module) : buff_{}, udp_op_(p), module_(module) {}
-  ~Udp() {}
+  udp(proactor &p, const char *module) : buff_{}, udp_op_(p), module_(module) {}
+  ~udp() = default;
 
   socket_type native() const { return udp_op_.native(); }
 
@@ -38,7 +38,8 @@ public:
                      << ec.message();
   }
 
-  void read(const std::error_code &re_ec, size_t size, const SocketAddr &from) {
+  void read(const std::error_code &re_ec, size_t size,
+            const socket_addr &from) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_DEBUG("%s: %d async read from %s:%d size %d %d \"%s\"", module_.c_str(),
@@ -61,12 +62,12 @@ public:
     memset(buff_, 0, sizeof(buff_));
     std::error_code ec;
     udp_op_.async_read((char *)buff_, sizeof(buff_),
-                       std::bind(&Udp::read, this, _1, _2, _3), ec);
+                       std::bind(&udp::read, this, _1, _2, _3), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
 
-  void async_write(const char *buff, size_t size, const SocketAddr &to) {
+  void async_write(const char *buff, size_t size, const socket_addr &to) {
     size = (std::min)(size, sizeof(buff));
     memcpy(buff_, buff, size);
     buff_[size] = 0;
@@ -74,35 +75,35 @@ public:
               to.get_port(), buff_);
     std::error_code ec;
     udp_op_.async_write((char *)buff_, size, to,
-                        std::bind(&Udp::write, this, _1, _2), ec);
+                        std::bind(&udp::write, this, _1, _2), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
 
 private:
   char buff_[1024];
-  UdpSocketOp udp_op_;
+  udp_socket_op udp_op_;
   std::string module_;
 };
 
 TEST(ProactorTest, ProactorUdp) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr const addr(nullptr, "8989");
+  socket_addr const addr(nullptr, "8989");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
 
-  Udp server(p, "Server");
+  udp server(p, "Server");
 
   LOG_DEBUG("bind port %s", port);
   server.bind(port);
   server.async_read();
 
-  Udp client(p, "client");
+  udp client(p, "client");
   client.create();
 
   char buff[] = "client udp send message!";

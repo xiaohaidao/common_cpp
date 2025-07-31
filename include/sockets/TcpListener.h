@@ -6,22 +6,22 @@
 
 #include "sockets/TcpStream.h"
 
-class TcpListener {
+class tcp_listener {
 public:
-  TcpListener();
-  explicit TcpListener(const socket_type &s);
+  tcp_listener();
+  explicit tcp_listener(const socket_type &s);
 
   // The default family is ipv4, bind and listen
-  static TcpListener bind(const char *port_or_service, std::error_code &ec);
-  static TcpListener bind(const char *port_or_service, FamilyType family,
-                          std::error_code &ec);
+  static tcp_listener bind(const char *port_or_service, std::error_code &ec);
+  static tcp_listener bind(const char *port_or_service, FamilyType family,
+                           std::error_code &ec);
 
   // The default family is ipv4, just bind
-  static TcpStream bind_port(const char *port_or_service, std::error_code &ec);
-  static TcpStream bind_port(const char *port_or_service, FamilyType family,
-                             std::error_code &ec);
+  static tcp_stream bind_port(const char *port_or_service, std::error_code &ec);
+  static tcp_stream bind_port(const char *port_or_service, FamilyType family,
+                              std::error_code &ec);
 
-  std::pair<TcpStream, SocketAddr> accept(std::error_code &ec);
+  std::pair<tcp_stream, socket_addr> accept(std::error_code &ec);
 
   void close(std::error_code &ec);
 
@@ -31,8 +31,8 @@ public:
   socket_type native() const;
 
 private:
-  socket_type socket_;
+  socket_type socket_{-1};
 
-}; // class TcpListener
+}; // class tcp_listener
 
 #endif // SOCKETS_TCPLISTENER_H

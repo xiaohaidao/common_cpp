@@ -1,4 +1,3 @@
-
 // NOLINT(llvm-header-guard)
 #pragma once
 
@@ -9,6 +8,6 @@
     }                                                                          \
   } while (false)
 
-#define CHECK_FALSE(check, re) CHECK_TRUE(!check, re)
+#define CHECK_FALSE(check, re) CHECK_TRUE(!(check), re)
 
 #define CHECK_EC CHECK_TRUE

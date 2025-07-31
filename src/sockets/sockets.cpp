@@ -52,7 +52,7 @@ socket_type socket(FamilyType family, SocketType type, Protocal protocal,
 }
 
 void set_keepalive(socket_type s, std::error_code &ec, int enable,
-                   KeepAliveParam param) {
+                   keep_alive_param param) {
 
   /*
   #ifdef _WIN32

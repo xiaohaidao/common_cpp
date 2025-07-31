@@ -10,7 +10,7 @@
 TEST(SocketsTest, IcmpSocketTest) {
   using namespace std::chrono;
   std::error_code ec;
-  IcmpSocket server = IcmpSocket::create(kIpV4, ec);
+  icmp_socket server = icmp_socket::create(kIpV4, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -18,7 +18,7 @@ TEST(SocketsTest, IcmpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr const addr("www.baidu.com", "8981");
+  socket_addr const addr("www.baidu.com", "8981");
   LOG_DEBUG("ping ip %s", addr.get_ip());
 
   auto now = std::chrono::steady_clock::now();
@@ -29,7 +29,7 @@ TEST(SocketsTest, IcmpSocketTest) {
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  std::pair<size_t, SocketAddr> rev = server.recv_from(buff, sizeof(buff), ec);
+  std::pair<size_t, socket_addr> rev = server.recv_from(buff, sizeof(buff), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   now = std::chrono::steady_clock::now();

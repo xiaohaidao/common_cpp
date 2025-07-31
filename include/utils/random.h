@@ -2,7 +2,7 @@
 #ifndef UTILS_RANDOM_H
 #define UTILS_RANDOM_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {

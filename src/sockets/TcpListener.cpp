@@ -20,20 +20,20 @@
 #define INVALID_SOCKET (socket_type)(~0)
 #endif // _WIN32
 
-TcpListener::TcpListener() : socket_(INVALID_SOCKET) {}
+tcp_listener::tcp_listener() : socket_(INVALID_SOCKET) {}
 
-TcpListener::TcpListener(const socket_type &s) : socket_(s) {}
+tcp_listener::tcp_listener(const socket_type &s) : socket_(s) {}
 
-TcpListener TcpListener::bind(const char *port_or_service,
-                              std::error_code &ec) {
+tcp_listener tcp_listener::bind(const char *port_or_service,
+                                std::error_code &ec) {
 
   return bind(port_or_service, kIpV4, ec);
 }
 
-TcpListener TcpListener::bind(const char *port_or_service, FamilyType family,
-                              std::error_code &ec) {
+tcp_listener tcp_listener::bind(const char *port_or_service, FamilyType family,
+                                std::error_code &ec) {
 
-  TcpListener re;
+  tcp_listener re;
   socket_type const listen = bind_port(port_or_service, family, ec).native();
   re.socket_ = listen;
   if (ec) {
@@ -47,16 +47,16 @@ TcpListener TcpListener::bind(const char *port_or_service, FamilyType family,
   return re;
 }
 
-TcpStream TcpListener::bind_port(const char *port_or_service,
-                                 std::error_code &ec) {
+tcp_stream tcp_listener::bind_port(const char *port_or_service,
+                                   std::error_code &ec) {
 
   return bind_port(port_or_service, kIpV4, ec);
 }
 
-TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
-                                 std::error_code &ec) {
+tcp_stream tcp_listener::bind_port(const char *port_or_service,
+                                   FamilyType family, std::error_code &ec) {
 
-  TcpStream re;
+  tcp_stream re;
   socket_type const listen = sockets::socket(family, kStream,
 #ifdef __linux__
                                              family == kUnix ? kIp :
@@ -72,13 +72,13 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
     return re;
   }
   // Setup the TCP listening socket
-  SocketAddr const addr =
+  socket_addr const addr =
 #ifdef __linux__
       family == kUnix
-          ? SocketAddr(port_or_service)
+          ? socket_addr(port_or_service)
           :
 #endif // __linux__
-          SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+          socket_addr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
     ::CLOSESOCKET(listen);
@@ -93,8 +93,8 @@ TcpStream TcpListener::bind_port(const char *port_or_service, FamilyType family,
   return re;
 }
 
-std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
-  std::pair<TcpStream, SocketAddr> re;
+std::pair<tcp_stream, socket_addr> tcp_listener::accept(std::error_code &ec) {
+  std::pair<tcp_stream, socket_addr> re;
 
   // Accept a client socket
   socket_type const client = ::accept(socket_, nullptr, nullptr);
@@ -104,21 +104,21 @@ std::pair<TcpStream, SocketAddr> TcpListener::accept(std::error_code &ec) {
     return re;
   }
   re.first.socket_ = client;
-  re.second = SocketAddr::get_remote_socket(client, ec);
+  re.second = socket_addr::get_remote_socket(client, ec);
   return re;
 }
 
-void TcpListener::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
+void tcp_listener::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
   sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
-size_t TcpListener::read_timeout(std::error_code &ec) const {
+size_t tcp_listener::read_timeout(std::error_code &ec) const {
   return sockets::read_timeout(socket_, ec);
 }
 
-void TcpListener::close(std::error_code &ec) {
+void tcp_listener::close(std::error_code &ec) {
 #ifdef __linux__
-  auto addr = SocketAddr::get_local_socket(socket_, ec);
+  auto addr = socket_addr::get_local_socket(socket_, ec);
   if (addr.get_family() == kUnix) {
     ::unlink(addr.get_ip());
   }
@@ -128,4 +128,4 @@ void TcpListener::close(std::error_code &ec) {
   }
 }
 
-socket_type TcpListener::native() const { return socket_; }
+socket_type tcp_listener::native() const { return socket_; }

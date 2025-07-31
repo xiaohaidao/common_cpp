@@ -6,14 +6,14 @@
 
 #include "sockets/SocketAddr.h"
 
-class TcpStream {
+class tcp_stream {
 public:
-  TcpStream();
-  explicit TcpStream(const socket_type &s);
+  tcp_stream();
+  explicit tcp_stream(const socket_type &s);
 
-  static TcpStream connect(const SocketAddr &addr, std::error_code &ec);
+  static tcp_stream connect(const socket_addr &addr, std::error_code &ec);
 
-  void connected(const SocketAddr &addr, std::error_code &ec);
+  void connected(const socket_addr &addr, std::error_code &ec);
 
   void shutdown(std::error_code &ec);
 
@@ -33,7 +33,7 @@ public:
   socket_type native() const;
 
 private:
-  friend class TcpListener;
+  friend class tcp_listener;
   socket_type socket_;
 
 }; // class TcpStream

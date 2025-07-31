@@ -19,7 +19,7 @@ TEST(LockFreeStack, LockFreeStackFunction1) {
   size_t const thread_size = std::thread::hardware_concurrency();
   std::vector<std::thread> threads;
   for (size_t i = 0; i < thread_size; ++i) {
-    threads.push_back(std::thread(thread_func, std::ref(stack), i));
+    threads.emplace_back(thread_func, std::ref(stack), i);
   }
 
   for (size_t i = 0; i < thread_size; ++i) {

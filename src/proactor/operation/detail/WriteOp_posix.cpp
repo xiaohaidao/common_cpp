@@ -12,11 +12,11 @@
 
 namespace detail {
 
-WriteOp::WriteOp() : fd_(0), buff_({}) {}
+write_op::write_op() : buff_({}) {}
 
-void WriteOp::async_write(void *proactor, func_type async_func,
-                          native_handle fd, const char *buff, size_t size,
-                          std::error_code &ec) {
+void write_op::async_write(void *proactor, func_type async_func,
+                           native_handle fd, const char *buff, size_t size,
+                           std::error_code &ec) {
 
   func_ = std::move(async_func);
   fd_ = fd;
@@ -27,11 +27,11 @@ void WriteOp::async_write(void *proactor, func_type async_func,
     return;
   }
   set_event_data(WRITE_OP_ENUM_ONCE);
-  static_cast<Proactor *>(proactor)->post(fd, this, ec);
+  static_cast< ::proactor *>(proactor)->post(fd, this, ec);
 }
 
-void WriteOp::complete(void *p, const std::error_code &result_ec,
-                       size_t /*trans_size*/) {
+void write_op::complete(void *p, const std::error_code &result_ec,
+                        size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

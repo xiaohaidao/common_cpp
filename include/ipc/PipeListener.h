@@ -8,14 +8,14 @@
 
 namespace ipc {
 
-class PipeListener {
+class pipe_listener {
 public:
-  PipeListener();
+  pipe_listener();
 
-  static PipeListener create(const char *name_pipe, std::error_code &ec);
+  static pipe_listener create(const char *name_pipe, std::error_code &ec);
   void create(std::error_code &ec);
 
-  PipeStream accept(std::error_code &ec);
+  pipe_stream accept(std::error_code &ec);
 
   void remove(std::error_code &ec);
 

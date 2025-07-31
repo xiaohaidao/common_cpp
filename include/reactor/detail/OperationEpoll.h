@@ -1,55 +1,55 @@
 
-#ifdef __linux__
-
 #ifndef REACTOR_DETAIL_OPERATIONEPOLL_H
 #define REACTOR_DETAIL_OPERATIONEPOLL_H
+
+#ifdef __linux__
 
 #include "reactor/detail/OperationPosix.h"
 
 namespace detail {
 
 enum OpEnum {
-  EPOLLIN = 0x001,     // readf
-  EPOLLPRI = 0x002,    // out-of-band data or other
-  EPOLLOUT = 0x004,    // write
-  EPOLLERR = 0x008,    // error
-  EPOLLHUP = 0x010,    // remote closed read
-  EPOLLRDHUP = 0x2000, // local closed write
+  kEpollin = 0x001,     // readf
+  kEpollprii = 0x002,   // out-of-band data or other
+  kEpollout = 0x004,    // write
+  kEpollerr = 0x008,    // error
+  kEpollhup = 0x010,    // remote closed read
+  kEpollrdhup = 0x2000, // local closed write
 
-  EPOLLONESHOT = 1u << 30, // one-shot notification
-  EPOLLET = 1u << 31       // EdgeTriggered
+  kEpolloneshot = 1u << 30, // one-shot notification
+  kEpollet = 1u << 31       // EdgeTriggered
 };
 
 #define READ_OP_ENUM                                                           \
-  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
-   ::detail::EPOLLET)
+  (::detail::kEpollin | ::detail::kEpollerr | ::detail::kEpollhup |            \
+   ::detail::kEpollet)
 #define WRITE_OP_ENUM                                                          \
-  (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP)
+  (::detail::kEpollout | ::detail::kEpollrdhup | ::detail::kEpollhup)
 #define READ_OP_ET_ENUM_ONCE                                                   \
-  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
-   ::detail::EPOLLONESHOT | ::detail::EPOLLET)
+  (::detail::kEpollin | ::detail::kEpollerr | ::detail::kEpollhup |            \
+   ::detail::kEpolloneshot | ::detail::kEpollet)
 #define READ_OP_ENUM_ONCE                                                      \
-  (::detail::EPOLLIN | ::detail::EPOLLERR | ::detail::EPOLLHUP |               \
-   ::detail::EPOLLONESHOT)
+  (::detail::kEpollin | ::detail::kEpollerr | ::detail::kEpollhup |            \
+   ::detail::kEpolloneshot)
 #define WRITE_OP_ENUM_ONCE                                                     \
-  (::detail::EPOLLOUT | ::detail::EPOLLRDHUP | ::detail::EPOLLHUP) |           \
-      ::detail::EPOLLONESHOT
+  (((::detail::kEpollout | ::detail::kEpollrdhup | ::detail::kEpollhup) |      \
+    ::detail::kEpolloneshot))
 
-class OperationEpoll : public OperationPosix {
+class operation_epoll : public operation_posix {
 public:
-  OperationEpoll() : OperationPosix(), event_(0) {}
+  operation_epoll() : operation_posix() {}
 
-  // protect:
+  // protected:
   void set_event_data(int event) { event_ = event; }
 
   int get_event_data() const { return event_; }
 
 private:
-  int event_;
-}; // class OperationEpoll
+  int event_{0};
+}; /* class */
 
 } // namespace detail
 
-#endif // REACTOR_DETAIL_OPERATIONEPOLL_H
-
 #endif // __linux__
+
+#endif // REACTOR_DETAIL_OPERATIONEPOLL_H

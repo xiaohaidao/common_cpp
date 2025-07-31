@@ -24,15 +24,15 @@
 
 namespace ipc {
 
-Semaphores::Semaphores() : sem_(nullptr) {}
+semaphores::semaphores() = default;
 
-Semaphores::~Semaphores() {
+semaphores::~semaphores() {
   std::error_code ec;
   close(ec);
 }
 
-Semaphores Semaphores::open(const char *key, std::error_code &ec) {
-  Semaphores result;
+semaphores semaphores::open(const char *key, std::error_code &ec) {
+  semaphores result;
   if ((result.sem_ = sem_open(key, O_RDWR, 0, 0)) == SEM_FAILED) {
     ec = get_error_code();
     return result;
@@ -41,9 +41,9 @@ Semaphores Semaphores::open(const char *key, std::error_code &ec) {
   return result;
 }
 
-Semaphores Semaphores::create(const char *key, std::error_code &ec,
+semaphores semaphores::create(const char *key, std::error_code &ec,
                               unsigned int number) {
-  Semaphores result;
+  semaphores result;
   //  delete O_EXCL will create force
   if ((result.sem_ = sem_open(key, O_RDWR | O_CREAT | O_EXCL, DEFFILEMODE,
                               number)) == SEM_FAILED) {
@@ -54,13 +54,13 @@ Semaphores Semaphores::create(const char *key, std::error_code &ec,
   return result;
 }
 
-void Semaphores::wait(std::error_code &ec) {
+void semaphores::wait(std::error_code &ec) {
   if (::sem_wait((sem_t *)sem_) == -1) {
     ec = get_error_code();
   }
 }
 
-bool Semaphores::try_wait(std::error_code &ec) {
+bool semaphores::try_wait(std::error_code &ec) {
   if (::sem_trywait((sem_t *)sem_) == -1) {
     int e = errno;
     if (e != EAGAIN) {
@@ -71,7 +71,7 @@ bool Semaphores::try_wait(std::error_code &ec) {
   return true;
 }
 
-bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
+bool semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
     ec = get_error_code();
@@ -92,14 +92,14 @@ bool Semaphores::try_wait_for(size_t timeout_ms, std::error_code &ec) {
   return true;
 }
 
-void Semaphores::notify_one(std::error_code &ec) {
+void semaphores::notify_one(std::error_code &ec) {
   if (::sem_post((sem_t *)sem_) == -1) {
     ec = get_error_code();
     return;
   }
 }
 
-void Semaphores::close(std::error_code &ec) {
+void semaphores::close(std::error_code &ec) {
   if (::sem_close((sem_t *)sem_) == -1) {
     ec = get_error_code();
     return;
@@ -107,7 +107,7 @@ void Semaphores::close(std::error_code &ec) {
   sem_ = nullptr;
 }
 
-void Semaphores::remove(std::error_code &ec) {
+void semaphores::remove(std::error_code &ec) {
   close(ec);
 
   if (sem_unlink(key_.c_str()) == -1) {

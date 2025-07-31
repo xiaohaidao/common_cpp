@@ -8,29 +8,29 @@
 #include "min_heap/min_heap.h"
 #include "reactor/detail/QueueOp.h"
 
-template <typename Clock> class TimerQueueSet {
+template <typename Clock> class timer_queue_set {
 public:
-  typedef typename Clock::time_point time_type;
-  typedef typename time_type::clock clock_type;
+  using time_type = typename std::chrono::steady_clock::time_point;
+  using clock_type = typename time_type::clock;
 
-  TimerQueueSet() {}
+  timer_queue_set() = default;
 
-  void push_ms(size_t timeout_ms, Operation *op) {
+  void push_ms(size_t timeout_ms, operation *op) {
     push_us(timeout_ms * 1000, 0, op);
   }
-  void push_ms(size_t timeout_ms, size_t interval_ms, Operation *op) {
+  void push_ms(size_t timeout_ms, size_t interval_ms, operation *op) {
     push_us(timeout_ms * 1000, interval_ms * 1000, op);
   }
 
-  void push_us(size_t timeout_us, Operation *op) { push_us(timeout_us, 0, op); }
-  void push_us(size_t timeout_us, size_t interval_us, Operation *op) {
+  void push_us(size_t timeout_us, operation *op) { push_us(timeout_us, 0, op); }
+  void push_us(size_t timeout_us, size_t interval_us, operation * /*op*/) {
     using namespace std::chrono;
     push(clock_type::now() + microseconds(timeout_us),
          microseconds(interval_us));
   }
 
   void push(const time_type &timeout,
-            const typename time_type::duration &interval, Operation *op) {
+            const typename time_type::duration &interval, operation *op) {
 
     timer_queue_t queue_op;
     using namespace std::chrono;
@@ -40,7 +40,7 @@ public:
     heap_.push(queue_op);
   }
 
-  void cancel(Operation *op) { heap_.erase(op); }
+  void cancel(operation *op) { heap_.erase(op); }
 
   size_t wait_duration_usec(size_t max_us) {
     if (heap_.empty()) {
@@ -68,7 +68,7 @@ public:
                      : duration_cast<milliseconds>(diff).count();
   }
 
-  void get_all_task(QueueOp &ops) {
+  void get_all_task(queue_op &ops) {
     time_type now = clock_type::now();
     while (!heap_.empty() && heap_.front()->expire <= now) {
       timer_queue_t timeout = *heap_.front();
@@ -84,19 +84,19 @@ public:
 
 private:
   struct timer_queue_t {
-    timer_queue_t() : op(0) {}
+    timer_queue_t() = default;
 
     time_type expire;
     typename time_type::duration interval;
-    Operation *op;
+    operation *op{nullptr};
 
     bool operator<(const timer_queue_t &other) const {
       return expire < other.expire;
     }
-    // bool operator<(const Operation *other_op) const { return op != other_op;
+    // bool operator<(const operation *other_op) const { return op != other_op;
     // } bool operator==(const timer_queue_t &other) const { return op ==
     // other.op; }
-    bool operator==(const Operation *other_op) const { return op == other_op; }
+    bool operator==(const operation *other_op) const { return op == other_op; }
   };
 
   min_heap<timer_queue_t> heap_;

@@ -35,8 +35,8 @@ std::string transfer_name(const std::string &name) {
   return name;
 }
 
-MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
-  MsgQueue result;
+msg_queue msg_queue::open(const std::string &key, std::error_code &ec) {
+  msg_queue result;
   if ((result.msgid_ = mq_open(transfer_name(key).c_str(), O_RDWR)) == -1) {
     ec = get_error_code();
     return result;
@@ -45,8 +45,8 @@ MsgQueue MsgQueue::open(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
-  MsgQueue result;
+msg_queue msg_queue::create(const std::string &key, std::error_code &ec) {
+  msg_queue result;
   //  delete O_EXCL will create force
   if ((result.msgid_ =
            mq_open(transfer_name(key).c_str(), O_RDWR | O_CREAT | O_EXCL,
@@ -58,7 +58,7 @@ MsgQueue MsgQueue::create(const std::string &key, std::error_code &ec) {
   return result;
 }
 
-void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
+void msg_queue::send(const char *data, size_t size, std::error_code &ec) {
   constexpr int kPriority = 0; // the priority in [0-31], highest priority first
   if (mq_send(msgid_, data, size, kPriority) == -1) {
     ec = get_error_code();
@@ -66,8 +66,8 @@ void MsgQueue::send(const char *data, size_t size, std::error_code &ec) {
   }
 }
 
-bool MsgQueue::send_timeout(const char *data, size_t size, size_t timeout_ms,
-                            std::error_code &ec) {
+bool msg_queue::send_timeout(const char *data, size_t size, size_t timeout_ms,
+                             std::error_code &ec) {
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
@@ -90,7 +90,7 @@ bool MsgQueue::send_timeout(const char *data, size_t size, size_t timeout_ms,
   return true;
 }
 
-size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
+size_t msg_queue::recv(char *data, size_t data_size, std::error_code &ec) {
   size_t size;
   if ((size = mq_receive(msgid_, data, data_size, nullptr)) == -1) {
     ec = get_error_code();
@@ -99,8 +99,8 @@ size_t MsgQueue::recv(char *data, size_t data_size, std::error_code &ec) {
   return size;
 }
 
-size_t MsgQueue::recv_timeout(char *data, size_t data_size, size_t timeout_ms,
-                              std::error_code &ec) {
+size_t msg_queue::recv_timeout(char *data, size_t data_size, size_t timeout_ms,
+                               std::error_code &ec) {
 
   struct timespec timeout {};
   if (clock_gettime(CLOCK_REALTIME, &timeout) == -1) {
@@ -124,7 +124,7 @@ size_t MsgQueue::recv_timeout(char *data, size_t data_size, size_t timeout_ms,
   return size;
 }
 
-void MsgQueue::close(std::error_code &ec) {
+void msg_queue::close(std::error_code &ec) {
   if (msgid_ <= 0) {
     return;
   }
@@ -135,7 +135,7 @@ void MsgQueue::close(std::error_code &ec) {
   msgid_ = 0;
 }
 
-void MsgQueue::remove(std::error_code &ec) {
+void msg_queue::remove(std::error_code &ec) {
   close(ec);
 
   if (mq_unlink(key_.c_str()) == -1) {

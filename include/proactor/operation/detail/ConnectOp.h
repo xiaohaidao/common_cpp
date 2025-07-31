@@ -8,15 +8,14 @@
 
 namespace detail {
 
-class ConnectOp : public Operation {
+class connect_op : public operation {
 public:
-  typedef std::function<void(void *, const std::error_code &, size_t,
-                             socket_type)>
-      func_type;
+  using func_type =
+      std::function<void(void *, const std::error_code &, size_t, socket_type)>;
 
-  ConnectOp();
+  connect_op();
 
-  void async_connect(void *proactor, socket_type s, const SocketAddr &addr,
+  void async_connect(void *proactor, socket_type s, const socket_addr &addr,
                      func_type async_func, std::error_code &ec);
 
   // protected:
@@ -26,7 +25,7 @@ public:
 
 private:
   func_type func_;
-  socket_type client_;
+  socket_type client_{-1};
 
 }; // class ConnectOp
 

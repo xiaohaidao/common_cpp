@@ -13,19 +13,19 @@
 
 extern char **environ;
 
-Process::Process() : child_handle_(0) {}
+process::process() = default;
 
-Process Process::call(const char *command,
+process process::call(const char *command,
                       const std::vector<const char *> &argv,
                       std::error_code &ec) {
 
-  ipc::Pipe pipe = ipc::Pipe::std_in_out();
+  auto pipe = ipc::pipe::std_in_out();
   return call(command, argv, pipe, ec);
 }
 
-Process Process::call(const char *command,
+process process::call(const char *command,
                       const std::vector<const char *> &argv,
-                      const ipc::Pipe &pipe, std::error_code &ec) {
+                      const ipc::pipe &pipe, std::error_code &ec) {
 
   std::vector<const char *> arg;
   arg.push_back(command);
@@ -36,7 +36,7 @@ Process Process::call(const char *command,
   }
   arg.push_back(nullptr);
 
-  Process sys;
+  process sys;
 
   posix_spawn_file_actions_t file_actions = {};
   posix_spawn_file_actions_init(&file_actions);
@@ -71,13 +71,13 @@ Process Process::call(const char *command,
   return sys;
 }
 
-Process Process::open(uint64_t pid, std::error_code & /*ec*/) {
-  Process p;
+process process::open(uint64_t pid, std::error_code & /*ec*/) {
+  process p;
   p.child_handle_ = pid;
   return p;
 }
 
-bool Process::running(std::error_code &ec) {
+bool process::running(std::error_code &ec) {
   int status = -1;
   if (::waitpid(child_handle_, &status, WNOHANG) == -1) {
     int e = errno;
@@ -95,7 +95,7 @@ bool Process::running(std::error_code &ec) {
   return true;
 }
 
-int Process::wait(std::error_code &ec) {
+int process::wait(std::error_code &ec) {
   int status = -1;
   if (::waitpid(child_handle_, &status, 0) == -1) {
     int e = errno;
@@ -106,7 +106,7 @@ int Process::wait(std::error_code &ec) {
   return WEXITSTATUS(status);
 }
 
-void Process::terminate(std::error_code &ec) {
+void process::terminate(std::error_code &ec) {
   if (::kill(child_handle_, SIGKILL) == -1) {
     ec = get_error_code();
   }

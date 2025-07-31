@@ -6,24 +6,24 @@
 
 TEST(IPCTest, SharedMemoryTest) {
   std::error_code ec;
-  ipc::SharedMemory::create(33333, 200, ec);
+  ipc::shared_memory::create(33333, 200, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  ipc::SharedMemory::create("sh_momery", 200, ec);
+  ipc::shared_memory::create("sh_momery", 200, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  ipc::SharedMemory::create(33333, 30, ec);
+  ipc::shared_memory::create(33333, 30, ec);
   EXPECT_TRUE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto sh1 = ipc::SharedMemory::open(33333, ec);
+  auto sh1 = ipc::shared_memory::open(33333, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  ipc::SharedMemory::open(2, ec);
+  ipc::shared_memory::open(2, ec);
   EXPECT_TRUE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto sh2 = ipc::SharedMemory::open("sh_momery", ec);
+  auto sh2 = ipc::shared_memory::open("sh_momery", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

@@ -9,14 +9,14 @@
 #include "proactor/operation/IpcStreamOp.h"
 #include "utils/log.h"
 
-class Client : public std::enable_shared_from_this<Client> {
+class client : public std::enable_shared_from_this<client> {
   char buff_[1024];
-  IpcStreamOp tcp_op_;
+  ipc_stream_op tcp_op_;
 
 public:
-  Client(const IpcStreamOp &op) : tcp_op_(op) {}
+  client(const ipc_stream_op &op) : tcp_op_(op) {}
 
-  ~Client() {
+  ~client() {
     std::error_code ec;
     tcp_op_.close(ec);
     LOG_INFO("~ %d close remote client %s\n", tcp_op_.native(),
@@ -88,19 +88,19 @@ public:
   }
 };
 
-class Server {
+class server {
 
-  IpcListenerOp server_;
+  ipc_listener_op server_;
 
   void do_accept() {
     std::error_code ec;
     server_.async_accept(
-        [this](const std::error_code &re, const IpcStreamOp &client) {
+        [this](const std::error_code &re, const ipc_stream_op &c) {
           if (!re) {
-            LOG_INFO("connect remote %d\n", client.native());
-            std::make_shared<Client>(client)->read();
+            LOG_INFO("connect remote %d\n", c.native());
+            std::make_shared<client>(c)->read();
           } else {
-            LOG_INFO("async connect error remote %d er %d\n", client.native(),
+            LOG_INFO("async connect error remote %d er %d\n", c.native(),
                      re.value());
           }
           do_accept();
@@ -112,7 +112,7 @@ class Server {
   }
 
 public:
-  Server(Proactor &p, const char *port) : server_(p) {
+  server(proactor &p, const char *port) : server_(p) {
     std::error_code ec;
     server_.bind(port, ec);
     if (ec) {
@@ -122,7 +122,7 @@ public:
     do_accept();
   }
 
-  ~Server() {
+  ~server() {
     std::error_code ec;
     server_.close(ec);
     LOG_INFO("close server\n");
@@ -131,17 +131,17 @@ public:
 
 TEST(ProactorTest, IpcOp) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
   const char name[] = "gen_server";
-  Server const server(p, name);
+  server const server(p, name);
 
-  IpcStreamOp const op(&p);
-  auto client = std::make_shared<Client>(op);
-  client->connect(name);
-  client->write("client send message!");
+  ipc_stream_op const op(&p);
+  auto c = std::make_shared<client>(op);
+  c->connect(name);
+  c->write("client send message!");
 
   LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
@@ -151,7 +151,7 @@ TEST(ProactorTest, IpcOp) {
   }
   LOG_DEBUG("-------------------- end run while --------------------");
 
-  client->close();
+  c->close();
   for (size_t i = 0; i < 2; ++i) {
     p.run_one(1000ull * 1000ull, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();

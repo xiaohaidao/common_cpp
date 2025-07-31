@@ -5,10 +5,10 @@
 
 namespace ipc {
 
-SharedMemory::SharedMemory() : shmid_(0), memory_(nullptr), size_(0) {}
+shared_memory::shared_memory() = default;
 
-void *SharedMemory::memory() const { return memory_; }
+void *shared_memory::memory() const { return memory_; }
 
-// size_t SharedMemory::size() const { return size_; }
+// size_t shared_memory::size() const { return size_; }
 
 } // namespace ipc

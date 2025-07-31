@@ -6,23 +6,23 @@
 
 TEST(IPCTest, SemaphoresTest) {
   std::error_code ec;
-  ipc::Semaphores::create(3, ec);
+  ipc::semaphores::create(3, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  ipc::Semaphores::create(3, ec);
+  ipc::semaphores::create(3, ec);
   EXPECT_TRUE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  ipc::Semaphores::create("sem_var", ec);
+  ipc::semaphores::create("sem_var", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto sem1 = ipc::Semaphores::open(3, ec);
+  auto sem1 = ipc::semaphores::open(3, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  auto sem2 = ipc::Semaphores::open("sem_var", ec);
+  auto sem2 = ipc::semaphores::open("sem_var", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

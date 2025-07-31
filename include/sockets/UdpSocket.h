@@ -6,19 +6,19 @@
 
 #include "sockets/SocketAddr.h"
 
-class UdpSocket {
+class udp_socket {
 public:
-  UdpSocket();
-  explicit UdpSocket(const socket_type &s);
+  udp_socket();
+  explicit udp_socket(const socket_type &s);
 
-  static UdpSocket create(FamilyType family, std::error_code &ec);
+  static udp_socket create(FamilyType family, std::error_code &ec);
 
   // The default family is ipv4
-  static UdpSocket bind(const char *port_or_service, std::error_code &ec);
-  static UdpSocket bind(const char *port_or_service, FamilyType family,
-                        std::error_code &ec);
+  static udp_socket bind(const char *port_or_service, std::error_code &ec);
+  static udp_socket bind(const char *port_or_service, FamilyType family,
+                         std::error_code &ec);
 
-  void connected(const SocketAddr &addr, std::error_code &ec);
+  void connected(const socket_addr &addr, std::error_code &ec);
   void close(std::error_code &ec);
 
   void set_read_timeout(size_t timeout_ms, std::error_code &ec);
@@ -27,30 +27,30 @@ public:
   size_t write_timeout(std::error_code &ec) const;
 
   // return receive size
-  std::pair<int, SocketAddr> recv_from(char *buf, size_t buf_size,
-                                       std::error_code &ec);
+  std::pair<int, socket_addr> recv_from(char *buf, size_t buf_size,
+                                        std::error_code &ec);
 
   // return send size
-  int send_to(const char *buf, size_t buf_size, const SocketAddr &to,
+  int send_to(const char *buf, size_t buf_size, const socket_addr &to,
               std::error_code &ec);
 
   void set_broadcast(bool enable, std::error_code &ec);
   bool broadcast(std::error_code &ec);
 
-  void joint_multicast(const SocketAddr &multicast, const SocketAddr &iface,
+  void joint_multicast(const socket_addr &multicast, const socket_addr &iface,
                        std::error_code &ec);
-  void leave_multicast(const SocketAddr &multicast, const SocketAddr &iface,
+  void leave_multicast(const socket_addr &multicast, const socket_addr &iface,
                        std::error_code &ec);
-  void set_multicast_interface(const SocketAddr &multicast,
+  void set_multicast_interface(const socket_addr &multicast,
                                std::error_code &ec);
   void set_multicast_loop(bool enable, std::error_code &ec);
   bool multicast_loop(std::error_code &ec);
   void set_multicast_ttl(int ttl, std::error_code &ec);
   int multicast_ttl(std::error_code &ec);
 
-  void joint_multicast_v6(const SocketAddr &multicast,
+  void joint_multicast_v6(const socket_addr &multicast,
                           unsigned int interface_index, std::error_code &ec);
-  void leave_multicast_v6(const SocketAddr &multicast,
+  void leave_multicast_v6(const socket_addr &multicast,
                           unsigned int interface_index, std::error_code &ec);
   void set_multicast_interface_v6(unsigned int interface_index,
                                   std::error_code &ec);
@@ -62,6 +62,6 @@ public:
 private:
   socket_type socket_;
 
-}; // class UdpSocket
+}; // class udp_socket
 
 #endif // SOCKETS_UDPSOCKET_H

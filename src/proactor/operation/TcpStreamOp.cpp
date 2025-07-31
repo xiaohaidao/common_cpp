@@ -8,31 +8,10 @@
 #include "sockets/TcpStream.h"
 #include "utils/error_code.h"
 
-TcpStreamOp::TcpStreamOp()
-    : ctx_(nullptr), socket_(-1)
-#ifdef __linux__
-      ,
-      write_socket_(-1)
-#endif
-{
-}
+tcp_stream_op::tcp_stream_op(proactor *context) : ctx_(context) {}
 
-TcpStreamOp::TcpStreamOp(Proactor *context)
-    : ctx_(context), socket_(-1)
-#ifdef __linux__
-      ,
-      write_socket_(-1)
-#endif
-{
-}
-
-TcpStreamOp::TcpStreamOp(Proactor *context, socket_type s)
-    : ctx_(context), socket_(s)
-#ifdef __linux__
-      ,
-      write_socket_(-1)
-#endif
-{
+tcp_stream_op::tcp_stream_op(proactor *context, socket_type s)
+    : ctx_(context), socket_(s) {
 
 #ifdef _WIN32
   if (ctx_ != nullptr) {
@@ -46,7 +25,7 @@ TcpStreamOp::TcpStreamOp(Proactor *context, socket_type s)
 #endif
 }
 
-TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
+tcp_stream_op::tcp_stream_op(const tcp_stream_op &other)
     : ctx_(other.ctx_), socket_(other.socket_)
 #ifdef __linux__
       ,
@@ -55,7 +34,7 @@ TcpStreamOp::TcpStreamOp(const TcpStreamOp &other)
 {
 }
 
-TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
+tcp_stream_op &tcp_stream_op::operator=(const tcp_stream_op &other) {
   if (&other == this) {
     return *this;
   }
@@ -65,28 +44,28 @@ TcpStreamOp &TcpStreamOp::operator=(const TcpStreamOp &other) {
   this->write_socket_ = other.write_socket_;
 #endif
   // this->connect_op_ = detail::ConnectOp();
-  // this->recv_op_ = detail::RecvOp();
-  // this->send_op_ = detail::SendOp();
+  // this->recv_op_ = detail::recv_op();
+  // this->send_op_ = detail::send_op();
   return *this;
 }
 
-size_t TcpStreamOp::read(char *buff, size_t buff_size, std::error_code &ec) {
-  TcpStream tcp(socket_);
+size_t tcp_stream_op::read(char *buff, size_t buff_size, std::error_code &ec) {
+  tcp_stream tcp(socket_);
   return tcp.read(buff, buff_size, ec);
 }
 
-size_t TcpStreamOp::write(const char *buff, size_t buff_size,
-                          std::error_code &ec) {
+size_t tcp_stream_op::write(const char *buff, size_t buff_size,
+                            std::error_code &ec) {
 
-  TcpStream tcp(socket_);
+  tcp_stream tcp(socket_);
   return tcp.write(buff, buff_size, ec);
 }
 
-void TcpStreamOp::connect(const SocketAddr &addr, std::error_code &ec) {
+void tcp_stream_op::connect(const socket_addr &addr, std::error_code &ec) {
   if (socket_ != -1 && socket_ != 0) {
     close(ec);
   }
-  TcpStream const tcp = TcpStream::connect(addr, ec);
+  tcp_stream const tcp = tcp_stream::connect(addr, ec);
   socket_ = tcp.native();
 #ifdef _WIN32
   if (!ec && ctx_ != nullptr) {
@@ -96,8 +75,9 @@ void TcpStreamOp::connect(const SocketAddr &addr, std::error_code &ec) {
 #endif
 }
 
-void TcpStreamOp::async_connect(const SocketAddr &addr, const func_type &f,
-                                std::error_code &ec) {
+void tcp_stream_op::async_connect(const socket_addr &addr,
+                                  const tcp_stream_op::func_type &f,
+                                  std::error_code &ec) {
 
   if (socket_ != -1 && socket_ != 0) {
     close(ec);
@@ -125,8 +105,9 @@ void TcpStreamOp::async_connect(const SocketAddr &addr, const func_type &f,
   connect_op_.async_connect(ctx_, socket_, addr, call_back, ec);
 }
 
-void TcpStreamOp::async_read(char *buff, size_t buff_size, const func_type &f,
-                             std::error_code &ec) {
+void tcp_stream_op::async_read(char *buff, size_t buff_size,
+                               const tcp_stream_op::func_type &f,
+                               std::error_code &ec) {
 
   auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t recv_size) { f(re_ec, recv_size); };
@@ -134,8 +115,9 @@ void TcpStreamOp::async_read(char *buff, size_t buff_size, const func_type &f,
   recv_op_.async_recv(ctx_, socket_, buff, buff_size, call_back, ec);
 }
 
-void TcpStreamOp::async_write(const char *buff, size_t buff_size,
-                              const func_type &f, std::error_code &ec) {
+void tcp_stream_op::async_write(const char *buff, size_t buff_size,
+                                const tcp_stream_op::func_type &f,
+                                std::error_code &ec) {
 
 #ifdef __linux__
   if (write_socket_ == -1) {
@@ -151,18 +133,18 @@ void TcpStreamOp::async_write(const char *buff, size_t buff_size,
   send_op_.async_send(ctx_, s, buff, buff_size, call_back, ec);
 }
 
-void TcpStreamOp::shutdown(std::error_code &ec) {
-  TcpStream tcp(socket_);
+void tcp_stream_op::shutdown(std::error_code &ec) {
+  tcp_stream tcp(socket_);
   tcp.shutdown(ec);
 }
 
-void TcpStreamOp::close(std::error_code &ec) {
+void tcp_stream_op::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
     // NOLINTNEXTLINE(performance-no-int-to-ptr)
     ctx_->cancel((::native_handle)socket_, t_ec);
   }
-  TcpStream tcp(socket_);
+  tcp_stream tcp(socket_);
   tcp.close(ec);
   socket_ = -1;
 #ifdef __linux__
@@ -174,4 +156,4 @@ void TcpStreamOp::close(std::error_code &ec) {
   recv_op_ = {};
 }
 
-socket_type TcpStreamOp::native() const { return socket_; }
+socket_type tcp_stream_op::native() const { return socket_; }

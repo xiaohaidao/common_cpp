@@ -16,7 +16,7 @@ namespace detail {
 ConnectOp::ConnectOp() : client_(INVALID_SOCKET) {}
 
 void ConnectOp::async_connect(void *proactor, socket_type s,
-                              const SocketAddr &addr, func_type async_func,
+                              const socket_addr &addr, func_type async_func,
                               std::error_code &ec) {
 
   // if (client_ != INVALID_SOCKET && client_ != 0) {

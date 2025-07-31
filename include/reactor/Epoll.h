@@ -6,25 +6,25 @@
 
 #include "reactor/detail/QueueOp.h"
 
-class Epoll {
+class epoll {
 public:
-  Epoll(const Epoll &) = delete;
-  const Epoll &operator=(const Epoll &) = delete;
+  epoll(const epoll &) = delete;
+  const epoll &operator=(const epoll &) = delete;
 
-  explicit Epoll(std::error_code &ec);
-  explicit Epoll(int fd);
+  explicit epoll(std::error_code &ec);
+  explicit epoll(int fd);
 
-  void post(int fd, ReactorOp *op,
+  void post(int fd, reactor_op *op,
             std::error_code &ec); // use op set the EPollOpEnum
-  void post_read(int fd, ReactorOp *op, std::error_code &ec);
-  void post_write(int fd, ReactorOp *op, std::error_code &ec);
+  void post_read(int fd, reactor_op *op, std::error_code &ec);
+  void post_write(int fd, reactor_op *op, std::error_code &ec);
   void cancel(int fd, std::error_code &ec);
 
-  size_t call(QueueOp &queue);
-  size_t call_one(QueueOp &queue);
+  size_t call(queue_op &queue);
+  size_t call_one(queue_op &queue);
 
-  size_t run_once(QueueOp &queue, std::error_code &ec);
-  size_t run_once_timeout(QueueOp &queue, int timeout_ms, std::error_code &ec);
+  size_t run_once(queue_op &queue, std::error_code &ec);
+  size_t run_once_timeout(queue_op &queue, int timeout_ms, std::error_code &ec);
 
   void close(std::error_code &ec);
 
@@ -33,10 +33,10 @@ public:
   void set_proactor(void *proactor);
 
 private:
-  Epoll();
+  epoll();
 
-  int fd_;
-  void *proactor_;
+  int fd_{-1};
+  void *proactor_{nullptr};
 };
 
 #endif // __linux__

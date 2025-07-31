@@ -9,7 +9,7 @@ TEST(SocketsTest, UdpSocketTest) {
   std::error_code ec;
   // #ifdef WIN32
   // // set_multicast_interface err when not bind port
-  UdpSocket server = UdpSocket::bind("9985", ec);
+  udp_socket server = udp_socket::bind("9985", ec);
   // #else
   //   UdpSocket server = UdpSocket::create(kIpV4, ec);
   // #endif
@@ -41,22 +41,22 @@ TEST(SocketsTest, UdpSocketTest) {
   server.connected({"www.baidu.com", "80"}, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
-  SocketAddr local_addr = SocketAddr::get_local_socket(server.native(), ec);
+  socket_addr local_addr = socket_addr::get_local_socket(server.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("server socket value %d  %s:%d", server.native(),
             local_addr.get_ip(), local_addr.get_port());
 
   const char port[] = "8981";
-  SocketAddr const addr("224.1.1.5", port);
+  socket_addr const addr("224.1.1.5", port);
   LOG_DEBUG("multicast ip is %s port %d", addr.get_ip(), addr.get_port());
 
   // initialize client
-  UdpSocket client = UdpSocket::bind(port, ec);
+  udp_socket client = udp_socket::bind(port, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  local_addr = SocketAddr::get_local_socket(client.native(), ec);
+  local_addr = socket_addr::get_local_socket(client.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("clinet socket value %d  %s:%d", client.native(),
@@ -71,7 +71,7 @@ TEST(SocketsTest, UdpSocketTest) {
   ec.clear();
 
   // get all local ip
-  auto locals_ip = SocketAddr::get_local_ip_mask(ec);
+  auto locals_ip = socket_addr::get_local_ip_mask(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -112,7 +112,7 @@ TEST(SocketsTest, UdpSocketTest) {
 
   // recv multicast message
   for (size_t i = 0; i < locals_ip.size(); ++i) {
-    std::pair<size_t, SocketAddr> const rev =
+    std::pair<size_t, socket_addr> const rev =
         client.recv_from(buff, sizeof(buff), ec);
     if (!ec) {
       LOG_DEBUG("client recv from %s:%d message size %d : %s",

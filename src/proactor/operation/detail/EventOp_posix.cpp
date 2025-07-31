@@ -13,18 +13,18 @@
 
 namespace detail {
 
-EventOp::EventOp() : fd_(-1) {}
+event_op::event_op() = default;
 
-void EventOp::close(std::error_code &ec) {
+void event_op::close(std::error_code &ec) {
   if (::close(fd_) < 0) {
     ec = get_error_code();
   }
 }
 
-native_handle EventOp::native() const { return fd_; }
+native_handle event_op::native() const { return fd_; }
 
-EventOp EventOp::create(std::error_code &ec) {
-  EventOp re;
+event_op event_op::create(std::error_code &ec) {
+  event_op re;
   re.fd_ = ::eventfd(0, 0);
   if (re.fd_ < 0) {
     ec = get_error_code();
@@ -32,14 +32,14 @@ EventOp EventOp::create(std::error_code &ec) {
   return re;
 }
 
-void EventOp::notify(std::error_code &ec) {
+void event_op::notify(std::error_code &ec) {
   uint64_t exp = 1;
   if (::write(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
     ec = get_error_code();
   }
 }
 
-uint64_t EventOp::wait(std::error_code &ec) {
+uint64_t event_op::wait(std::error_code &ec) {
   uint64_t exp = 0;
   if (::read(fd_, &exp, sizeof(exp)) != sizeof(exp)) {
     ec = get_error_code();
@@ -47,8 +47,8 @@ uint64_t EventOp::wait(std::error_code &ec) {
   return exp;
 }
 
-void EventOp::async_wait(void *proactor, func_type async_func,
-                         std::error_code &ec) {
+void event_op::async_wait(void *proactor, event_op::func_type async_func,
+                          std::error_code &ec) {
 
   func_ = std::move(async_func);
   if (proactor == nullptr) {
@@ -57,11 +57,11 @@ void EventOp::async_wait(void *proactor, func_type async_func,
     return;
   }
   set_event_data(READ_OP_ENUM_ONCE);
-  static_cast<Proactor *>(proactor)->post(fd_, this, ec);
+  static_cast< ::proactor *>(proactor)->post(fd_, this, ec);
 }
 
-void EventOp::complete(void * /*p*/, const std::error_code &result_ec,
-                       size_t /*trans_size*/) {
+void event_op::complete(void * /*p*/, const std::error_code &result_ec,
+                        size_t /*trans_size*/) {
 
   std::error_code re_ec = result_ec;
   if (func_) {

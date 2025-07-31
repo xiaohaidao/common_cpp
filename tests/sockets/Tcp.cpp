@@ -10,10 +10,10 @@ TEST(SocketsTest, TcpTest) {
   // server
   std::error_code ec;
 
-  SocketAddr const addr("127.0.0.1", "8988");
+  socket_addr const addr("127.0.0.1", "8988");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
-  auto tcp = TcpListener::bind(std::to_string(addr.get_port()).c_str(), ec);
+  auto tcp = tcp_listener::bind(std::to_string(addr.get_port()).c_str(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(tcp.native() > 0);
@@ -30,11 +30,11 @@ TEST(SocketsTest, TcpTest) {
   ec.clear();
 
   // client
-  auto st = TcpStream::connect(addr, ec);
+  auto st = tcp_stream::connect(addr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(st.native() > 0);
-  SocketAddr const local_addr = SocketAddr::get_local_socket(st.native(), ec);
+  socket_addr const local_addr = socket_addr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),
@@ -82,9 +82,9 @@ TEST(SocketsTest, TcpUnixTest) {
   // server
   std::error_code ec;
   const char k_local_unix[] = "local_unix";
-  SocketAddr addr(k_local_unix);
+  socket_addr addr(k_local_unix);
 
-  auto tcp = TcpListener::bind(k_local_unix, kUnix, ec);
+  auto tcp = tcp_listener::bind(k_local_unix, kUnix, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(tcp.native() > 0);
@@ -100,11 +100,11 @@ TEST(SocketsTest, TcpUnixTest) {
   ec.clear();
 
   // client
-  auto st = TcpStream::connect(addr, ec);
+  auto st = tcp_stream::connect(addr, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(st.native() > 0);
-  SocketAddr local_addr = SocketAddr::get_local_socket(st.native(), ec);
+  socket_addr local_addr = socket_addr::get_local_socket(st.native(), ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   LOG_DEBUG("clinet socket value %d  %s:%d", st.native(), local_addr.get_ip(),

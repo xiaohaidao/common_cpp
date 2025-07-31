@@ -31,13 +31,13 @@
 #define SD_BOTH (SHUT_RDWR)
 #endif // _WIN32
 
-UdpSocket::UdpSocket() : socket_(INVALID_SOCKET) {}
+udp_socket::udp_socket() : socket_(INVALID_SOCKET) {}
 
-UdpSocket::UdpSocket(const socket_type &s) : socket_(s) {}
+udp_socket::udp_socket(const socket_type &s) : socket_(s) {}
 
-UdpSocket UdpSocket::create(FamilyType family, std::error_code &ec) {
+udp_socket udp_socket::create(FamilyType family, std::error_code &ec) {
 
-  UdpSocket re;
+  udp_socket re;
   socket_type const s = sockets::socket(family, kDgram,
 #ifdef __linux__
                                         family == kUnix ? kIp :
@@ -51,25 +51,25 @@ UdpSocket UdpSocket::create(FamilyType family, std::error_code &ec) {
   return re;
 }
 
-UdpSocket UdpSocket::bind(const char *port_or_service, std::error_code &ec) {
+udp_socket udp_socket::bind(const char *port_or_service, std::error_code &ec) {
   return bind(port_or_service, kIpV4, ec);
 }
 
-UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
-                          std::error_code &ec) {
-  SocketAddr const addr =
+udp_socket udp_socket::bind(const char *port_or_service, FamilyType family,
+                            std::error_code &ec) {
+  socket_addr const addr =
 #ifdef __linux__
       family == kUnix
-          ? SocketAddr(port_or_service)
+          ? socket_addr(port_or_service)
           :
 #endif // __linux__
-          SocketAddr::resolve_host(nullptr, port_or_service, ec, family, true);
+          socket_addr::resolve_host(nullptr, port_or_service, ec, family, true);
 
   if (ec) {
     return {};
   }
 
-  UdpSocket re;
+  udp_socket re;
   socket_type const s = sockets::socket(family, kDgram,
 #ifdef __linux__
                                         family == kUnix ? kIp :
@@ -94,7 +94,7 @@ UdpSocket UdpSocket::bind(const char *port_or_service, FamilyType family,
   return re;
 }
 
-void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
+void udp_socket::connected(const socket_addr &addr, std::error_code &ec) {
   if (::connect(socket_, (const sockaddr *)addr.native_addr(),
                 (int)addr.native_addr_size())) {
     ec = get_net_error_code();
@@ -102,26 +102,26 @@ void UdpSocket::connected(const SocketAddr &addr, std::error_code &ec) {
   }
 }
 
-void UdpSocket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
+void udp_socket::set_read_timeout(size_t timeout_ms, std::error_code &ec) {
   sockets::set_read_timeout(socket_, ec, timeout_ms);
 }
 
-void UdpSocket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
+void udp_socket::set_write_timeout(size_t timeout_ms, std::error_code &ec) {
   sockets::set_write_timeout(socket_, ec, timeout_ms);
 }
 
-size_t UdpSocket::read_timeout(std::error_code &ec) const {
+size_t udp_socket::read_timeout(std::error_code &ec) const {
   return sockets::read_timeout(socket_, ec);
 }
 
-size_t UdpSocket::write_timeout(std::error_code &ec) const {
+size_t udp_socket::write_timeout(std::error_code &ec) const {
   return sockets::write_timeout(socket_, ec);
 }
 
-std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
-                                                std::error_code &ec) {
+std::pair<int, socket_addr> udp_socket::recv_from(char *buf, size_t buf_size,
+                                                  std::error_code &ec) {
 
-  std::pair<int, SocketAddr> re;
+  std::pair<int, socket_addr> re;
   socklen_t len = (int)re.second.native_addr_size();
   int const ret = ::recvfrom(socket_, buf, (int)buf_size, 0,
                              (sockaddr *)re.second.native_addr(), &len);
@@ -132,8 +132,8 @@ std::pair<int, SocketAddr> UdpSocket::recv_from(char *buf, size_t buf_size,
   return re;
 }
 
-int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
-                       std::error_code &ec) {
+int udp_socket::send_to(const char *buf, size_t buf_size, const socket_addr &to,
+                        std::error_code &ec) {
 
 #ifdef _WIN32
 #define MSG_NOSIGNAL 0
@@ -147,7 +147,7 @@ int UdpSocket::send_to(const char *buf, size_t buf_size, const SocketAddr &to,
   return rev;
 }
 
-void UdpSocket::close(std::error_code &ec) {
+void udp_socket::close(std::error_code &ec) {
   if (::shutdown(socket_, SD_SEND)) {
     std::error_code const re_ec = get_net_error_code();
     if (ENOTCONN != re_ec.value()) {
@@ -159,7 +159,7 @@ void UdpSocket::close(std::error_code &ec) {
   }
 }
 
-void UdpSocket::set_broadcast(bool enable, std::error_code &ec) {
+void udp_socket::set_broadcast(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, sizeof(en)) <
       0) {
@@ -167,7 +167,7 @@ void UdpSocket::set_broadcast(bool enable, std::error_code &ec) {
   }
 }
 
-bool UdpSocket::broadcast(std::error_code &ec) {
+bool udp_socket::broadcast(std::error_code &ec) {
   int en = 0;
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, SOL_SOCKET, SO_BROADCAST, (char *)&en, &len) < 0) {
@@ -176,8 +176,9 @@ bool UdpSocket::broadcast(std::error_code &ec) {
   return en;
 }
 
-void UdpSocket::joint_multicast(const SocketAddr &multicast,
-                                const SocketAddr &iface, std::error_code &ec) {
+void udp_socket::joint_multicast(const socket_addr &multicast,
+                                 const socket_addr &iface,
+                                 std::error_code &ec) {
 
   struct ip_mreq mreq = {};
   mreq.imr_multiaddr =
@@ -189,8 +190,9 @@ void UdpSocket::joint_multicast(const SocketAddr &multicast,
   }
 }
 
-void UdpSocket::leave_multicast(const SocketAddr &multicast,
-                                const SocketAddr &iface, std::error_code &ec) {
+void udp_socket::leave_multicast(const socket_addr &multicast,
+                                 const socket_addr &iface,
+                                 std::error_code &ec) {
   struct ip_mreq mreq = {};
   mreq.imr_multiaddr =
       ((struct sockaddr_in *)multicast.native_addr())->sin_addr;
@@ -201,8 +203,8 @@ void UdpSocket::leave_multicast(const SocketAddr &multicast,
   }
 }
 
-void UdpSocket::set_multicast_interface(const SocketAddr &iface,
-                                        std::error_code &ec) {
+void udp_socket::set_multicast_interface(const socket_addr &iface,
+                                         std::error_code &ec) {
 
   // struct ip_mreq mreq = {};
   in_addr mreq = ((struct sockaddr_in *)iface.native_addr())->sin_addr;
@@ -212,7 +214,7 @@ void UdpSocket::set_multicast_interface(const SocketAddr &iface,
   }
 }
 
-void UdpSocket::set_multicast_loop(bool enable, std::error_code &ec) {
+void udp_socket::set_multicast_loop(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&en,
                    sizeof(en)) < 0) {
@@ -220,7 +222,7 @@ void UdpSocket::set_multicast_loop(bool enable, std::error_code &ec) {
   }
 }
 
-bool UdpSocket::multicast_loop(std::error_code &ec) {
+bool udp_socket::multicast_loop(std::error_code &ec) {
   int en = 0;
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IP, IP_MULTICAST_LOOP, (char *)&en, &len) <
@@ -230,14 +232,14 @@ bool UdpSocket::multicast_loop(std::error_code &ec) {
   return en;
 }
 
-void UdpSocket::set_multicast_ttl(int ttl, std::error_code &ec) {
+void udp_socket::set_multicast_ttl(int ttl, std::error_code &ec) {
   if (::setsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&ttl,
                    sizeof(ttl)) < 0) {
     ec = get_net_error_code();
   }
 }
 
-int UdpSocket::multicast_ttl(std::error_code &ec) {
+int udp_socket::multicast_ttl(std::error_code &ec) {
   int en = 0;
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IP, IP_MULTICAST_TTL, (char *)&en, &len) <
@@ -247,9 +249,9 @@ int UdpSocket::multicast_ttl(std::error_code &ec) {
   return en;
 }
 
-void UdpSocket::joint_multicast_v6(const SocketAddr &multicast,
-                                   unsigned int interface_index,
-                                   std::error_code &ec) {
+void udp_socket::joint_multicast_v6(const socket_addr &multicast,
+                                    unsigned int interface_index,
+                                    std::error_code &ec) {
 
   struct ipv6_mreq mreq = {};
   mreq.ipv6mr_multiaddr =
@@ -261,9 +263,9 @@ void UdpSocket::joint_multicast_v6(const SocketAddr &multicast,
   }
 }
 
-void UdpSocket::leave_multicast_v6(const SocketAddr &multicast,
-                                   unsigned int interface_index,
-                                   std::error_code &ec) {
+void udp_socket::leave_multicast_v6(const socket_addr &multicast,
+                                    unsigned int interface_index,
+                                    std::error_code &ec) {
   struct ipv6_mreq mreq = {};
   mreq.ipv6mr_multiaddr =
       ((struct sockaddr_in6 *)multicast.native_addr())->sin6_addr;
@@ -274,8 +276,8 @@ void UdpSocket::leave_multicast_v6(const SocketAddr &multicast,
   }
 }
 
-void UdpSocket::set_multicast_interface_v6(unsigned int interface_index,
-                                           std::error_code &ec) {
+void udp_socket::set_multicast_interface_v6(unsigned int interface_index,
+                                            std::error_code &ec) {
 
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_IF,
                    (char *)&interface_index, sizeof(interface_index)) < 0) {
@@ -283,7 +285,7 @@ void UdpSocket::set_multicast_interface_v6(unsigned int interface_index,
   }
 }
 
-void UdpSocket::set_multicast_loop_v6(bool enable, std::error_code &ec) {
+void udp_socket::set_multicast_loop_v6(bool enable, std::error_code &ec) {
   int en = enable ? 1 : 0;
   if (::setsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&en,
                    sizeof(en)) < 0) {
@@ -291,7 +293,7 @@ void UdpSocket::set_multicast_loop_v6(bool enable, std::error_code &ec) {
   }
 }
 
-bool UdpSocket::multicast_loop_v6(std::error_code &ec) {
+bool udp_socket::multicast_loop_v6(std::error_code &ec) {
   int en = 0;
   socklen_t len = sizeof(en);
   if (::getsockopt(socket_, IPPROTO_IPV6, IPV6_MULTICAST_LOOP, (char *)&en,
@@ -301,4 +303,4 @@ bool UdpSocket::multicast_loop_v6(std::error_code &ec) {
   return en;
 }
 
-socket_type UdpSocket::native() const { return socket_; }
+socket_type udp_socket::native() const { return socket_; }

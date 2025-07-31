@@ -8,13 +8,12 @@
 
 namespace detail {
 
-class RecvFromOp : public Operation {
+class recv_from_op : public operation {
 public:
-  typedef std::function<void(void *, const std::error_code &, size_t,
-                             const SocketAddr &)>
-      func_type;
+  using func_type = std::function<void(void *, const std::error_code &, size_t,
+                                       const socket_addr &)>;
 
-  RecvFromOp();
+  recv_from_op();
 
   void async_recv_from(void *proactor, socket_type s, char *buff, size_t size,
                        func_type async_func, std::error_code &ec);
@@ -25,13 +24,13 @@ public:
                 size_t trans_size) override;
 
 private:
-  struct Buff {
+  struct buff {
     uint32_t len;
     char *buff;
   } buff_;
 
   func_type func_;
-  SocketAddr from_;
+  socket_addr from_;
 
 #ifdef _WIN32
   int from_size_;
@@ -39,7 +38,7 @@ private:
   socket_type socket_;
 #endif // #ifdef _WIN32
 
-}; // class RecvFromOp
+}; // class recv_from_op
 
 } // namespace detail
 

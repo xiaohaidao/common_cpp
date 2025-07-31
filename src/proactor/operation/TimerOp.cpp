@@ -6,18 +6,18 @@
 
 using namespace std::chrono;
 
-TimerOp::TimerOp(Proactor &context) : ctx_(&context), op_({}) {}
+timer_op::timer_op(proactor &context) : ctx_(&context), op_({}) {}
 
-void TimerOp::set_timeout(size_t expire_ms) { set_timeout(expire_ms, 0); }
+void timer_op::set_timeout(size_t expire_ms) { set_timeout(expire_ms, 0); }
 
 // NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
-void TimerOp::set_timeout(size_t expire_ms, size_t interval_ms) {
+void timer_op::set_timeout(size_t expire_ms, size_t interval_ms) {
   op_.expire = time_clock::now() + milliseconds(expire_ms);
   op_.interval = milliseconds(interval_ms);
   op_.timeout_num = 0;
 }
 
-void TimerOp::wait() {
+void timer_op::wait() {
   auto now = time_clock::now();
   if (op_.expire < now) {
     if (!(op_.interval > time_clock::duration::zero())) {
@@ -29,11 +29,11 @@ void TimerOp::wait() {
   std::this_thread::sleep_until(op_.expire);
 }
 
-TimerOp::time_clock::duration TimerOp::expire() {
+timer_op::time_clock::duration timer_op::expire() {
   return op_.expire - time_clock::now();
 }
 
-void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
+void timer_op::async_wait(func_type async_func, std::error_code &ec) {
   if (!ctx_) {
     wait();
     return;
@@ -43,7 +43,7 @@ void TimerOp::async_wait(func_type async_func, std::error_code &ec) {
   ctx_->post_timeout(&op_, op_.expire, ec);
 }
 
-void TimerOp::close(std::error_code &ec) {
+void timer_op::close(std::error_code &ec) {
   if (ctx_) {
     ctx_->cancel_timeout(&op_, ec);
   }
@@ -51,9 +51,9 @@ void TimerOp::close(std::error_code &ec) {
   op_.stop = 1;
 }
 
-void TimerOp::TimerOpPrivate::complete(void *proactor,
-                                       const std::error_code &result_ec,
-                                       size_t /*trans_size*/) {
+void timer_op::timer_op_private::complete(void *pro,
+                                          const std::error_code &result_ec,
+                                          size_t /*trans_size*/) {
   auto tmp = std::move(func);
   if (stop == 1) {
     return;
@@ -72,8 +72,8 @@ void TimerOp::TimerOpPrivate::complete(void *proactor,
     return;
   }
   func = std::move(tmp);
-  if (proactor) {
+  if (pro) {
     std::error_code ec;
-    ((Proactor *)proactor)->post_timeout(this, expire, ec);
+    ((proactor *)pro)->post_timeout(this, expire, ec);
   }
 }

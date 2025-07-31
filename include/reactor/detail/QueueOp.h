@@ -4,28 +4,27 @@
 
 #include "reactor/detail/Operation.h"
 
-class QueueOp {
+class queue_op {
 public:
-  QueueOp() : begin_(nullptr), end_(nullptr) {}
-  ~QueueOp() {
-    while (Operation *op = begin_) {
+  ~queue_op() {
+    while (operation *op = begin_) {
       pop();
-      // op->complete(0, std::error_code(), 0); // double free
     }
+    // op->complete(0, std::error_code(), 0); // double free
   }
 
-  Operation *begin() const { return begin_; }
+  operation *begin() const { return begin_; }
 
   bool empty() const { return begin_ == nullptr; }
 
-  bool exist(Operation *op) const {
+  bool exist(operation *op) const {
     return detail::OperationAccess::next((void *)op) != nullptr || end_ == op;
   }
 
   void pop() {
     if (begin_) {
-      Operation *tmp = begin_;
-      begin_ = static_cast<Operation *>(
+      operation *tmp = begin_;
+      begin_ = static_cast<operation *>(
           detail::OperationAccess::next((void *)begin_));
       if (begin_ == nullptr) {
         end_ = nullptr;
@@ -34,7 +33,7 @@ public:
     }
   }
 
-  void push(Operation *op) {
+  void push(operation *op) {
     if (begin_) {
       detail::OperationAccess::set_next((void *)end_, (void *)op);
       end_ = op;
@@ -44,7 +43,7 @@ public:
     detail::OperationAccess::set_next((void *)end_, nullptr);
   }
 
-  void push(QueueOp &ops) {
+  void push(queue_op &ops) {
     if (begin_) {
       detail::OperationAccess::set_next((void *)end_, (void *)ops.begin_);
       if (ops.end_) {
@@ -59,9 +58,8 @@ public:
   }
 
 private:
-  Operation *begin_;
-  Operation *end_;
-
-}; // class QueueOp
+  operation *begin_{nullptr};
+  operation *end_{nullptr};
+}; /* class queue_op */
 
 #endif // REACTOR_DETAIL_QUEUEOP_H

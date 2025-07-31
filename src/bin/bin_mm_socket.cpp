@@ -6,13 +6,13 @@
 
 void local_unix() {
 #ifdef __linux__
-  SocketAddr a("local_socket");
+  socket_addr a("local_socket");
   std::error_code ec;
-  auto client = TcpStream::connect(a, ec);
+  auto client = tcp_stream::connect(a, ec);
   bool is_server = ec ? true : false;
   if (is_server) {
     ec.clear();
-    TcpListener server = TcpListener::bind("local_socket", kUnix, ec);
+    tcp_listener server = tcp_listener::bind("local_socket", kUnix, ec);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 
@@ -109,13 +109,13 @@ void local_unix() {
 }
 
 void tcp() {
-  SocketAddr const a("127.0.0.1", "8980");
+  socket_addr const a("127.0.0.1", "8980");
   std::error_code ec;
-  auto client = TcpStream::connect(a, ec);
+  auto client = tcp_stream::connect(a, ec);
   bool const is_server = ec ? true : false;
   if (is_server) {
     ec.clear();
-    TcpListener server = TcpListener::bind("8980", ec);
+    tcp_listener server = tcp_listener::bind("8980", ec);
     // EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
 

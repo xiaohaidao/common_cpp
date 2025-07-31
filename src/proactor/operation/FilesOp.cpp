@@ -10,11 +10,12 @@
 
 #include "utils/error_code.h"
 
-FilesOp::FilesOp() : ctx_(nullptr), fd_(0) {}
+files_op::files_op() = default;
 
-FilesOp::FilesOp(Proactor *context) : ctx_(context), fd_(0) {}
+files_op::files_op(proactor *context) : ctx_(context) {}
 
-FilesOp::FilesOp(Proactor *context, ::native_handle s) : ctx_(context), fd_(s) {
+files_op::files_op(proactor *context, ::native_handle s)
+    : ctx_(context), fd_(s) {
 
 #ifdef _WIN32
   if (ctx_ != nullptr) {
@@ -27,9 +28,9 @@ FilesOp::FilesOp(Proactor *context, ::native_handle s) : ctx_(context), fd_(s) {
 #endif
 }
 
-FilesOp::FilesOp(const FilesOp &other) : ctx_(other.ctx_), fd_(other.fd_) {}
+files_op::files_op(const files_op &other) : ctx_(other.ctx_), fd_(other.fd_) {}
 
-FilesOp &FilesOp::operator=(const FilesOp &other) {
+files_op &files_op::operator=(const files_op &other) {
   if (&other == this) {
     return *this;
   }
@@ -41,11 +42,11 @@ FilesOp &FilesOp::operator=(const FilesOp &other) {
 }
 
 /** don't support file
-void FilesOp::open(const char *file_path, std::error_code &ec) {
+void files_op::open(const char *file_path, std::error_code &ec) {
   open(file_path, false, ec);
 }
 
-void FilesOp::open(const char *file_path, bool create, std::error_code &ec) {
+void files_op::open(const char *file_path, bool create, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
   fd_ = ::CreateFile(file_path, GENERIC_READ | GENERIC_WRITE,
@@ -70,7 +71,7 @@ void FilesOp::open(const char *file_path, bool create, std::error_code &ec) {
 }
 */
 
-size_t FilesOp::read(char *buff, size_t buff_size, std::error_code &ec) {
+size_t files_op::read(char *buff, size_t buff_size, std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
   if (!::ReadFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
@@ -87,7 +88,8 @@ size_t FilesOp::read(char *buff, size_t buff_size, std::error_code &ec) {
 #endif
 }
 
-size_t FilesOp::write(const char *buff, size_t buff_size, std::error_code &ec) {
+size_t files_op::write(const char *buff, size_t buff_size,
+                       std::error_code &ec) {
 #ifdef _WIN32
   DWORD num = 0;
   if (!::WriteFile(fd_, buff, static_cast<DWORD>(buff_size), &num, NULL)) {
@@ -104,8 +106,8 @@ size_t FilesOp::write(const char *buff, size_t buff_size, std::error_code &ec) {
 #endif
 }
 
-void FilesOp::async_read(char *buff, size_t buff_size, const func_type &f,
-                         std::error_code &ec) {
+void files_op::async_read(char *buff, size_t buff_size, const func_type &f,
+                          std::error_code &ec) {
 
   auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t recv_size) { f(re_ec, recv_size); };
@@ -113,8 +115,8 @@ void FilesOp::async_read(char *buff, size_t buff_size, const func_type &f,
   read_op_.async_read(ctx_, call_back, fd_, buff, buff_size, ec);
 }
 
-void FilesOp::async_write(const char *buff, size_t buff_size,
-                          const func_type &f, std::error_code &ec) {
+void files_op::async_write(const char *buff, size_t buff_size,
+                           const func_type &f, std::error_code &ec) {
 
   auto call_back = [f](void * /*ctx*/, const std::error_code &re_ec,
                        size_t send_size) { f(re_ec, send_size); };
@@ -122,7 +124,7 @@ void FilesOp::async_write(const char *buff, size_t buff_size,
   write_op_.async_write(ctx_, call_back, fd_, buff, buff_size, ec);
 }
 
-void FilesOp::close(std::error_code &ec) {
+void files_op::close(std::error_code &ec) {
   if (ctx_) {
     std::error_code t_ec;
     ctx_->cancel((::native_handle)fd_, t_ec);
@@ -141,4 +143,4 @@ void FilesOp::close(std::error_code &ec) {
   write_op_ = {};
 }
 
-native_handle FilesOp::native() const { return fd_; }
+native_handle files_op::native() const { return fd_; }

@@ -2,15 +2,16 @@
 #ifndef UTILS_LOG_H
 #define UTILS_LOG_H
 
+#include <cstring>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <string.h>
-
-#define SUB_UNIX_PATH(file) (strrchr(file, '/') ? strrchr(file, '/') + 1 : file)
+#define SUB_UNIX_PATH(file)                                                    \
+  (strrchr(file, '/') ? strrchr(file, '/') + 1 : (file))
 #define SUB_WIN_PATH(file)                                                     \
-  (strrchr(file, '\\') ? strrchr(file, '\\') + 1 : file)
+  (strrchr(file, '\\') ? strrchr(file, '\\') + 1 : (file))
 
 #ifndef _MSC_VER
 // NOLINTNEXTLINE

@@ -4,17 +4,17 @@
 
 #include "sockets/SocketAddr.h"
 
-class IcmpSocket {
+class icmp_socket {
 public:
-  IcmpSocket();
-  explicit IcmpSocket(const socket_type &s);
+  icmp_socket();
+  explicit icmp_socket(const socket_type &s);
 
-  static IcmpSocket create(FamilyType family, std::error_code &ec);
+  static icmp_socket create(FamilyType family, std::error_code &ec);
 
   // The default family is ipv4
-  static IcmpSocket bind(const char *port_or_service, std::error_code &ec);
-  static IcmpSocket bind(const char *port_or_service, FamilyType family,
-                         std::error_code &ec);
+  static icmp_socket bind(const char *port_or_service, std::error_code &ec);
+  static icmp_socket bind(const char *port_or_service, FamilyType family,
+                          std::error_code &ec);
 
   void close(std::error_code &ec);
 
@@ -24,13 +24,13 @@ public:
   size_t write_timeout(std::error_code &ec) const;
 
   // return receive size
-  std::pair<size_t, SocketAddr> recv_from(char *buf, size_t buf_size,
-                                          std::error_code &ec);
+  std::pair<size_t, socket_addr> recv_from(char *buf, size_t buf_size,
+                                           std::error_code &ec);
 
   // buf_size >= data_size + 8(sizeof(struct icmphdr))
   // data will be copied to buf
   size_t send_to(char *buf, const char *data, size_t data_size,
-                 const SocketAddr &to, std::error_code &ec);
+                 const socket_addr &to, std::error_code &ec);
 
   socket_type native() const;
 
@@ -42,6 +42,6 @@ private:
   size_t send_timeout_;
 #endif // _WIN32
 
-}; // class IcmpSocket
+}; // class icmp_socket
 
 #endif // SOCKETS_ICMPSOCKET_H

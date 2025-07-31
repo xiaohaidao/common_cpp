@@ -10,11 +10,11 @@
 
 using namespace std::placeholders; // for _1, _2, _3...
 
-class Files {
+class files {
 public:
-  Files(Proactor &p, const char *module, native_handle s)
+  files(proactor &p, const char *module, native_handle s)
       : buff_{}, file_op_(&p, s), module_(module) {}
-  ~Files() {}
+  ~files() = default;
 
   ::native_handle native() const { return file_op_.native(); }
 
@@ -26,7 +26,7 @@ public:
                      << ec.message();
   }
 
-  void read(const std::error_code &re_ec, size_t size, Files *f) {
+  void read(const std::error_code &re_ec, size_t size, files *f) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_DEBUG("%s: %d async read size %d %d \"%s\"", module_.c_str(), native(),
@@ -36,7 +36,7 @@ public:
     }
   }
 
-  void write(const std::error_code &re_ec, size_t size, Files *f) {
+  void write(const std::error_code &re_ec, size_t size, files *f) {
     EXPECT_FALSE(re_ec) << "module: " << module_ << ", " << re_ec.value()
                         << " : " << re_ec.message();
     LOG_DEBUG("%s: %d async write buff complete %d %d \"%s\"", module_.c_str(),
@@ -46,54 +46,54 @@ public:
     }
   }
 
-  void async_read(Files *f) {
+  void async_read(files *f) {
     memset(buff_, 0, sizeof(buff_));
     std::error_code ec;
     file_op_.async_read((char *)buff_, sizeof(buff_),
-                        std::bind(&Files::read, this, _1, _2, f), ec);
+                        std::bind(&files::read, this, _1, _2, f), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
 
-  void async_write(const char *buff, size_t size, Files *f) {
+  void async_write(const char *buff, size_t size, files *f) {
     size = (std::min)(size, sizeof(buff));
     memcpy(buff_, buff, size);
     buff_[size] = 0;
     LOG_DEBUG("%s: write message \"%s\"", module_.c_str(), buff);
     std::error_code ec;
     file_op_.async_write((char *)buff_, size,
-                         std::bind(&Files::write, this, _1, _2, f), ec);
+                         std::bind(&files::write, this, _1, _2, f), ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
 
 private:
   char buff_[1024];
-  FilesOp file_op_;
+  files_op file_op_;
   std::string module_;
 };
 
 /*
 TEST(ProactorTest, ProactorFiles) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
   char path[] = "test_pipe_name";
   LOG_DEBUG("op file %s", path);
 
-  using ipc::Pipe;
-  Pipe pipe = Pipe::create(path, ec);
+  using ipc::pipe;
+  pipe pipe = pipe::create(path, ec);
   if (ec) {
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
-    pipe = Pipe::connect(path, ec);
+    pipe = pipe::connect(path, ec);
   }
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  Pipe client_pipe = Pipe::connect(path, ec);
+  pipe client_pipe = pipe::connect(path, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

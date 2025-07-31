@@ -22,13 +22,13 @@
 
 namespace ipc {
 
-SharedMemory::~SharedMemory() {
+shared_memory::~shared_memory() {
   // std::error_code ec;
   // close(ec);
 }
 
-SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
-  SharedMemory result;
+shared_memory shared_memory::open(const char *key, std::error_code &ec) {
+  shared_memory result;
 
   std::string const key_g = std::string("Global\\") + key;
   HANDLE map_file = OpenFileMapping(FILE_MAP_ALL_ACCESS, // read/write access
@@ -44,8 +44,8 @@ SharedMemory SharedMemory::open(const char *key, std::error_code &ec) {
   return result;
 }
 
-SharedMemory SharedMemory::create(const char *key, size_t mem_size,
-                                  std::error_code &ec) {
+shared_memory shared_memory::create(const char *key, size_t mem_size,
+                                    std::error_code &ec) {
 
   std::string const key_g = std::string("Global\\") + key;
   HANDLE map_file = CreateFileMapping(
@@ -56,7 +56,7 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
       static_cast<DWORD>(mem_size), // maximum object size (low-order DWORD)
       key_g.c_str());               // name of mapping object
 
-  SharedMemory result;
+  shared_memory result;
   std::error_code const er = get_error_code();
   if (map_file == nullptr || er.value() == ERROR_ALREADY_EXISTS) {
     ec = er;
@@ -70,7 +70,7 @@ SharedMemory SharedMemory::create(const char *key, size_t mem_size,
   return result;
 }
 
-void SharedMemory::deatch(std::error_code &ec) {
+void shared_memory::deatch(std::error_code &ec) {
   if (memory_ == nullptr) {
     return;
   }
@@ -83,7 +83,7 @@ void SharedMemory::deatch(std::error_code &ec) {
   size_ = 0;
 }
 
-void SharedMemory::attach(std::error_code &ec) {
+void shared_memory::attach(std::error_code &ec) {
   memory_ = MapViewOfFile(shmid_,              // handle to map object
                           FILE_MAP_ALL_ACCESS, // read/write permission
                           0, 0, size_);
@@ -103,7 +103,7 @@ void SharedMemory::attach(std::error_code &ec) {
   }
 }
 
-void SharedMemory::close(std::error_code &ec) {
+void shared_memory::close(std::error_code &ec) {
   deatch(ec);
   if (shmid_ == nullptr) {
     return;
@@ -115,7 +115,7 @@ void SharedMemory::close(std::error_code &ec) {
   shmid_ = nullptr;
 }
 
-void SharedMemory::remove(std::error_code &ec) { CHECK_EC(ec, ); }
+void shared_memory::remove(std::error_code &ec) { CHECK_EC(ec, ); }
 
 } // namespace ipc
 

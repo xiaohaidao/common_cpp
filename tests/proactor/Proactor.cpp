@@ -9,13 +9,13 @@
 
 using namespace std::placeholders; // for _1, _2, _3...
 
-class Tcp {
+class tcp {
 public:
-  explicit Tcp(Proactor &p, const char *module)
+  explicit tcp(proactor &p, const char *module)
       : tcp_op_(&p), module_(module) {}
-  explicit Tcp(const TcpStreamOp &p, const char *module)
+  explicit tcp(const tcp_stream_op &p, const char *module)
       : tcp_op_(p), module_(module) {}
-  ~Tcp() {}
+  ~tcp() = default;
 
   socket_type native() const { return tcp_op_.native(); }
 
@@ -51,9 +51,9 @@ public:
     f();
   }
 
-  template <typename F> void async_connect(const SocketAddr &addr, F f) {
+  template <typename F> void async_connect(const socket_addr &addr, F f) {
     std::error_code ec;
-    tcp_op_.async_connect(addr, std::bind(&Tcp::connected<F>, this, f, _1, _2),
+    tcp_op_.async_connect(addr, std::bind(&tcp::connected<F>, this, f, _1, _2),
                           ec);
     EXPECT_FALSE(ec) << "module_: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
@@ -63,7 +63,7 @@ public:
     memset(buff_, 0, sizeof(buff_));
     std::error_code ec;
     tcp_op_.async_read((char *)buff_, sizeof(buff_),
-                       std::bind(&Tcp::read, this, _1, _2), ec);
+                       std::bind(&tcp::read, this, _1, _2), ec);
     EXPECT_FALSE(ec) << "module_: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
@@ -75,21 +75,21 @@ public:
     LOG_DEBUG("%s: write message \"%s\"", module_.c_str(), buff_);
     std::error_code ec;
     tcp_op_.async_write((char *)buff_, size,
-                        std::bind(&Tcp::write, this, _1, _2), ec);
+                        std::bind(&tcp::write, this, _1, _2), ec);
     EXPECT_FALSE(ec) << "module_: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
   }
 
 private:
   char buff_[1024];
-  TcpStreamOp tcp_op_;
+  tcp_stream_op tcp_op_;
   std::string module_;
 };
 
-template <size_t listeners_size = 0> class Service {
+template <size_t listeners_size = 0> class service {
 public:
-  Service(Proactor &p) : listener_(p) {}
-  ~Service() {}
+  service(proactor &p) : listener_(p) {}
+  ~service() = default;
 
   socket_type native() const { return listener_.native(); }
 
@@ -114,17 +114,17 @@ public:
   }
 
   void accept(const std::error_code &re_ec,
-              const std::pair<TcpStreamOp, SocketAddr> &ac) {
+              const std::pair<tcp_stream_op, socket_addr> &ac) {
 
     LOG_DEBUG("server socket %d begin accpet", native());
 
     EXPECT_FALSE(re_ec) << re_ec.value() << " : " << re_ec.message();
-    Tcp service_tcp(ac.first, "server");
+    tcp service_tcp(ac.first, "server");
     LOG_DEBUG("socket %d client ip and port %s:%d", service_tcp.native(),
               ac.second.get_ip(), ac.second.get_port());
 
     tcps_.push_back(std::move(service_tcp));
-    Tcp &alias = *tcps_.rbegin();
+    tcp &alias = *tcps_.rbegin();
     alias.async_write("Server send message", 19);
     async_accept();
   }
@@ -134,7 +134,7 @@ public:
       return;
     }
     std::error_code ec;
-    listeners_[index].async_accept(std::bind(&Service::accept, this, _1, _2),
+    listeners_[index].async_accept(std::bind(&service::accept, this, _1, _2),
                                    ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
@@ -142,29 +142,29 @@ public:
 
   void async_accept() {
     std::error_code ec;
-    listener_.async_accept(std::bind(&Service::accept, this, _1, _2), ec);
+    listener_.async_accept(std::bind(&service::accept, this, _1, _2), ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
   }
 
 private:
-  TcpListenerOp listener_;
-  std::array<TcpListenerOp, listeners_size> listeners_;
-  std::vector<Tcp> tcps_;
+  tcp_listener_op listener_;
+  std::array<tcp_listener_op, listeners_size> listeners_;
+  std::vector<tcp> tcps_;
 };
 
 TEST(ProactorTest, Proactor) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  SocketAddr const addr(nullptr, "8989");
+  socket_addr const addr(nullptr, "8989");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
 
-  Service<> server(p);
+  service<> server(p);
 
   LOG_DEBUG("bind port %s", port);
   server.bind(port);
@@ -172,7 +172,7 @@ TEST(ProactorTest, Proactor) {
   LOG_DEBUG("server accept");
   server.async_accept();
 
-  Tcp client(p, "client");
+  tcp client(p, "client");
 
   LOG_DEBUG("client async connect");
   auto client_call_back = [&client]() {

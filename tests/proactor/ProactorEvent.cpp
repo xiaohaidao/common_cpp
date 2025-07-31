@@ -9,11 +9,11 @@ namespace proactor_eventop {
 
 TEST(ProactorTest, Eventop) {
   std::error_code ec;
-  Proactor p(ec);
+  proactor p(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
-  EventOp event(&p);
+  event_op event(&p);
 
   event.async_notify([](const std::error_code & /*re*/,
                         size_t /*size*/) { LOG_DEBUG("notify done"); },

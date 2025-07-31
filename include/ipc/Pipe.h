@@ -7,17 +7,17 @@
 namespace ipc {
 
 #ifdef _WIN32
-typedef void *native_handle;
+using native_handle = void *;
 #else
-typedef int native_handle;
+using native_handle = int;
 #endif
 
-class Pipe {
+class pipe {
 public:
-  Pipe();
+  pipe();
 
-  static Pipe std_in_out();
-  static Pipe create(std::error_code &ec);
+  static pipe std_in_out();
+  static pipe create(std::error_code &ec);
 
   size_t read(char *buff, size_t buff_size, std::error_code &ec);
   size_t write(const char *buff, size_t buff_size, std::error_code &ec);
@@ -29,9 +29,9 @@ public:
   native_handle error_native() const;
 
 private:
-  native_handle read_pipe_;
-  native_handle write_pipe_;
-  native_handle error_pipe_;
+  native_handle read_pipe_{0};
+  native_handle write_pipe_{0};
+  native_handle error_pipe_{0};
 };
 
 } // namespace ipc

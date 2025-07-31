@@ -9,23 +9,22 @@
 #include "utils/error_code.h"
 
 struct ThreadInfo {
-  QueueOp queue;
+  queue_op queue;
 };
 
-Proactor::Proactor() : fd_(0), shutdown_(false) {}
+proactor::proactor() = default;
 
-Proactor::Proactor(std::error_code &ec)
-    : fd_(Reactor(ec).native()), shutdown_(false),
-      event_(::detail::EventOp::create(ec)) {}
+proactor::proactor(std::error_code &ec)
+    : fd_(reactor(ec).native()), event_(::detail::event_op::create(ec)) {}
 
-void Proactor::shutdown() {
+void proactor::shutdown() {
   shutdown_ = true;
 
   std::error_code ec;
   notify_op(nullptr, ec); // TODO: multiple thread close
 }
 
-size_t Proactor::run() {
+size_t proactor::run() {
   std::error_code ec;
   size_t n = 0;
   ThreadInfo tread_info;
@@ -40,7 +39,7 @@ size_t Proactor::run() {
   return n;
 }
 
-size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
+size_t proactor::run_one(size_t timeout_us, std::error_code &ec) {
   ThreadInfo thread_info;
   size_t n = call_one(timeout_us, thread_info, ec);
   while (thread_info.queue.begin()) {
@@ -51,7 +50,7 @@ size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
   return n;
 }
 
-void Proactor::notify_op(Operation *op, std::error_code &ec) {
+void proactor::notify_op(operation *op, std::error_code &ec) {
   if (op) {
     std::lock_guard<std::mutex> lck(event_mutex_);
     event_queue_.push(op);
@@ -61,30 +60,30 @@ void Proactor::notify_op(Operation *op, std::error_code &ec) {
   event_.notify(ec);
 }
 
-void Proactor::post(native_handle file_descriptor, Operation *op,
+void proactor::post(native_handle file_descriptor, operation *op,
                     std::error_code &ec) {
 
-  Reactor reactor(fd_);
+  reactor reactor(fd_);
   reactor.post(file_descriptor, op, ec);
 }
 
-void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
+void proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
-  Reactor reactor(fd_);
+  reactor reactor(fd_);
   reactor.cancel(file_descriptor, ec);
 }
 
-void Proactor::close(std::error_code &ec) {
-  Reactor reactor(fd_);
+void proactor::close(std::error_code &ec) {
+  reactor reactor(fd_);
   reactor.close(ec);
 }
 
-size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
+size_t proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
                           std::error_code &ec) {
 
-  Reactor reactor(fd_);
+  reactor reactor(fd_);
   reactor.set_proactor(this);
-  QueueOp &queue = thread_info.queue;
+  queue_op &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.begin()) {
       size_t timeout_ms = timer_queue_.wait_duration_ms(INT32_MAX);

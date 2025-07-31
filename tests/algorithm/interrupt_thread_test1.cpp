@@ -12,11 +12,9 @@ void background_thread(int /*disk_id*/) {
 }
 
 void start_background_processing() {
-  background_threads.push_back(
-      thread::interruptible_thread(std::bind(background_thread, 1)));
+  background_threads.emplace_back(std::bind(background_thread, 1));
 
-  background_threads.push_back(
-      thread::interruptible_thread(std::bind(background_thread, 2)));
+  background_threads.emplace_back(std::bind(background_thread, 2));
 }
 
 TEST(InterruptibleThread, InterruptibleThreadFunction1) {

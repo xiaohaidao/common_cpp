@@ -5,4 +5,7 @@ project("common_cpp" VERSION 0.2.1)
 # import common configure
 include(cmake/get_cmake.cmake)
 
-include(use_project_top_dir)
+add_dir_src(src)
+
+add_dir_tests(tests)
+

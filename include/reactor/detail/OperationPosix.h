@@ -8,10 +8,8 @@ namespace detail {
 
 class OperationAccess;
 
-class OperationPosix {
+class operation_posix {
 public:
-  OperationPosix() : next_(nullptr) {}
-
   // owner is Reactor
   virtual void complete(void *owner, const std::error_code &result_ec,
                         size_t trans_size) = 0;
@@ -19,9 +17,9 @@ public:
 private:
   friend class detail::OperationAccess;
 
-  void *next_;
-
-}; // class OperationPosix
+  void *next_{nullptr};
+};
+/* class OperationPosix */
 
 } // namespace detail
 

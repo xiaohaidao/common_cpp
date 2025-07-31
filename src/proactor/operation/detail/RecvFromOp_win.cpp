@@ -11,11 +11,11 @@
 
 namespace detail {
 
-RecvFromOp::RecvFromOp() {}
+recv_from_op::recv_from_op() {}
 
-void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
-                                 size_t size, func_type async_func,
-                                 std::error_code &ec) {
+void recv_from_op::async_recv_from(void *proactor, socket_type s, char *buff,
+                                   size_t size, func_type async_func,
+                                   std::error_code &ec) {
 
   buff_ = {(uint32_t)size, buff};
   func_ = std::move(async_func);
@@ -33,8 +33,8 @@ void RecvFromOp::async_recv_from(void *proactor, socket_type s, char *buff,
   }
 }
 
-void RecvFromOp::complete(void *p, const std::error_code &result_ec,
-                          size_t trans_size) {
+void recv_from_op::complete(void *p, const std::error_code &result_ec,
+                            size_t trans_size) {
 
   if (func_) {
     auto tmp = std::move(func_);

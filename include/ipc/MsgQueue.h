@@ -9,30 +9,30 @@
 
 namespace ipc {
 
-class MsgQueue {
+class msg_queue {
 public:
-  MsgQueue();
-  ~MsgQueue();
+  msg_queue();
+  ~msg_queue();
 
-  static MsgQueue create(const std::string &key, std::error_code &ec);
+  static msg_queue create(const std::string &key, std::error_code &ec);
 
-  static MsgQueue create(const char *key, std::error_code &ec) {
+  static msg_queue create(const char *key, std::error_code &ec) {
     return create(std::string(key), ec);
   }
 
   template <typename T>
-  static MsgQueue create(const T &key, std::error_code &ec) {
+  static msg_queue create(const T &key, std::error_code &ec) {
     return create(std::to_string(key), ec);
   }
 
-  static MsgQueue open(const std::string &key, std::error_code &ec);
+  static msg_queue open(const std::string &key, std::error_code &ec);
 
-  static MsgQueue open(const char *key, std::error_code &ec) {
+  static msg_queue open(const char *key, std::error_code &ec) {
     return open(std::string(key), ec);
   }
 
   template <typename T>
-  static MsgQueue open(const T &key, std::error_code &ec) {
+  static msg_queue open(const T &key, std::error_code &ec) {
     return open(std::to_string(key), ec);
   }
 
@@ -54,12 +54,12 @@ public:
   void remove(std::error_code &ec);
 
 private:
-  int msgid_;
+  int msgid_{0};
 
   /// unlink need it
   std::string key_;
 
-}; // class MsgQueue
+}; // class msg_queue
 
 } // namespace ipc
 

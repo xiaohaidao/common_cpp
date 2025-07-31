@@ -11,10 +11,10 @@
 
 class client : public std::enable_shared_from_this<client> {
   char buff_[1024];
-  IpcStreamOp tcp_op_;
+  ipc_stream_op tcp_op_;
 
 public:
-  client(const IpcStreamOp &op) : tcp_op_(op) {}
+  client(const ipc_stream_op &op) : tcp_op_(op) {}
 
   ~client() {
     std::error_code ec;
@@ -83,12 +83,12 @@ public:
 
 class server {
 
-  IpcListenerOp server_;
+  ipc_listener_op server_;
 
   void do_accept() {
     std::error_code ec;
     server_.async_accept(
-        [this](const std::error_code &re, const IpcStreamOp &c) {
+        [this](const std::error_code &re, const ipc_stream_op &c) {
           if (!re) {
             LOG_INFO("connect remote %d\n", c.native());
             std::make_shared<client>(c)->read();
@@ -105,7 +105,7 @@ class server {
   }
 
 public:
-  server(Proactor &p, const char *port) : server_(p) {
+  server(proactor &p, const char *port) : server_(p) {
     std::error_code ec;
     server_.bind(port, ec);
     if (ec) {
@@ -132,12 +132,12 @@ int main(int args, char **argv) {
   try {
     if (strcmp(argv[1], "-c") == 0) {
       std::error_code ec;
-      Proactor a(ec);
+      proactor a(ec);
       if (ec) {
         LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
       }
 
-      IpcStreamOp const op(&a);
+      ipc_stream_op const op(&a);
       auto c = std::make_shared<client>(op);
       c->connect(argv[2]);
       c->write("client send message!");
@@ -145,7 +145,7 @@ int main(int args, char **argv) {
 
     } else if (strcmp(argv[1], "-s") == 0) {
       std::error_code ec;
-      Proactor a(ec);
+      proactor a(ec);
       if (ec) {
         LOG_ERROR("Proactor create error %s\n", ec.message().c_str());
       }

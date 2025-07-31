@@ -5,9 +5,9 @@
 #include "utils/log.h"
 
 TEST(IPCTest, AnonymousPipeTest) {
-  using ipc::Pipe;
+  using ipc::pipe;
   std::error_code ec;
-  Pipe pipe = Pipe::create(ec);
+  pipe pipe = pipe::create(ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 
@@ -33,16 +33,16 @@ TEST(IPCTest, AnonymousPipeTest) {
 TEST(IPCTest, PipeTest) {
   using ipc::Pipe;
   std::error_code ec;
-  Pipe pipe = Pipe::create("test_pipe_name", ec);
+  pipe pipe = pipe::create("test_pipe_name", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   if (ec) {
     ec.clear();
-    pipe = Pipe::connect("test_pipe_name", ec);
+    pipe = pipe::connect("test_pipe_name", ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   }
   ec.clear();
 
-  Pipe client_pipe = Pipe::connect("test_pipe_name", ec);
+  pipe client_pipe = pipe::connect("test_pipe_name", ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
 

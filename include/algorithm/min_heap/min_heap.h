@@ -8,8 +8,8 @@
  *
  */
 
-#ifndef MIN_HEAP_H
-#define MIN_HEAP_H
+#ifndef ALGORITHM_MIN_HEAP_MIN_HEAP_H
+#define ALGORITHM_MIN_HEAP_MIN_HEAP_H
 
 #include <algorithm>
 #include <functional>
@@ -19,13 +19,13 @@
 template <typename Container, typename Compare = std::less<Container> >
 class min_heap {
 public:
-  typedef std::size_t index_type;
-  typedef Container value_type;
-  typedef Compare compare_type;
-  typedef typename std::vector<value_type>::const_iterator const_iterator;
+  using index_type = std::size_t;
+  using value_type = Container;
+  using compare_type = Compare;
+  using const_iterator = typename std::vector<value_type>::const_iterator;
 
-  min_heap() {}
-  ~min_heap() {}
+  min_heap() = default;
+  ~min_heap() = default;
 
   void push(const value_type &va) {
     heap_.push_back(va);
@@ -107,4 +107,4 @@ private:
   compare_type comp_;
 };
 
-#endif // MIN_HEAP_H
+#endif // ALGORITHM_MIN_HEAP_MIN_HEAP_H

@@ -11,11 +11,11 @@
 
 namespace detail {
 
-SendOp::SendOp() {}
+send_op::send_op() {}
 
-void SendOp::async_send(void *proactor, socket_type s, const char *buff,
-                        size_t size, func_type async_func,
-                        std::error_code &ec) {
+void send_op::async_send(void *proactor, socket_type s, const char *buff,
+                         size_t size, func_type async_func,
+                         std::error_code &ec) {
 
   buff_ = {(uint32_t)size, (char *)buff};
   func_ = std::move(async_func);
@@ -30,8 +30,8 @@ void SendOp::async_send(void *proactor, socket_type s, const char *buff,
   }
 }
 
-void SendOp::complete(void *p, const std::error_code &result_ec,
-                      size_t trans_size) {
+void send_op::complete(void *p, const std::error_code &result_ec,
+                       size_t trans_size) {
 
   if (func_) {
     auto tmp = std::move(func_);

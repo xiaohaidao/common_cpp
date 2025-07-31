@@ -9,11 +9,11 @@ void callback(LogLevel, const char *data, int size) {
   static bool use_udp = false;
   std::error_code ec;
 #ifdef _WIN32
-  static SocketAddr const kLogAddr(nullptr, "514");
-  static UdpSocket udp = UdpSocket::create(kIpV4, ec);
+  static socket_addr const kLogAddr(nullptr, "514");
+  static udp_socket udp = udp_socket::create(kIpV4, ec);
 #else
-  static SocketAddr const kLogAddr("/dev/log");
-  static UdpSocket udp = UdpSocket::create(kUnix, ec);
+  static socket_addr const kLogAddr("/dev/log");
+  static udp_socket udp = udp_socket::create(kUnix, ec);
 #endif
   if (!init) {
     udp.connected(kLogAddr, ec);

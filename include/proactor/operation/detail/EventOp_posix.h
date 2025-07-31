@@ -8,12 +8,12 @@
 
 namespace detail {
 
-class EventOp : public Operation {
+class event_op : public operation {
 public:
-  typedef std::function<void(const std::error_code &, size_t)> func_type;
+  using func_type = std::function<void(const std::error_code &, size_t)>;
 
-  EventOp();
-  static EventOp create(std::error_code &ec);
+  event_op();
+  static event_op create(std::error_code &ec);
 
   void notify(std::error_code &ec);
   uint64_t wait(std::error_code &ec);
@@ -30,10 +30,10 @@ public:
                 size_t trans_size) override;
 
 private:
-  ::native_handle fd_;
+  ::native_handle fd_{-1};
   func_type func_;
 
-}; // class EventOp
+}; // class event_op
 
 } // namespace detail
 

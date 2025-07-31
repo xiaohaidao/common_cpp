@@ -9,12 +9,12 @@
 #include "utils/error_code.h"
 
 struct ThreadInfo {
-  QueueOp queue;
+  queue_op queue;
 };
 
-Proactor::Proactor() : fd_(nullptr), shutdown_(false) {}
+proactor::proactor() : fd_(nullptr), shutdown_(false) {}
 
-Proactor::Proactor(std::error_code &ec) : fd_(nullptr), shutdown_(false) {
+proactor::proactor(std::error_code &ec) : fd_(nullptr), shutdown_(false) {
   HANDLE han = CreateIoCompletionPort(INVALID_HANDLE_VALUE, nullptr, 0, 0);
   if (han == nullptr) {
     ec = get_error_code();
@@ -22,14 +22,14 @@ Proactor::Proactor(std::error_code &ec) : fd_(nullptr), shutdown_(false) {
   fd_ = han;
 }
 
-void Proactor::shutdown() {
+void proactor::shutdown() {
   shutdown_ = true;
 
   std::error_code ec;
   notify_op(nullptr, ec); // TODO: multiple thread close
 }
 
-size_t Proactor::run() {
+size_t proactor::run() {
   std::error_code ec;
   size_t n = 0;
   ThreadInfo thread_info;
@@ -43,7 +43,7 @@ size_t Proactor::run() {
   return n;
 }
 
-size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
+size_t proactor::run_one(size_t timeout_us, std::error_code &ec) {
   ThreadInfo thread_info;
   size_t n = call_one(timeout_us, thread_info, ec);
   while (thread_info.queue.begin()) {
@@ -54,13 +54,13 @@ size_t Proactor::run_one(size_t timeout_us, std::error_code &ec) {
   return n;
 }
 
-void Proactor::notify_op(Operation *op, std::error_code &ec) {
+void proactor::notify_op(operation *op, std::error_code &ec) {
   if (!PostQueuedCompletionStatus(fd_, 0, 0, op)) {
     ec = get_error_code();
   }
 }
 
-void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
+void proactor::post(native_handle file_descriptor, operation * /*op*/,
                     std::error_code &ec) {
   HANDLE han = CreateIoCompletionPort(file_descriptor, fd_, 0, 0);
   if (han == nullptr) {
@@ -70,7 +70,7 @@ void Proactor::post(native_handle file_descriptor, Operation * /*op*/,
   // assert(han == fd_);
 }
 
-void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
+void proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
 
   if (!::CancelIoEx(file_descriptor, nullptr)) {
     std::error_code const re_ec = get_error_code();
@@ -80,18 +80,18 @@ void Proactor::cancel(native_handle file_descriptor, std::error_code &ec) {
   }
 }
 
-void Proactor::close(std::error_code &ec) {
+void proactor::close(std::error_code &ec) {
   if (!::CloseHandle(fd_)) {
     ec = get_error_code();
   }
 }
 
-size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
+size_t proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
                           std::error_code &ec) {
-  QueueOp &queue = thread_info.queue;
+  queue_op &queue = thread_info.queue;
   for (; !shutdown_;) {
     if (!queue.empty()) {
-      auto *op = static_cast<Operation *>(queue.begin());
+      auto *op = static_cast<operation *>(queue.begin());
       queue.pop();
       op->complete(this, std::error_code(), 0);
       return 1;
@@ -118,7 +118,7 @@ size_t Proactor::call_one(size_t timeout_us, ThreadInfo &thread_info,
       result_ec = {0, result_ec.category()};
     }
     if (overlapped) {
-      auto *op = static_cast<Operation *>(overlapped);
+      auto *op = static_cast<operation *>(overlapped);
 
       op->complete(this, result_ec, bytes_transferred);
 

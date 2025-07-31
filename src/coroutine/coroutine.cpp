@@ -13,9 +13,7 @@ coroutine &get_global_coroutine() {
   return *static_globoal_co_xbrefw;
 }
 
-coroutine::coroutine() : current_index_(0), is_exit_to_main_(true) {
-  contexts_.push_back(std::make_shared<context>());
-}
+coroutine::coroutine() { contexts_.push_back(std::make_shared<context>()); }
 
 coroutine::~coroutine() {
   loop();

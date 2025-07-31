@@ -9,13 +9,13 @@
 
 namespace ipc {
 
-PipeStream::PipeStream() : named_pipe_(0), is_server_(false) {}
+pipe_stream::pipe_stream() : named_pipe_(0), is_server_(false) {}
 
-PipeStream::PipeStream(native_handle native_handle, bool is_server)
+pipe_stream::pipe_stream(native_handle native_handle, bool is_server)
     : named_pipe_(native_handle), is_server_(is_server) {}
 
-PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
-  PipeStream re;
+pipe_stream pipe_stream::connect(const char *name_pipe, std::error_code &ec) {
+  pipe_stream re;
   char buff_name[256];
   snprintf(buff_name, sizeof(buff_name), "%s%s", "\\\\.\\pipe\\", name_pipe);
   HANDLE client = ::CreateFile(buff_name, GENERIC_WRITE | GENERIC_READ, 0, NULL,
@@ -28,7 +28,7 @@ PipeStream PipeStream::connect(const char *name_pipe, std::error_code &ec) {
   return re;
 }
 
-size_t PipeStream::read(char *buff, size_t buff_size, std::error_code &ec) {
+size_t pipe_stream::read(char *buff, size_t buff_size, std::error_code &ec) {
   DWORD num = 0;
   if (!::ReadFile(named_pipe_, buff, static_cast<DWORD>(buff_size), &num,
                   NULL)) {
@@ -37,8 +37,8 @@ size_t PipeStream::read(char *buff, size_t buff_size, std::error_code &ec) {
   return num;
 }
 
-size_t PipeStream::write(const char *buff, size_t buff_size,
-                         std::error_code &ec) {
+size_t pipe_stream::write(const char *buff, size_t buff_size,
+                          std::error_code &ec) {
   DWORD num = 0;
   if (!::WriteFile(named_pipe_, buff, static_cast<DWORD>(buff_size), &num,
                    NULL)) {
@@ -47,7 +47,7 @@ size_t PipeStream::write(const char *buff, size_t buff_size,
   return num;
 }
 
-void PipeStream::close(std::error_code &ec) {
+void pipe_stream::close(std::error_code &ec) {
   if (is_server_) {
     if (!::DisconnectNamedPipe(named_pipe_)) {
       ec = get_error_code();
@@ -58,7 +58,7 @@ void PipeStream::close(std::error_code &ec) {
   }
 }
 
-native_handle PipeStream::native() const { return named_pipe_; }
+native_handle pipe_stream::native() const { return named_pipe_; }
 
 } // namespace ipc
 

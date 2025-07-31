@@ -7,21 +7,21 @@
 namespace ipc {
 
 #ifdef _WIN32
-typedef void *native_handle;
+using native_handle = void *;
 #else
-typedef int native_handle;
+using native_handle = int;
 #endif
 
-class PipeStream {
+class pipe_stream {
 public:
-  PipeStream();
+  pipe_stream();
 #if defined(__linux__)
-  PipeStream(native_handle native_handle);
+  pipe_stream(native_handle native_handle);
 #elif defined(_WIN32)
-  PipeStream(native_handle native_handle, bool is_server);
+  pipe_stream(native_handle native_handle, bool is_server);
 #endif
 
-  static PipeStream connect(const char *name_pipe, std::error_code &ec);
+  static pipe_stream connect(const char *name_pipe, std::error_code &ec);
 
   // It can read and write by itself on Linux
   size_t read(char *buff, size_t buff_size, std::error_code &ec);
@@ -32,7 +32,7 @@ public:
   native_handle native() const;
 
 private:
-  native_handle named_pipe_;
+  native_handle named_pipe_{0};
 
 #ifdef _WIN32
   bool is_server_;

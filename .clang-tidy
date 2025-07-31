@@ -5,7 +5,7 @@ Checks:          >
     modernize-*,
 
 WarningsAsErrors: '*'
-#HeaderFilterRegex: 'common_cpp/(include|src|tests)/.*'
+HeaderFilterRegex: 'common_cpp/(include|src|tests)/.*'
 # AnalyzeTemporaryDtors: false
 FormatStyle:     file
 CheckOptions:

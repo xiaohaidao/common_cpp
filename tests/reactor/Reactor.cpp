@@ -12,12 +12,12 @@
 
 using namespace sockets;
 
-template <typename T> class Tcp : public ReactorOp {
+template <typename T> class tcp : public reactor_op {
 public:
-  Tcp() = default;
-  explicit Tcp(const char *module) : module_(module) {}
+  tcp() = default;
+  explicit tcp(const char *module) : module_(module) {}
 
-  Tcp(const TcpStream &stream, const char *module)
+  tcp(const tcp_stream &stream, const char *module)
       : client_(stream), module_(module) {}
 
   void close() {
@@ -31,9 +31,9 @@ public:
 
   socket_type native() const { return client_.native(); }
 
-  void connect(const SocketAddr &addr) {
+  void connect(const socket_addr &addr) {
     std::error_code ec;
-    client_ = TcpStream::connect(addr, ec);
+    client_ = tcp_stream::connect(addr, ec);
     EXPECT_FALSE(ec) << "module: " << module_ << ", " << ec.value() << " : "
                      << ec.message();
     ec.clear();
@@ -88,16 +88,16 @@ public:
   }
 
 private:
-  TcpStream client_;
+  tcp_stream client_;
   char buff_[1024];
   std::string module_;
 
 }; // class Server
 
-template <typename T> class Server : public ReactorOp {
+template <typename T> class server : public reactor_op {
 public:
-  explicit Server(const char *port, std::error_code &ec) {
-    server_ = TcpListener::bind(port, ec);
+  explicit server(const char *port, std::error_code &ec) {
+    server_ = tcp_listener::bind(port, ec);
   }
 
   void close() {
@@ -117,15 +117,15 @@ public:
   void accept(void *reactor) {
     LOG_DEBUG("server socket %d begin accpet", native());
     std::error_code ec;
-    std::pair<TcpStream, SocketAddr> const rec = server_.accept(ec);
+    std::pair<tcp_stream, socket_addr> const rec = server_.accept(ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
     LOG_DEBUG("server accpet client socket %d ip and port %s:%d",
               rec.first.native(), rec.second.get_ip(), rec.second.get_port());
 
-    TcpStream const &st = rec.first;
+    tcp_stream const &st = rec.first;
     socket_type const s = st.native();
-    tcps_[s] = Tcp<T>(st, "server");
+    tcps_[s] = tcp<T>(st, "server");
     char buff[128] = "server begin send message";
     tcps_[s].write(buff, strlen(buff));
 
@@ -144,19 +144,19 @@ public:
   }
 
 private:
-  TcpListener server_;
-  std::map<socket_type, Tcp<T> > tcps_;
+  tcp_listener server_;
+  std::map<socket_type, tcp<T> > tcps_;
 
 }; // class Server
 
 template <typename T> void reactor_func() {
   std::error_code ec;
-  SocketAddr const addr(nullptr, "8988");
+  socket_addr const addr(nullptr, "8988");
   LOG_DEBUG("local ip is %s port %d", addr.get_ip(), addr.get_port());
 
   char port[8] = {};
   snprintf(port, sizeof(port), "%d", addr.get_port());
-  Server<T> server(port, ec);
+  server<T> server(port, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
   ec.clear();
   EXPECT_TRUE(server.native() > 0);
@@ -170,7 +170,7 @@ template <typename T> void reactor_func() {
 
   LOG_DEBUG("client begin connect server %s:%d", addr.get_ip(),
             addr.get_port());
-  Tcp<T> client("client");
+  tcp<T> client("client");
   client.connect(addr);
   reactor.post_read(client.native(), &client, ec);
   EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
@@ -179,7 +179,7 @@ template <typename T> void reactor_func() {
   LOG_DEBUG("-------------------- begin run while --------------------");
   for (size_t i = 0; i < 10; ++i) {
     std::error_code ec;
-    QueueOp queue;
+    queue_op queue;
     size_t const size = reactor.run_once_timeout(queue, 1000, ec);
     EXPECT_FALSE(ec) << ec.value() << " : " << ec.message();
     ec.clear();
@@ -196,6 +196,6 @@ template <typename T> void reactor_func() {
   ec.clear();
 }
 
-TEST(ReactorTest, ReactorTcp) { reactor_func<Reactor>(); }
+TEST(ReactorTest, ReactorTcp) { reactor_func<reactor>(); }
 
-TEST(ReactorTest, SelectTcp) { reactor_func<ReactorSelect>(); }
+TEST(ReactorTest, SelectTcp) { reactor_func<reactor_select>(); }

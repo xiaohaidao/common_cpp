@@ -5,18 +5,20 @@
 
 #include "coroutine/coroutine.h"
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
 #include <ucontext.h>
+
+#include <utility>
 
 struct context {
   ucontext_t ctx;
-  void *stack;
-  uint32_t stack_size;
+  void *stack{nullptr};
+  uint32_t stack_size{0};
   std::function<void()> callback;
 
-  context() : ctx({}), stack(nullptr), stack_size(0) {}
+  context() : ctx({}) {}
   ~context() { free_stack(); }
 
   void make_context(context &end_ctx, std::function<void()> f,
@@ -31,7 +33,7 @@ struct context {
       return;
     }
 
-    callback = f;
+    callback = std::move(f);
     ctx.uc_stack.ss_sp = stack;
     ctx.uc_stack.ss_size = stack_size;
     ctx.uc_link = &(end_ctx.ctx);
@@ -60,8 +62,8 @@ private:
     if (block_size == 0) {
       return;
     }
-    constexpr uint32_t BLOCK_SIZE = 4096;
-    size_t size = BLOCK_SIZE * block_size;
+    constexpr uint32_t kBlockSize = 4096;
+    size_t size = kBlockSize * block_size;
     if (stack_size == size) {
       return;
     }

@@ -13,11 +13,11 @@
 
 namespace detail {
 
-ConnectOp::ConnectOp() : client_(-1) {}
+connect_op::connect_op() = default;
 
-void ConnectOp::async_connect(void *proactor, socket_type s,
-                              const SocketAddr &addr, func_type async_func,
-                              std::error_code &ec) {
+void connect_op::async_connect(void *proactor, socket_type s,
+                               const socket_addr &addr, func_type async_func,
+                               std::error_code &ec) {
 
   client_ = s;
   func_ = std::move(async_func);
@@ -43,11 +43,11 @@ void ConnectOp::async_connect(void *proactor, socket_type s,
     return;
   }
   set_event_data(WRITE_OP_ENUM_ONCE);
-  static_cast<Proactor *>(proactor)->post(s, this, ec);
+  static_cast< ::proactor *>(proactor)->post(s, this, ec);
 }
 
-void ConnectOp::complete(void *p, const std::error_code &result_ec,
-                         size_t trans_size) {
+void connect_op::complete(void *p, const std::error_code &result_ec,
+                          size_t trans_size) {
 
   std::error_code ec;
   int flags = fcntl(client_, F_GETFL, 0);
