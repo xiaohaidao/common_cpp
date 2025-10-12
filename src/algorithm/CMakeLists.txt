@@ -17,5 +17,5 @@ target_include_directories(
 
 target_compile_features(${library_name} INTERFACE cxx_std_11)
 
-# install and export configure
-include(use_install_export)
+message(".... library_name : ${library_name}")
+install(TARGETS ${library_name} EXPORT ${PROJECT_NAME})

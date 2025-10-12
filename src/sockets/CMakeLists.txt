@@ -1,9 +1,12 @@
 set(library_name "sockets")
-add_library(${library_name} IcmpSocket.cpp SocketAddr.cpp sockets.cpp
-                            TcpListener.cpp TcpStream.cpp UdpSocket.cpp)
-add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
-
-target_link_libraries(${library_name} PUBLIC)
+add_src_lib(
+    ${library_name}
+    IcmpSocket.cpp
+    SocketAddr.cpp
+    sockets.cpp
+    TcpListener.cpp
+    TcpStream.cpp
+    UdpSocket.cpp)
 
 if(WIN32)
     target_link_libraries(${library_name} PUBLIC Ws2_32 IPHLPAPI)
@@ -11,13 +14,4 @@ elseif(UNIX)
 
 endif()
 
-target_include_directories(
-    ${library_name}
-    PRIVATE ${PROJECT_SOURCE_DIR}/src
-    PUBLIC $<INSTALL_INTERFACE:include/>
-           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>)
-
 target_compile_features(${library_name} PUBLIC cxx_std_11)
-
-# install and export configure
-include(use_install_export)

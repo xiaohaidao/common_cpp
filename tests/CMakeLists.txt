@@ -1,7 +1,25 @@
+if(NOT PROJECT_NAME)
+    cmake_minimum_required(VERSION 3.14)
+
+    project("project_test" VERSION 0.2.1)
+
+    enable_testing()
+
+    include(FetchContent)
+    FetchContent_Declare(
+        project_test_cpp
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../
+        GIT_SHALLOW ON
+        GIT_PROGRESS ON)
+    FetchContent_MakeAvailable(project_test_cpp)
+    # include(${CMAKE_CURRENT_LIST_DIR}/../cmake/get_cmake.cmake)
+endif()
+
 # include(StringVersion)
+find_package(GTest REQUIRED)
 
 set(test_name "cpp_common_test")
-add_executable(
+add_test_exe(
     ${test_name}
     # main.cpp
     algorithm/interrupt_thread_test1.cpp
@@ -35,24 +53,6 @@ add_executable(
 target_include_directories(${test_name} PRIVATE ${PROJECT_SOURCE_DIR}/src
                                                 ${PROJECT_SOURCE_DIR}/include)
 
-if(MSVC)
-    set(VLD_DIR "C:/Program Files (x86)/Visual Leak Detector")
-    if(EXISTS "${VLD_DIR}/include/vld.h")
-        target_compile_definitions(${test_name} PRIVATE HAS_VLD_H)
-    endif()
-    target_include_directories(${test_name} PRIVATE "${VLD_DIR}/include")
-    target_link_directories(
-        ${test_name}
-        PRIVATE
-        if
-        (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        "${VLD_DIR}/lib/Win64"
-        elseif
-        (CMAKE_SIZEOF_VOID_P EQUAL 4)
-        "${VLD_DIR}/lib/Win32"
-        endif
-        ())
-endif()
 # if(NOT MSVC) target_link_libraries(${test_name} PRIVATE -static-libstdc++
 # -static-libgcc ) endif()
 
@@ -67,5 +67,3 @@ target_link_libraries(
             utils
             algorithm
             coroutine)
-
-add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)

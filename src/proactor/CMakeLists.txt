@@ -1,5 +1,5 @@
 set(library_name "proactor")
-add_library(
+add_src_lib(
     ${library_name}
     Proactor_posix.cpp
     Proactor_win.cpp
@@ -31,7 +31,6 @@ add_library(
     operation/detail/SendToOp_win.cpp
     operation/detail/WriteOp_posix.cpp
     operation/detail/WriteOp_win.cpp)
-add_library(${PROJECT_NAME}::${library_name} ALIAS ${library_name})
 
 target_link_libraries(${library_name} PUBLIC sockets algorithm ipc)
 
@@ -41,13 +40,4 @@ elseif(UNIX)
     target_link_libraries(${library_name} PUBLIC)
 endif()
 
-target_include_directories(
-    ${library_name}
-    PRIVATE ${PROJECT_SOURCE_DIR}/src
-    PUBLIC $<INSTALL_INTERFACE:include/>
-           $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>)
-
 target_compile_features(${library_name} PUBLIC cxx_std_11)
-
-# install and export configure
-include(use_install_export)

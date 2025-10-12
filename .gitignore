@@ -5,3 +5,4 @@ StringVersion.h
 *third_party
 .cache
 compile_commands.json
+*CMakeUserPresets.json

@@ -1,5 +1,11 @@
-if(NOT get_cmake_version)
-    set(get_cmake_version 0.1.0)
+set(get_cmake_default_version 0.1.0)
+if(get_cmake_version)
+    message(
+        "-- get_cmake versoin: ${get_cmake_version}, default version: ${get_cmake_default_version}"
+    )
+else()
+    set(get_cmake_version ${get_cmake_default_version})
+    message("-- set get_cmake default versoin: ${get_cmake_version}")
 endif()
 
 if(NOT GIT_COMMON_CMAKE_REPOSITORY)
@@ -17,7 +23,7 @@ if(NOT COMMAND fetch_add_packet)
         include(FetchContent)
         FetchContent_Declare(
             ${name}
-            ${ARGN}
+            ${ARGN} OVERRIDE_FIND_PACKAGE
             GIT_SHALLOW ON
             GIT_PROGRESS ON)
         FetchContent_MakeAvailable(${name})
@@ -30,9 +36,15 @@ endif()
 
 if(NOT CUSTOM_LOCAL_COMMON_CMAKE)
     if((NOT ${CMAKE_PROJECT_NAME} STREQUAL "workspace_project")
-       AND (EXISTS ${CMAKE_SOURCE_DIR}/../common_cmake))
-        fetch_add_packet_macro(common_cmake SOURCE_DIR
-                               ${CMAKE_SOURCE_DIR}/../common_cmake)
+       AND ((EXISTS ${CMAKE_SOURCE_DIR}/../common_cmake)
+            OR (EXISTS ${PROJECT_SOURCE_DIR}/../common_cmake)))
+        if(EXISTS ${CMAKE_SOURCE_DIR}/../common_cmake)
+            fetch_add_packet_macro(common_cmake SOURCE_DIR
+                                   ${CMAKE_SOURCE_DIR}/../common_cmake)
+        else()
+            fetch_add_packet_macro(common_cmake SOURCE_DIR
+                                   ${PROJECT_SOURCE_DIR}/../common_cmake)
+        endif()
     else()
         fetch_add_packet_macro(
             common_cmake GIT_REPOSITORY ${GIT_COMMON_CMAKE_REPOSITORY} GIT_TAG
