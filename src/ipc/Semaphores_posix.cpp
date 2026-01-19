@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #include <semaphore.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #include "utils/error_code.h"
 #include "utils/macro.h"

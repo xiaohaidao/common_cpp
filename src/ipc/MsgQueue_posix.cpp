@@ -22,6 +22,7 @@
 #include <mqueue.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "utils/error_code.h"
 #include "utils/macro.h"
