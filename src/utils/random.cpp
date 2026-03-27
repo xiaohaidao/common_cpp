@@ -4,75 +4,89 @@
 #include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <random>
 
 namespace {
 
-using time_type = std::chrono::time_point<std::chrono::steady_clock>;
+using time_clock = std::chrono::steady_clock;
 
-class xorshift32 {
-  uint32_t seed_{static_cast<uint32_t>(
-      time_type::clock::now().time_since_epoch().count())};
+struct splitmix64_t {
+  constexpr uint64_t operator()(uint64_t &v) const noexcept {
+    uint64_t z = (v += 0x9e3779b97f4a7c15ULL);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebULL;
+    return z ^ (z >> 31);
+  }
+};
 
-public:
-  xorshift32() = default;
+inline constexpr splitmix64_t splitmix64{};
 
-  uint32_t operator()() {
-    uint64_t x = seed_;
+struct xorshift32_t {
+  constexpr uint32_t operator()(uint32_t &v) const noexcept {
+    uint64_t x = v;
     x ^= x << 13;
     x ^= x >> 17;
     x ^= x << 5;
-    return seed_ = static_cast<uint32_t>(x);
+    return v = static_cast<uint32_t>(x);
   }
 };
 
-class xorshift64 {
-  uint64_t seed_{static_cast<uint64_t>(
-      time_type::clock::now().time_since_epoch().count())};
+inline constexpr xorshift32_t xorshift32;
 
-public:
-  xorshift64() = default;
-
-  uint64_t operator()() {
-    uint64_t x = seed_;
+struct xorshift64_t {
+  constexpr uint64_t operator()(uint64_t &v) const noexcept {
+    uint64_t x = v;
     x ^= x << 13;
     x ^= x >> 7;
     x ^= x << 17;
-    return seed_ = x;
+    return v = x;
   }
 };
 
-class seed {
-  bool fix_seed_{false};
+inline constexpr xorshift64_t xorshift64;
+
+struct seed_t {
   static constexpr uint64_t kFixSeed = 15011051792192176828u;
 
-public:
-  seed() = default;
+  struct fixed_tag_t {};
 
-  void gen32(uint32_t *dst, size_t size) {
-    xorshift32 xor32;
-    for (size_t i = 0; i < size; ++i) {
-      dst[i] = static_cast<uint32_t>(fix_seed_ ? (kFixSeed | i) : xor32());
-    }
+  constexpr uint64_t operator()(uint64_t &seed) const noexcept {
+    return splitmix64(seed);
   }
 
-  void gen64(uint64_t *dst, size_t size) {
-    xorshift64 xor64;
-    for (size_t i = 0; i < size; ++i) {
-      dst[i] = fix_seed_ ? (kFixSeed | i) : xor64();
-    }
+  template <typename OutputIt>
+  constexpr void operator()(fixed_tag_t, OutputIt first,
+                            OutputIt last) const noexcept {
+    uint64_t x = kFixSeed;
+    operator()(first, last, x);
   }
 
-  void set_fix(bool fix) { fix_seed_ = fix; }
+  template <typename OutputIt>
+  void operator()(OutputIt first, OutputIt last) const {
+    uint64_t x = std::random_device{}() ^
+                 (uint64_t(time_clock::now().time_since_epoch().count())) << 32;
+    operator()(first, last, x);
+  }
+
+  template <typename OutputIt>
+  constexpr void operator()(OutputIt first, OutputIt last,
+                            uint64_t seed) const noexcept {
+    for (; first != last; ++first) {
+      *first = splitmix64(seed);
+    }
+  }
 };
+
+inline constexpr seed_t::fixed_tag_t fixed_tag{};
+inline constexpr seed_t random_seed{};
 
 class xorshift128 {
   uint32_t seed_[4];
-  seed gen_seed_;
 
 public:
-  xorshift128() { set_fix_seed(false); }
+  constexpr xorshift128() noexcept : seed_{} { set_fix_seed(false); }
 
-  uint32_t operator()() {
+  constexpr uint32_t operator()() noexcept {
     uint32_t t = seed_[3];
 
     uint32_t const s = seed_[0]; /* Perform a contrived 32-bit shift. */
@@ -85,22 +99,26 @@ public:
     return seed_[0] = t ^ s ^ (s >> 19);
   }
 
-  void set_fix_seed(bool fix) {
-    gen_seed_.set_fix(fix);
-    gen_seed_.gen32(seed_, 4);
+  constexpr void set_fix_seed(bool fix) noexcept {
+    if (fix) {
+      random_seed(fixed_tag, seed_, seed_ + 4);
+    } else {
+      random_seed(seed_, seed_ + 4);
+    }
   }
 };
 
 class xoshiro256ss {
   uint64_t seed_[4];
-  seed gen_seed_;
 
-  uint64_t rol64(uint64_t x, uint64_t k) { return (x << k) | (x >> (64 - k)); }
+  static constexpr uint64_t rol64(uint64_t x, uint64_t k) noexcept {
+    return (x << k) | (x >> (64 - k));
+  }
 
 public:
-  xoshiro256ss() { set_fix_seed(false); }
+  constexpr xoshiro256ss() noexcept : seed_{} { set_fix_seed(false); }
 
-  uint64_t operator()() {
+  constexpr uint64_t operator()() noexcept {
     uint64_t *s = seed_;
     uint64_t const result = rol64(s[1] * 5, 7) * 9;
     uint64_t const t = s[1] << 17;
@@ -114,12 +132,15 @@ public:
     return result;
   }
 
-  void set_fix_seed(bool fix) {
-    gen_seed_.set_fix(fix);
-    gen_seed_.gen64(seed_, 4);
+  constexpr void set_fix_seed(bool fix) noexcept {
+    if (fix) {
+      random_seed(fixed_tag, seed_, seed_ + 4);
+    } else {
+      random_seed(seed_, seed_ + 4);
+    }
   }
 
-  float gen_float() {
+  constexpr float gen_float() noexcept {
     uint64_t s = (*this)();
     s = ((s >> 41) + (0x7fUL << 23));
     float r = {};
@@ -127,7 +148,7 @@ public:
     return r;
   }
 
-  double gen_double() {
+  constexpr double gen_double() noexcept {
     uint64_t s = (*this)();
     s = ((s >> 12) + (0x3ffULL << 52));
     double r = {};
@@ -136,7 +157,7 @@ public:
   }
 };
 
-xoshiro256ss g_xorshfit;
+static xoshiro256ss g_xorshfit;
 
 } // namespace
 
